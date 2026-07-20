@@ -31,12 +31,13 @@ pnpm dlx shadcn@latest add <component>
 - **Data Fetching**: TanStack Query
 - **Styling**: Tailwind CSS v4 + shadcn/ui (new-york style)
 - **HTTP Client**: ky
-- **State**: Zustand (for UI state, watchlist memory)
+- **State**: Jotai (for UI state, watchlist memory)
 - **Graph**: @xyflow/react (React Flow v12) - planned
 
 ## Path Aliases
 
 Both `#/*` and `@/*` resolve to `./src/*`:
+
 ```typescript
 import { cn } from '#/lib/utils'
 import { cn } from '@/lib/utils'
@@ -45,12 +46,15 @@ import { cn } from '@/lib/utils'
 ## Architecture
 
 ### File-Based Routing
+
 Routes are defined in `src/routes/`. The route tree is auto-generated to `src/routeTree.gen.ts`.
-- `__root.tsx` - Root layout with Header, Footer, and devtools
+
+- `__root.tsx` - Root layout with Header (GNB) and devtools
 - `index.tsx` - Home page
 - `demo/` - Demo pages (can be safely deleted)
 
 ### Key Directories (Planned Structure)
+
 ```
 src/
 ├── routes/          # File-based routes
@@ -70,8 +74,9 @@ src/
 ```
 
 ### State Management Pattern
+
 - **Server state**: TanStack Query only (news, graph, analysis, verification data)
-- **UI state**: Zustand (view mode, selected news, graph mode, sector filter, briefing state)
+- **UI state**: Jotai (view mode, selected news, graph mode, sector filter, briefing state)
 - **No localStorage**: Watchlist is session memory only
 
 ## Graph Implementation Notes (@xyflow/react)
@@ -95,6 +100,7 @@ When implementing the graph visualization:
 ## API Pattern
 
 Base path is `/api`. No authentication. All endpoints wrapped with TanStack Query:
+
 - `GET /api/news` - News list with sector filter
 - `GET /api/news/{id}/analysis` - Impact analysis with propagation chains
 - `GET /api/graph` - Full ontology graph
