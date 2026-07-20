@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KOSLINK — 뉴스로 읽는 종목 관계</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+:root{
+  --o-50:#FFF4ED; --o-100:#FFE4D3; --o-200:#FFC7A6; --o-300:#FCA271;
+  --o-500:#F26722; --o-600:#DD5410; --o-700:#B0400B;
+  --d-50:#E9F3F8; --d-100:#CFE5EF; --d-500:#0E6E96; --d-600:#0A5878; --d-700:#08455E;
+  --n-0:#fff; --n-25:#FCFCFB; --n-50:#FAFAF9; --n-100:#F4F3F1; --n-150:#EDEBE8;
+  --n-200:#E3E0DC; --n-300:#D6D3D1; --n-400:#B4AFAA; --n-500:#8A847E;
+  --n-600:#57534E; --n-700:#44403C; --n-900:#1C1917; --ok:#0F8A5F;
+  --sh-s:0 1px 2px rgba(28,25,23,.05);
+  --sh-m:0 1px 2px rgba(28,25,23,.04),0 6px 18px rgba(28,25,23,.06);
+  --sh-l:0 8px 28px rgba(28,25,23,.12);
+  --gnb:60px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Malgun Gothic',system-ui,sans-serif;
+  background:var(--n-50);color:var(--n-900);-webkit-font-smoothing:antialiased;font-feature-settings:'tnum'}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input{font:inherit}
+.hidden{display:none!important}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--n-300);border-radius:8px}
+
+.gnb{position:sticky;top:0;z-index:40;height:var(--gnb);display:flex;align-items:center;gap:26px;padding:0 24px;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--n-150)}
+.brand b{font-size:19px;font-weight:800;letter-spacing:-.035em}
+.brand b span{color:var(--o-500)}
+.brand em{font-style:normal;font-size:12px;color:var(--n-500);margin-left:9px}
+.tabs{display:flex;gap:2px}
+.tab{padding:8px 14px;border-radius:9px;font-size:14.5px;font-weight:600;color:var(--n-500)}
+.tab:hover{background:var(--n-100);color:var(--n-700)}
+.tab.on{background:var(--n-900);color:#fff}
+.gnbr{margin-left:auto;font-size:12.5px;color:var(--n-500);display:flex;align-items:center;gap:7px}
+.gnbr i{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+
+.view{padding:16px 20px 26px}
+.map{display:grid;grid-template-columns:312px minmax(0,1fr) 384px;gap:16px;
+  height:calc(100vh - var(--gnb) - 42px);min-height:640px}
+.panel{background:#fff;border:1px solid var(--n-150);border-radius:16px;box-shadow:var(--sh-m);
+  display:flex;flex-direction:column;overflow:hidden}
+.phead{padding:16px 18px 12px;border-bottom:1px solid var(--n-150)}
+.phead h2{font-size:14.5px;font-weight:700;letter-spacing:-.025em}
+.phead p{font-size:12.5px;color:var(--n-500);margin-top:3px}
+.pbody{flex:1;overflow-y:auto}
+
+.chips{display:flex;gap:6px;padding:12px 14px 4px;flex-wrap:wrap}
+.chip{padding:5px 11px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--n-600);background:var(--n-100)}
+.chip.on{background:var(--n-900);color:#fff}
+.news{padding:8px 12px 16px;display:flex;flex-direction:column;gap:6px}
+.ncard{position:relative;text-align:left;width:100%;padding:13px 14px;border-radius:11px;border:1px solid transparent;transition:.15s}
+.ncard:hover{background:var(--n-50)}
+.ncard.on{border-color:var(--o-300);background:var(--o-50)}
+.ncard.on::before{content:"";position:absolute;left:0;top:13px;bottom:13px;width:3px;border-radius:0 3px 3px 0;background:var(--o-500)}
+.ntop{display:flex;align-items:center;gap:5px;margin-bottom:6px}
+.sec-b{font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--n-100);color:var(--n-600)}
+.ncard.on .sec-b{background:var(--o-100);color:var(--o-700)}
+.ntitle{font-size:14px;font-weight:600;line-height:1.45;letter-spacing:-.022em;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nmeta{margin-top:7px;font-size:12px;color:var(--n-500)}
+.nmeta b{font-weight:500;color:var(--n-600)}
+
+.newsbar{display:none}
+.nscrim{display:none}
+.sheet-grab{display:none}
+.sheet-x{display:none}
+
+/* ── 그래프 ── */
+.gbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--n-150);flex-wrap:wrap}
+.gbar h2{font-size:14.5px;font-weight:700;letter-spacing:-.025em}
+.seg{display:flex;background:var(--n-100);border-radius:9px;padding:2px}
+.seg button{padding:6px 12px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--n-500)}
+.seg button.on{background:#fff;color:var(--n-900);box-shadow:var(--sh-s)}
+.ghint{font-size:12.5px;color:var(--n-500)}
+.gtools{margin-left:auto;display:flex;gap:4px}
+.gtool{width:30px;height:30px;border-radius:8px;border:1px solid var(--n-200);font-size:14px;color:var(--n-600);display:grid;place-items:center}
+.gtool:hover{background:var(--n-100)}
+.canvas{position:relative;flex:1;min-height:0;overflow:hidden;cursor:grab;
+  background:radial-gradient(circle at 1px 1px,var(--n-200) 1.2px,transparent 0) 0 0/22px 22px,var(--n-25)}
+.canvas.grab{cursor:grabbing}
+#vp{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#esvg{position:absolute;left:-3000px;top:-3000px;width:6000px;height:6000px;pointer-events:none}
+.ep{fill:none;stroke:var(--n-300);stroke-width:1.8;transition:stroke .3s,stroke-width .3s,opacity .3s}
+.ep.dim{opacity:.12}
+.ep.hide{opacity:0}
+.ep.up{stroke:var(--o-500);stroke-width:2.8}
+.ep.down{stroke:var(--d-500);stroke-width:2.8}
+.ep.up2{stroke:var(--o-300);stroke-width:2.2}
+.ep.down2{stroke:#7FB3CC;stroke-width:2.2}
+.ep.near{stroke:var(--o-300);stroke-width:2.4}
+.elabel{position:absolute;transform:translate(-50%,-50%);padding:3px 8px;border-radius:7px;font-size:11px;
+  font-weight:700;letter-spacing:-.015em;background:var(--n-25);border:1px solid var(--n-200);color:var(--n-500);
+  white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s}
+.elabel.show{opacity:1}
+.elabel.up{color:var(--o-700);border-color:var(--o-200);background:var(--o-50)}
+.elabel.down{color:var(--d-700);border-color:var(--d-100);background:var(--d-50)}
+
+.nd{position:absolute;transform:translate(-50%,-50%);border-radius:13px;border:2px solid var(--n-300);
+  background:var(--n-100);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  box-shadow:var(--sh-s);cursor:pointer;
+  transition:background-color .3s,border-color .3s,opacity .35s,box-shadow .3s,transform .35s}
+.nd-name{font-size:13.5px;font-weight:700;letter-spacing:-.03em;color:var(--n-700);line-height:1.2;white-space:nowrap}
+.nd-tk{font-size:10.5px;font-weight:600;color:var(--n-400)}
+.nd.abs{border-style:dashed;background:var(--n-50);border-color:var(--n-200)}
+.nd.abs .nd-name{font-size:12.5px;font-weight:600;color:var(--n-500)}
+.nd.t1{background:var(--n-700);border-color:var(--n-700);box-shadow:0 2px 10px rgba(28,25,23,.16)}
+.nd.t1 .nd-name{color:#fff}
+.nd.t1 .nd-tk{color:var(--n-400)}
+.nd.t2{background:var(--n-150);border-color:var(--n-300)}
+.nd.t3{background:var(--n-25);border-color:var(--n-200)}
+.nd.t3 .nd-name{color:var(--n-500);font-weight:600}
+.nd.origin{background:var(--n-900);border-color:#fff;border-width:3px;
+  box-shadow:0 0 0 3px var(--n-900),0 6px 22px rgba(28,25,23,.28)}
+.nd.origin .nd-name{color:#fff}
+.nd.origin .nd-tk{color:var(--n-400)}
+.seclab{position:absolute;transform:translate(-50%,-50%);font-size:15px;font-weight:800;
+  letter-spacing:-.03em;color:var(--n-300);pointer-events:none;white-space:nowrap}
+.backchip{display:none;align-items:center;gap:5px;padding:6px 12px;border-radius:9px;
+  background:var(--n-900);color:#fff;font-size:12.5px;font-weight:700}
+.backchip.on{display:inline-flex}
+.backchip:hover{background:var(--n-700)}
+.nd.hide{opacity:0;transform:translate(-50%,-50%) scale(.85)}
+.nd.dim{opacity:.2}
+.nd.via{background:#fff;border-color:var(--o-300);box-shadow:0 0 0 4px var(--o-50)}
+.nd.via .nd-name{color:var(--o-700)}
+.nd.up{background:var(--o-500);border-color:var(--o-500);box-shadow:0 3px 14px rgba(242,103,34,.3)}
+.nd.up .nd-name{color:#fff}.nd.up .nd-tk{color:var(--o-100)}
+.nd.down{background:var(--d-500);border-color:var(--d-500);box-shadow:0 3px 14px rgba(14,110,150,.28)}
+.nd.down .nd-name{color:#fff}.nd.down .nd-tk{color:var(--d-100)}
+.nd.via2{background:#fff;border-color:var(--o-200);box-shadow:0 0 0 3px rgba(255,199,166,.3)}
+.nd.via2 .nd-name{color:var(--o-600)}
+.nd.up2{background:var(--o-200);border-color:var(--o-300)}
+.nd.up2 .nd-name{color:var(--o-700)}
+.nd.down2{background:var(--d-100);border-color:#8FBDD4}
+.nd.down2 .nd-name{color:var(--d-700)}
+.nd.main{border-color:#fff;border-width:3px;box-shadow:0 0 0 3px var(--o-500),0 6px 22px rgba(242,103,34,.32)}
+.nd.main.down{box-shadow:0 0 0 3px var(--d-500),0 6px 22px rgba(14,110,150,.3)}
+.ring{position:absolute;inset:-8px;border-radius:20px;border:2.5px solid var(--o-500);opacity:0;pointer-events:none}
+.ring.go{animation:pulse 1.1s ease-out 2}
+.nd.down .ring{border-color:var(--d-500)}
+@keyframes pulse{0%{opacity:.65;transform:scale(.95)}100%{opacity:0;transform:scale(1.4)}}
+.nbadge{position:absolute;top:-9px;right:-9px;padding:2px 7px;border-radius:7px;font-size:10.5px;font-weight:800;
+  background:#fff;border:1.5px solid currentColor}
+.nbadge.up{color:var(--o-600)}.nbadge.down{color:var(--d-600)}
+.stage{position:absolute;left:50%;top:14px;transform:translateX(-50%);padding:7px 15px;border-radius:999px;
+  background:var(--n-900);color:#fff;font-size:12.5px;font-weight:600;opacity:0;transition:.25s;pointer-events:none;z-index:9}
+.stage.on{opacity:1}
+.legend{position:absolute;left:14px;bottom:14px;display:flex;flex-wrap:wrap;gap:12px;padding:9px 13px;border-radius:11px;
+  background:rgba(255,255,255,.96);border:1px solid var(--n-150);font-size:11.5px;color:var(--n-600);z-index:8;
+  box-shadow:var(--sh-s);max-width:calc(100% - 28px)}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:10px;height:10px;border-radius:3px;flex:none}
+.tip{position:absolute;padding:8px 11px;border-radius:9px;background:var(--n-900);color:#fff;font-size:12px;
+  line-height:1.5;opacity:0;transition:.12s;white-space:nowrap;z-index:10;pointer-events:none}
+.tip.on{opacity:1}
+.tip b{color:var(--o-200)}
+
+/* ── 분석 ── */
+.s{padding:16px 18px;border-bottom:1px solid var(--n-100)}
+.s:last-child{border-bottom:none}
+.lab{font-size:11.5px;font-weight:700;color:var(--n-500);margin-bottom:9px}
+.sumbox{background:var(--n-50);border-radius:12px;padding:13px 14px;display:flex;flex-direction:column;gap:7px}
+.sumbox p{font-size:13px;line-height:1.6;color:var(--n-600);letter-spacing:-.022em;display:flex;gap:8px}
+.sumbox p b{color:var(--n-400);font-weight:700;flex:none}
+.srcline{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:12px;color:var(--n-500)}
+.srcline b{font-weight:600;color:var(--n-600)}
+.srcline button{margin-left:auto;font-size:12px;font-weight:700;color:var(--n-700)}
+.srcline button:hover{text-decoration:underline}
+.mstock{border:2px solid var(--o-500);border-radius:15px;padding:15px 16px;background:var(--o-50)}
+.mstock.down{border-color:var(--d-500);background:var(--d-50)}
+.msrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.msname{font-size:18px;font-weight:800;letter-spacing:-.035em}
+.msname small{font-size:12px;font-weight:600;color:var(--n-500);margin-left:6px}
+.dbadge{padding:4px 10px;border-radius:8px;font-size:12.5px;font-weight:800;flex:none}
+.dbadge.up{background:var(--o-500);color:#fff}
+.dbadge.down{background:var(--d-500);color:#fff}
+.imp{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:5px 11px;border-radius:8px;
+  font-size:12px;font-weight:700;letter-spacing:-.02em;background:#fff;border:1px solid var(--o-200);color:var(--o-700)}
+.mstock.down .imp{border-color:var(--d-100);color:var(--d-700)}
+.imp b{font-weight:800}
+.msr{margin-top:11px;font-size:12.5px;line-height:1.55;color:var(--o-700);letter-spacing:-.022em}
+.msr.down{color:var(--d-700)}
+.rel{display:flex;flex-direction:column;gap:7px}
+.rcard{display:block;width:100%;text-align:left;border:1px solid var(--n-150);border-radius:12px;padding:12px 13px;transition:.18s}
+.rcard:hover{background:var(--n-50);border-color:var(--n-200)}
+.rcard.hl{border-color:var(--o-500);background:var(--o-50);box-shadow:0 0 0 3px var(--o-50)}
+.rtop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.rname{font-size:14px;font-weight:700;letter-spacing:-.025em}
+.rnum{font-size:12.5px;font-weight:800;padding:4px 10px;border-radius:8px;flex:none;letter-spacing:-.02em}
+.rnum.up{background:var(--o-500);color:#fff}
+.rnum.down{background:var(--d-500);color:#fff}
+.rtag{display:inline-block;margin-right:7px;padding:1px 7px;border-radius:5px;font-size:11px;font-weight:800;
+  background:var(--n-100);color:var(--n-600)}
+.rtag.t1{background:var(--o-100);color:var(--o-700)}
+.rtag.t2{background:var(--o-50);color:var(--o-600)}
+.rwhy{margin-top:6px;font-size:12px;color:var(--n-600)}
+.rwhy b{color:var(--n-900);font-weight:700}
+.rchain{margin-top:7px;font-size:11.5px;color:var(--n-400)}
+.why{background:var(--o-50);border:1px solid var(--o-100);border-radius:14px;padding:15px 16px}
+.why h3{font-size:12.5px;font-weight:800;color:var(--o-700);margin-bottom:11px;display:flex;align-items:center;gap:7px}
+.why h3::before{content:"";width:3px;height:12px;border-radius:2px;background:var(--o-500)}
+.wrow{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--o-100)}
+.wrow:first-of-type{border-top:none;padding-top:0}
+.wkey{flex:none;width:58px;font-size:11.5px;font-weight:800;color:var(--o-600)}
+.wval{font-size:12.5px;line-height:1.62;color:var(--n-700);letter-spacing:-.022em}
+.wval b{font-weight:700;color:var(--o-700)}
+.gvbtn{width:100%;padding:12px;border-radius:12px;border:1px solid var(--n-200);font-size:13px;font-weight:700;color:var(--n-600)}
+.gvbtn:hover{background:var(--n-50)}
+.empty{padding:64px 24px;text-align:center;color:var(--n-500)}
+.empty b{display:block;font-size:15px;font-weight:700;color:var(--n-600);margin-bottom:7px}
+.empty p{font-size:13px;line-height:1.6}
+
+/* ── 검증 ── */
+.vwrap{display:flex;flex-direction:column;gap:14px}
+.ctxbar{display:flex;align-items:center;gap:12px;padding:13px 18px;border-radius:14px;
+  background:var(--o-50);border:1px solid var(--o-200)}
+.ctxbar .ic{width:30px;height:30px;border-radius:9px;background:var(--o-500);color:#fff;flex:none;
+  display:grid;place-items:center;font-size:14px;font-weight:800}
+.ctxbar p{font-size:13px;color:var(--o-700);line-height:1.5;letter-spacing:-.022em}
+.ctxbar p b{font-weight:800}
+.ctxbar button{margin-left:auto;flex:none;padding:8px 14px;border-radius:9px;background:#fff;
+  border:1px solid var(--o-200);font-size:12.5px;font-weight:700;color:var(--o-700)}
+.ctxbar button:hover{background:var(--o-50)}
+
+.sumcard{display:grid;grid-template-columns:300px minmax(0,1fr);gap:0;background:#fff;
+  border:1px solid var(--n-150);border-radius:16px;box-shadow:var(--sh-m);overflow:hidden}
+.mets{padding:20px 22px;border-right:1px solid var(--n-100);display:flex;flex-direction:column;gap:16px}
+.met .k{font-size:12px;color:var(--n-500);font-weight:600}
+.met .v{font-size:30px;font-weight:800;letter-spacing:-.05em;margin-top:3px;line-height:1}
+.met .v em{font-size:15px;font-weight:700;font-style:normal;color:var(--n-400);margin-left:2px}
+.met.key .v{color:var(--o-600);font-size:40px}
+.met .d{font-size:11.5px;color:var(--n-400);margin-top:4px}
+.chartbox{padding:18px 20px 10px;min-width:0}
+.chartbox h3{font-size:13.5px;font-weight:700;letter-spacing:-.025em}
+.chartbox p{font-size:12px;color:var(--n-500);margin-top:3px}
+
+.vsplit{display:grid;grid-template-columns:392px minmax(0,1fr);gap:14px;align-items:start}
+.vlist{background:#fff;border:1px solid var(--n-150);border-radius:16px;box-shadow:var(--sh-m);
+  display:flex;flex-direction:column;overflow:hidden;max-height:620px}
+.vlhead{padding:15px 16px 11px;border-bottom:1px solid var(--n-150)}
+.vlhead h2{font-size:14.5px;font-weight:700;letter-spacing:-.025em}
+.vlhead p{font-size:12px;color:var(--n-500);margin-top:3px}
+.vfil{display:flex;gap:5px;padding:11px 14px 4px;flex-wrap:wrap}
+.vrowsbox{flex:1;overflow-y:auto;padding:6px 10px 12px;display:flex;flex-direction:column;gap:4px}
+.vitem{width:100%;text-align:left;padding:12px 12px;border-radius:11px;border:1px solid transparent;
+  display:flex;gap:12px;align-items:center;transition:.15s}
+.vitem:hover{background:var(--n-50)}
+.vitem.on{background:var(--o-50);border-color:var(--o-300)}
+.vbar-mini{flex:none;width:40px;text-align:center}
+.vbar-mini b{display:block;font-size:14px;font-weight:800;letter-spacing:-.04em;color:var(--o-600)}
+.vbar-mini i{display:block;height:4px;border-radius:4px;background:var(--n-150);margin-top:5px;overflow:hidden}
+.vbar-mini i span{display:block;height:100%;border-radius:4px;background:var(--o-500)}
+.vitxt{min-width:0;flex:1}
+.vitxt .tt{font-size:13px;font-weight:600;letter-spacing:-.025em;line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vitxt .mm{margin-top:5px;font-size:11.5px;color:var(--n-500);display:flex;gap:6px;align-items:center}
+
+.vdet{background:#fff;border:1px solid var(--n-150);border-radius:16px;box-shadow:var(--sh-m);overflow:hidden}
+.vdhead{padding:20px 22px 18px;border-bottom:1px solid var(--n-100)}
+.vdmeta{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.vdtitle{font-size:18px;font-weight:800;line-height:1.4;letter-spacing:-.035em}
+.vdscore{display:flex;align-items:center;gap:16px;margin-top:16px;padding:14px 16px;border-radius:13px;
+  background:var(--o-50);border:1px solid var(--o-100)}
+.vdring{flex:none;position:relative;width:64px;height:64px}
+.vdring b{position:absolute;inset:0;display:grid;place-items:center;font-size:16px;font-weight:800;
+  letter-spacing:-.04em;color:var(--o-700)}
+.vdsx{font-size:13px;color:var(--o-700);line-height:1.55;letter-spacing:-.022em}
+.vdsx b{font-weight:800}
+.vdtable{padding:8px 12px 16px}
+.vdth{display:flex;align-items:center;gap:10px;padding:10px 10px 8px;font-size:11px;font-weight:700;color:var(--n-400)}
+.vrow{display:flex;align-items:center;gap:10px;padding:11px 10px;border-radius:10px;border-top:1px solid var(--n-100)}
+.vrow:hover{background:var(--n-50)}
+.vname{font-size:13.5px;font-weight:600;flex:1;min-width:0;letter-spacing:-.025em}
+.vname i{display:block;font-style:normal;font-size:11px;color:var(--n-400);font-weight:500;margin-top:3px}
+.vpred{font-size:12px;font-weight:700;width:56px;flex:none}
+.vpred.up{color:var(--o-600)}.vpred.down{color:var(--d-600)}
+.vact{font-size:13.5px;font-weight:800;width:68px;text-align:right;flex:none}
+.hitb{padding:3px 8px;border-radius:6px;font-size:11px;font-weight:800;width:50px;text-align:center;flex:none}
+.hitb.y{background:var(--o-50);color:var(--o-700)}
+.hitb.n{background:var(--n-100);color:var(--n-500)}
+.vdempty{padding:70px 24px;text-align:center;color:var(--n-500)}
+.vdempty b{display:block;font-size:15px;font-weight:700;color:var(--n-600);margin-bottom:7px}
+.vdempty p{font-size:13px;line-height:1.6}
+
+/* ── 브리핑 ── */
+.fab{position:fixed;right:24px;bottom:24px;z-index:45;display:flex;align-items:center;gap:9px;padding:14px 20px;
+  border-radius:999px;background:var(--n-900);color:#fff;font-size:14px;font-weight:700;box-shadow:var(--sh-l)}
+.fab:hover{background:var(--n-700)}
+.fab .cnt{background:var(--o-500);border-radius:999px;padding:1px 8px;font-size:12px;font-weight:800}
+.scrim{position:fixed;inset:0;background:rgba(28,25,23,.34);opacity:0;pointer-events:none;transition:.25s;z-index:48}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:424px;max-width:92vw;background:#fff;z-index:50;
+  transform:translateX(102%);transition:transform .32s cubic-bezier(.32,0,.2,1);display:flex;flex-direction:column;
+  box-shadow:-10px 0 34px rgba(28,25,23,.12)}
+.drawer.on{transform:none}
+.dhead{position:relative;padding:20px 22px 16px;border-bottom:1px solid var(--n-150)}
+.dhead h2{font-size:17px;font-weight:800;letter-spacing:-.035em}
+.dhead p{font-size:12.5px;color:var(--n-500);margin-top:5px;line-height:1.55}
+.dclose{position:absolute;top:18px;right:18px;width:30px;height:30px;border-radius:8px;color:var(--n-500);font-size:18px}
+.dclose:hover{background:var(--n-100)}
+.dbody{flex:1;overflow-y:auto;padding:18px 22px 24px}
+.tbox{border:1px solid var(--n-200);border-radius:12px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tbox:focus-within{border-color:var(--o-500)}
+.tchip{display:inline-flex;align-items:center;gap:6px;padding:5px 8px 5px 11px;border-radius:8px;
+  background:var(--o-50);color:var(--o-700);font-size:12.5px;font-weight:700}
+.tchip button{color:var(--o-500);font-size:14px;line-height:1}
+#tin{flex:1;min-width:110px;border:none;outline:none;font-size:13.5px;padding:5px 2px}
+.sugg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.sugg button{padding:6px 11px;border-radius:8px;border:1px solid var(--n-200);font-size:12.5px;color:var(--n-600);font-weight:600}
+.sugg button:hover{background:var(--n-50)}
+.runbtn{width:100%;margin-top:14px;padding:13px;border-radius:12px;background:var(--o-500);color:#fff;font-size:14.5px;font-weight:700}
+.runbtn:hover{background:var(--o-600)}
+.savedbar{display:flex;align-items:center;gap:8px;margin-top:18px;padding:10px 12px;border-radius:10px;
+  background:var(--n-50);font-size:12px;color:var(--n-500)}
+.savedbar b{color:var(--n-700);font-weight:700}
+.savedbar button{margin-left:auto;font-size:12px;font-weight:700;color:var(--o-600)}
+.rsum{font-size:14px;font-weight:700;line-height:1.6;margin:20px 0 12px}
+.rsum b{color:var(--o-600)}
+.bcard{border:1px solid var(--n-150);border-radius:12px;padding:14px;margin-bottom:8px}
+.btop{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.bname{font-size:14.5px;font-weight:700}
+.bnews{font-size:12.5px;color:var(--n-600);line-height:1.5}
+.bpath{margin-top:8px;font-size:11.5px;color:var(--n-500)}
+.bgo{margin-top:11px;width:100%;padding:9px;border-radius:9px;border:1px solid var(--n-200);font-size:12.5px;font-weight:700;color:var(--n-600)}
+.bgo:hover{background:var(--n-50)}
+.bnone{padding:12px 14px;border-radius:12px;background:var(--n-50);font-size:12.5px;color:var(--n-500);line-height:1.6}
+
+@media(max-width:1280px){.map{grid-template-columns:268px minmax(0,1fr) 344px;gap:12px}.metric b{font-size:30px}}
+@media(max-width:1240px){
+  .vsplit{grid-template-columns:340px minmax(0,1fr)}
+  .sumcard{grid-template-columns:260px minmax(0,1fr)}
+}
+@media(max-width:1080px){
+  .view{padding:14px}
+  .vsplit{grid-template-columns:minmax(0,1fr)}
+  .vlist{max-height:340px}
+  .sumcard{grid-template-columns:minmax(0,1fr)}
+  .mets{border-right:none;border-bottom:1px solid var(--n-100);flex-direction:row;gap:24px;flex-wrap:wrap}
+  .map{grid-template-columns:minmax(0,1fr) 344px;grid-template-rows:auto 1fr;height:auto}
+  .col-graph{min-height:560px}
+
+  /* 상단 현재 뉴스 바 */
+  .newsbar{display:flex;grid-column:1/-1;align-items:stretch;gap:8px;
+    background:#fff;border:1px solid var(--n-150);border-radius:14px;box-shadow:var(--sh-m);padding:6px}
+  .nb-nav{flex:none;width:40px;border-radius:10px;font-size:22px;line-height:1;color:var(--n-500);
+    background:var(--n-50);font-weight:400}
+  .nb-nav:hover{background:var(--n-100);color:var(--n-900)}
+  .nb-nav:disabled{color:var(--n-300);cursor:default;background:var(--n-25)}
+  .nb-cur{flex:1;min-width:0;text-align:left;padding:9px 12px;border-radius:10px}
+  .nb-cur:hover{background:var(--n-50)}
+  .nb-top{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+  .nb-cnt{font-size:11.5px;font-weight:700;color:var(--n-500)}
+  .nb-cnt::after{content:" ▾";color:var(--n-400)}
+  .nb-t{display:block;font-size:14px;font-weight:700;letter-spacing:-.028em;line-height:1.35;
+    overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical}
+
+  /* 뉴스 목록 = 바텀시트 */
+  .nscrim{display:block;position:fixed;inset:0;background:rgba(28,25,23,.36);z-index:52;
+    opacity:0;pointer-events:none;transition:opacity .25s}
+  .nscrim.on{opacity:1;pointer-events:auto}
+  .col-news{position:fixed;left:0;right:0;bottom:0;z-index:53;max-height:76vh;
+    border-radius:20px 20px 0 0;border-bottom:none;box-shadow:0 -8px 34px rgba(28,25,23,.16);
+    transform:translateY(103%);transition:transform .32s cubic-bezier(.32,0,.2,1)}
+  .col-news.open{transform:none}
+  .sheet-grab{display:block;width:40px;height:4px;border-radius:4px;background:var(--n-200);
+    margin:10px auto 2px}
+  .phead{position:relative}
+  .sheet-x{display:grid;place-items:center;position:absolute;top:12px;right:14px;
+    width:30px;height:30px;border-radius:9px;font-size:19px;color:var(--n-500)}
+  .sheet-x:hover{background:var(--n-100)}
+  .news{flex-direction:column;gap:6px;padding-bottom:24px}
+  .ncard{min-width:0;padding:14px 15px}
+  .ntitle{-webkit-line-clamp:3}
+  }
+@media(max-width:820px){
+  .map{grid-template-columns:minmax(0,1fr)}
+  .col-graph{min-height:440px}
+  .nb-nav{width:36px;font-size:20px}
+  .nb-t{font-size:13.5px}
+  .metrics{grid-template-columns:1fr;gap:10px}
+  .gnb{padding:0 14px;gap:14px}.brand em{display:none}.gnbr{display:none}
+  .fab{right:14px;bottom:14px;padding:13px 17px;font-size:13.5px}
+}
+</style>
+</head>
+<body>
+
+<header class="gnb">
+  <div class="brand"><b>KOS<span>LINK</span></b><em>뉴스로 읽는 종목 관계</em></div>
+  <nav class="tabs">
+    <button class="tab on" data-v="map">뉴스맵</button>
+    <button class="tab" data-v="verify">예측 검증</button>
+  </nav>
+  <div class="gnbr"><i></i>온톨로지 36개 노드 · 52개 관계</div>
+</header>
+
+<main class="view map" id="vmap">
+  <div class="newsbar" id="newsbar">
+    <button class="nb-nav" id="nbPrev" aria-label="이전 뉴스">‹</button>
+    <button class="nb-cur" id="nbCur">
+      <span class="nb-top"><span class="sec-b" id="nbSec">반도체</span>
+        <span class="nb-cnt" id="nbCnt">1 / 6</span></span>
+      <span class="nb-t" id="nbTitle">뉴스를 선택해 주세요</span>
+    </button>
+    <button class="nb-nav" id="nbNext" aria-label="다음 뉴스">›</button>
+  </div>
+  <div class="nscrim" id="nscrim"></div>
+  <section class="panel col-news" id="colnews">
+    <div class="sheet-grab"></div>
+    <div class="phead"><h2>최신 뉴스</h2><p>뉴스를 선택하면 영향받는 종목이 나타납니다</p>
+      <button class="sheet-x" id="sheetX">×</button></div>
+    <div class="chips" id="chips"></div>
+    <div class="pbody"><div class="news" id="newsList"></div></div>
+  </section>
+
+  <section class="panel col-graph">
+    <div class="gbar">
+      <h2>관계 그래프</h2>
+      <div class="seg"><button id="mFocus" class="on">파급 경로</button><button id="mAll">전체 관계망</button></div>
+      <button class="backchip" id="backchip">← 전체 관계망</button>
+      <span class="ghint" id="ghint"></span>
+      <div class="gtools">
+        <button class="gtool" id="zin">+</button>
+        <button class="gtool" id="zout">−</button>
+        <button class="gtool" id="zfit">⤾</button>
+      </div>
+    </div>
+    <div class="canvas" id="canvas">
+      <div id="vp"><svg id="esvg"><defs>
+        <marker id="ar-up" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,1 L9,5 L0,9 z" fill="#F26722"/></marker>
+        <marker id="ar-down" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,1 L9,5 L0,9 z" fill="#0E6E96"/></marker>
+      </defs></svg></div>
+      <div class="stage" id="stage"></div>
+      <div class="tip" id="tip"></div>
+      <div class="legend" id="legend">
+        <span><i style="background:#F26722"></i>상승</span>
+        <span><i style="background:#0E6E96"></i>하락</span>
+        <span><i style="background:#fff;border:2px solid #FCA271"></i>경유</span>
+        <span><i style="background:#F4F3F1;border:1.5px dashed #D6D3D1"></i>테마·제품</span>
+        <span style="color:#B4AFAA">카드 크기 = 시가총액</span>
+      </div>
+    </div>
+  </section>
+
+  <aside class="panel col-panel">
+    <div class="phead"><h2>영향 분석</h2><p id="apsub">뉴스 선택 대기 중</p></div>
+    <div class="pbody" id="analysis"></div>
+  </aside>
+</main>
+
+<main class="view vwrap hidden" id="vverify">
+  <div class="ctxbar hidden" id="ctxbar">
+    <span class="ic">!</span>
+    <p id="ctxtext"></p>
+    <button id="ctxclear">전체 검증 보기</button>
+  </div>
+
+  <div class="sumcard">
+    <div class="mets">
+      <div class="met key"><div class="k">뉴스 단위 적중률</div>
+        <div class="v" id="mHit">0<em>%</em></div>
+        <div class="d">예측 종목의 절반 이상을 맞힌 뉴스 비율</div></div>
+      <div class="met"><div class="k">종목 단위 적중률</div>
+        <div class="v" id="mStock">0<em>%</em></div>
+        <div class="d">예측 방향과 익일 종가 방향 일치</div></div>
+      <div class="met"><div class="k">검증 완료</div>
+        <div class="v" id="mNews">0<em>건</em></div>
+        <div class="d" id="mNewsSub">최근 30일 기준</div></div>
+    </div>
+    <div class="chartbox">
+      <h3>일자별 적중률 추이</h3><p>최근 30거래일</p>
+      <svg id="chart" viewBox="0 0 980 200" style="width:100%;height:auto;margin-top:6px"></svg>
+    </div>
+  </div>
+
+  <div class="vsplit">
+    <div class="vlist">
+      <div class="vlhead"><h2>검증 목록</h2><p id="vlsub">뉴스를 선택하면 오른쪽에 상세가 나옵니다</p></div>
+      <div class="vfil" id="vfil"></div>
+      <div class="vrowsbox" id="vrowsbox"></div>
+    </div>
+    <div class="vdet" id="vdet"></div>
+  </div>
+</main>
+
+<button class="fab" id="openBrief">관심종목 브리핑<span class="cnt hidden" id="fabCnt">0</span></button>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer">
+  <div class="dhead"><h2>관심종목 브리핑</h2>
+    <p>보유 종목을 넣으면 오늘 뉴스 중 영향을 주는 건만 역으로 찾아드립니다</p>
+    <button class="dclose" id="closeBrief">×</button></div>
+  <div class="dbody">
+    <div class="tbox" id="tbox"><input id="tin" placeholder="종목명 입력 후 Enter" /></div>
+    <div class="sugg" id="sugg"></div>
+    <button class="runbtn" id="runBrief">오늘 뉴스에서 찾기</button>
+    <div id="result"></div>
+  </div>
+</aside>
+
+<script>
+"use strict";
+/* ═════════ 데이터 ═════════ */
+var N=[
+ {id:'sk',n:'SK하이닉스',t:'000660',s:'반도체',cap:1200000},
+ {id:'ss',n:'삼성전자',t:'005930',s:'반도체',cap:4600000},
+ {id:'hanmi',n:'한미반도체',t:'042700',s:'반도체',cap:120000},
+ {id:'eo',n:'이오테크닉스',t:'039030',s:'반도체',cap:42000},
+ {id:'jusung',n:'주성엔지니어링',t:'036930',s:'반도체',cap:18000},
+ {id:'wonik',n:'원익IPS',t:'240810',s:'반도체',cap:22000},
+ {id:'hpsp',n:'HPSP',t:'403870',s:'반도체',cap:26000},
+ {id:'lino',n:'리노공업',t:'058470',s:'반도체',cap:32000},
+ {id:'tck',n:'티씨케이',t:'064760',s:'반도체',cap:12000},
+ {id:'dbh',n:'DB하이텍',t:'000990',s:'반도체',cap:16000},
+ {id:'solb',n:'솔브레인',t:'357780',s:'반도체',cap:19000},
+ {id:'dj',n:'동진쎄미켐',t:'005290',s:'반도체',cap:15000},
+ {id:'hbm',n:'HBM',k:'제품',s:'반도체'},
+ {id:'dram',n:'D램',k:'제품',s:'반도체'},
+ {id:'fdry',n:'파운드리',k:'테마',s:'반도체'},
+ {id:'aidc',n:'AI 데이터센터',k:'테마',s:'반도체'},
+ {id:'lgen',n:'LG에너지솔루션',t:'373220',s:'2차전지',cap:900000},
+ {id:'sdi',n:'삼성SDI',t:'006400',s:'2차전지',cap:250000},
+ {id:'skinn',n:'SK이노베이션',t:'096770',s:'2차전지',cap:110000},
+ {id:'ecop',n:'에코프로비엠',t:'247540',s:'2차전지',cap:160000},
+ {id:'posf',n:'포스코퓨처엠',t:'003670',s:'2차전지',cap:180000},
+ {id:'lnf',n:'엘앤에프',t:'066970',s:'2차전지',cap:52000},
+ {id:'cb',n:'천보',t:'278280',s:'2차전지',cap:14000},
+ {id:'hmc',n:'현대차',t:'005380',s:'2차전지',cap:520000},
+ {id:'cath',n:'양극재',k:'제품',s:'2차전지'},
+ {id:'li',n:'리튬',k:'원자재',s:'2차전지'},
+ {id:'ev',n:'전기차',k:'테마',s:'2차전지'},
+ {id:'hwa',n:'한화에어로스페이스',t:'012450',s:'방산',cap:300000},
+ {id:'lig',n:'LIG넥스원',t:'079550',s:'방산',cap:60000},
+ {id:'rotem',n:'현대로템',t:'064350',s:'방산',cap:75000},
+ {id:'kai',n:'한국항공우주',t:'047810',s:'방산',cap:58000},
+ {id:'pung',n:'풍산',t:'103140',s:'방산',cap:20000},
+ {id:'k9',n:'K9 자주포',k:'제품',s:'방산'},
+ {id:'gm',n:'유도무기',k:'제품',s:'방산'},
+ {id:'dex',n:'방산 수출',k:'테마',s:'방산'},
+ {id:'agr',n:'해외 정부계약',k:'테마',s:'방산'}];
+
+var E=[
+ ['sk','hbm','주력 생산',1],['sk','dram','주력 생산',1],['sk','hanmi','장비 공급',1],['sk','ss','경쟁',-1],
+ ['sk','eo','레이저 장비',1],['sk','wonik','증착 장비',1],['sk','hpsp','고압 어닐링',1],['sk','lino','테스트 소켓',1],
+ ['sk','tck','소모품 공급',1],['sk','solb','공정 소재',1],['hbm','hanmi','TC본더 필수',1],['hbm','aidc','수요 견인',1],
+ ['ss','hbm','생산',1],['ss','dram','생산',1],['ss','fdry','사업 영위',1],['ss','jusung','장비 공급',1],
+ ['ss','lino','테스트 소켓',1],['ss','dj','포토레지스트',1],['dbh','fdry','사업 영위',1],['aidc','fdry','수요 견인',1],
+ ['dram','aidc','수요 견인',1],
+ ['lgen','cath','핵심 소재',1],['lgen','ecop','양극재 조달',1],['lgen','lnf','양극재 조달',1],['lgen','sdi','경쟁',-1],
+ ['lgen','ev','배터리 공급',1],['lgen','cb','첨가제 조달',1],['lgen','skinn','경쟁',-1],['sdi','posf','양극재 조달',1],
+ ['sdi','ev','배터리 공급',1],['ecop','cath','생산',1],['posf','cath','생산',1],['lnf','cath','생산',1],
+ ['cath','li','원재료',1],['skinn','ev','배터리 공급',1],['ev','hmc','완성차',1],
+ ['hwa','k9','생산',1],['hwa','dex','수출 주도',1],['hwa','pung','탄약 조달',1],['hwa','lig','경쟁',-1],
+ ['lig','gm','생산',1],['lig','dex','수출',1],['rotem','dex','수출',1],['kai','dex','수출',1],['pung','dex','탄약 수출',1],
+ ['k9','dex','대표 품목',1],['gm','dex','대표 품목',1],['dex','agr','계약 형태',1],['k9','agr','계약 대상',1],
+ ['kai','hwa','엔진 협력',1],['rotem','hmc','계열사',1],['pung','k9','탄약 공급',1]];
+
+var NEWS=[
+ {id:'n1',s:'반도체',t:'SK하이닉스, HBM4 양산 위해 청주 M15X 증설 확정… 2027년 가동',p:'연합뉴스',ago:'12분 전',pub:'09:12',url:'https://www.yna.co.kr/',
+  sum:['SK하이닉스가 청주 M15X 공장 증설 투자를 확정했다고 공시했다.','HBM4 양산 대응이 목적이며 2027년 상반기 가동이 목표다.','장비 발주는 올해 4분기부터 순차 집행될 예정이다.'],
+  main:{id:'sk',dir:'UP',c:.86,r:'HBM4 증설 발표로 생산능력이 직접 확대되는 당사자'},
+  rel:[{id:'hanmi',dir:'UP',c:.78,rel:'장비 공급',chain:['sk','hanmi']},
+       {id:'hpsp',dir:'UP',c:.66,rel:'고압 어닐링 장비',chain:['sk','hpsp']},
+       {id:'wonik',dir:'UP',c:.62,rel:'증착 장비',chain:['sk','wonik']},
+       {id:'ss',dir:'DOWN',c:.44,rel:'경쟁 관계',chain:['sk','ss']}],
+  why:{e:'SK하이닉스가 HBM4 대응 목적의 청주 M15X 증설을 확정',
+       p:'장비를 대는 <b>한미반도체 · HPSP · 원익IPS</b>에는 수주 확대 요인, 같은 시장에서 겨루는 <b>삼성전자</b>에는 점유율 압박 요인',
+       h:'동일 유형 증설 공시 5건 중 4건에서 장비주가 익일 평균 <b>+3.1%</b>'}},
+ {id:'n2',s:'반도체',t:'엔비디아, 차세대 AI 가속기 물량 30% 상향… 메모리 조달 확대',p:'전자신문',ago:'48분 전',pub:'08:36',url:'https://www.etnews.com/',
+  sum:['엔비디아가 차세대 AI 가속기 생산 계획을 기존 대비 30퍼센트 상향했다.','추가 물량 대응을 위해 HBM 조달을 늘릴 것으로 알려졌다.','국내 메모리 업체의 공급 비중이 확대될 전망이다.'],
+  main:{id:'aidc',dir:'UP',c:.79,r:'AI 데이터센터 투자 확대가 메모리 수요를 직접 견인'},
+  rel:[{id:'sk',dir:'UP',c:.81,rel:'HBM 주력 생산',chain:['aidc','hbm','sk']},
+       {id:'hanmi',dir:'UP',c:.7,rel:'HBM 필수 장비',chain:['aidc','hbm','hanmi']},
+       {id:'ss',dir:'UP',c:.58,rel:'HBM 생산',chain:['aidc','hbm','ss']},
+       {id:'eo',dir:'UP',c:.48,rel:'장비 납품',chain:['aidc','hbm','sk','eo']}],
+  why:{e:'엔비디아가 AI 가속기 생산 물량을 30퍼센트 상향',
+       p:'AI 데이터센터 수요가 HBM을 거쳐 <b>SK하이닉스 · 삼성전자</b>로, 다시 후공정 장비사인 <b>한미반도체</b>까지 이어짐',
+       h:'유사 수요 상향 뉴스 6건 중 4건에서 메모리주가 익일 평균 <b>+2.2%</b>'}},
+ {id:'n3',s:'2차전지',t:'리튬 가격 3개월 만에 최저… 양극재 판가 연동 하락 불가피',p:'머니투데이',ago:'1시간 전',pub:'08:05',url:'https://news.mt.co.kr/',
+  sum:['탄산리튬 현물 가격이 3개월 만에 최저 수준으로 내려왔다.','양극재는 리튬 가격에 판가가 연동되는 구조다.','배터리 셀 업체는 원가 부담이 줄어드는 반대 효과가 예상된다.'],
+  main:{id:'li',dir:'DOWN',c:.74,r:'리튬 현물 가격이 3개월 내 최저 수준으로 하락'},
+  rel:[{id:'ecop',dir:'DOWN',c:.71,rel:'양극재 판가 연동',chain:['li','cath','ecop']},
+       {id:'posf',dir:'DOWN',c:.64,rel:'양극재 판가 연동',chain:['li','cath','posf']},
+       {id:'lnf',dir:'DOWN',c:.6,rel:'양극재 판가 연동',chain:['li','cath','lnf']},
+       {id:'lgen',dir:'UP',c:.55,rel:'원가 하락 수혜',chain:['li','cath','lgen']}],
+  why:{e:'탄산리튬 현물 가격이 3개월 만에 최저치 기록',
+       p:'양극재를 만들어 파는 <b>에코프로비엠 · 포스코퓨처엠 · 엘앤에프</b>는 판가가 함께 내려가고, 그 양극재를 사다 쓰는 <b>LG에너지솔루션</b>은 반대로 원가가 낮아짐',
+       h:'리튬 급락 구간 7건 중 5건에서 양극재주가 익일 평균 <b>-2.6%</b>'}},
+ {id:'n4',s:'2차전지',t:'美, 중국산 전기차 관세 추가 인상… 한국 배터리 반사이익 전망',p:'서울경제',ago:'2시간 전',pub:'07:20',url:'https://www.sedaily.com/',
+  sum:['미국이 중국산 전기차에 대한 관세를 추가 인상하기로 했다.','북미 생산 거점을 확보한 한국 배터리 업체가 수혜 대상으로 지목된다.','양극재 등 소재 발주도 함께 늘어날 전망이다.'],
+  main:{id:'lgen',dir:'UP',c:.75,r:'북미 생산 거점 기반으로 관세 인상의 직접 수혜'},
+  rel:[{id:'ecop',dir:'UP',c:.63,rel:'양극재 조달처',chain:['lgen','ecop']},
+       {id:'lnf',dir:'UP',c:.58,rel:'양극재 조달처',chain:['lgen','lnf']},
+       {id:'cb',dir:'UP',c:.5,rel:'첨가제 공급',chain:['lgen','cb']},
+       {id:'sdi',dir:'UP',c:.52,rel:'배터리 공급',chain:['lgen','ev','sdi']}],
+  why:{e:'미국이 중국산 전기차 관세를 추가 인상',
+       p:'북미 거점을 가진 <b>LG에너지솔루션</b>의 수주가 늘면 양극재와 첨가제를 대는 <b>에코프로비엠 · 엘앤에프 · 천보</b>의 발주도 함께 증가',
+       h:'관세 인상 관련 뉴스 4건 중 3건에서 배터리주가 익일 평균 <b>+1.8%</b>'}},
+ {id:'n5',s:'방산',t:'폴란드, K9 자주포 2차 실행계약 서명… 3조원대 규모',p:'뉴시스',ago:'3시간 전',pub:'06:41',url:'https://www.newsis.com/',
+  sum:['폴란드 정부가 K9 자주포 2차 실행계약에 서명했다.','계약 규모는 3조원대로 알려졌다.','탄약 패키지가 별도 협상으로 이어질 가능성이 제기된다.'],
+  main:{id:'hwa',dir:'UP',c:.88,r:'K9 자주포 생산 주체로 계약 물량이 전량 반영'},
+  rel:[{id:'pung',dir:'UP',c:.67,rel:'탄약 공급',chain:['hwa','pung']},
+       {id:'rotem',dir:'UP',c:.55,rel:'방산 수출 확대',chain:['hwa','dex','rotem']},
+       {id:'kai',dir:'UP',c:.5,rel:'방산 수출 확대',chain:['hwa','dex','kai']},
+       {id:'lig',dir:'DOWN',c:.4,rel:'경쟁 관계',chain:['hwa','lig']}],
+  why:{e:'폴란드가 K9 자주포 2차 실행계약에 서명, 3조원대 규모',
+       p:'생산 주체인 <b>한화에어로스페이스</b>가 물량을 받으면 탄약을 대는 <b>풍산</b>도 함께 늘고, 방산 수출 기대가 <b>현대로템 · 한국항공우주</b>로 번짐',
+       h:'대형 수출 계약 공시 8건 중 6건에서 방산주가 익일 평균 <b>+4.2%</b>'}},
+ {id:'n6',s:'방산',t:'국방부, 차세대 장거리 유도무기 개발사업 착수',p:'국방일보',ago:'5시간 전',pub:'04:30',url:'https://kookbang.dema.mil.kr/',
+  sum:['국방부가 차세대 장거리 유도무기 개발사업에 착수했다고 밝혔다.','총 사업비와 개발 기간은 추후 확정될 예정이다.','유도무기 체계 개발 경험이 있는 업체가 주관사 후보로 거론된다.'],
+  main:{id:'lig',dir:'UP',c:.83,r:'유도무기 체계 개발 이력으로 사업 참여 가능성 최상위'},
+  rel:[{id:'kai',dir:'UP',c:.52,rel:'방산 수출 확대',chain:['lig','dex','kai']},
+       {id:'pung',dir:'UP',c:.46,rel:'방산 수출 확대',chain:['lig','dex','pung']},
+       {id:'hwa',dir:'DOWN',c:.41,rel:'경쟁 관계',chain:['lig','hwa']}],
+  why:{e:'국방부가 차세대 장거리 유도무기 개발사업에 착수',
+       p:'유도무기를 만들어 온 <b>LIG넥스원</b>이 주관사 후보로 앞서고, 같은 사업을 노리는 <b>한화에어로스페이스</b>에는 수주 분산 요인',
+       h:'개발사업 착수 뉴스 5건 중 3건에서 주관 후보사가 익일 평균 <b>+2.4%</b>'}}];
+
+var VERIFY=[
+ {d:'07-17',s:'반도체',t:'SK하이닉스, 엔비디아향 HBM 공급 계약 확대',
+  it:[['한미반도체','UP',3.42,1,'장비 공급 · 1단계'],['삼성전자','DOWN',-0.81,1,'경쟁 관계 · 1단계'],
+      ['HPSP','UP',1.94,1,'고압 어닐링 장비 · 1단계'],['원익IPS','UP',-0.35,0,'증착 장비 · 1단계']]},
+ {d:'07-17',s:'2차전지',t:'유럽 배터리 규제 완화 논의 시작',
+  it:[['LG에너지솔루션','UP',1.62,1,'뉴스 직접 언급'],['삼성SDI','UP',0.94,1,'전기차 배터리 공급 · 2단계'],
+      ['SK이노베이션','UP',-0.42,0,'전기차 배터리 공급 · 2단계']]},
+ {d:'07-16',s:'2차전지',t:'美 전기차 보조금 개편안 발표',
+  it:[['LG에너지솔루션','UP',2.15,1,'뉴스 직접 언급'],['에코프로비엠','UP',-1.24,0,'양극재 조달 · 1단계'],
+      ['엘앤에프','UP',0.88,1,'양극재 조달 · 1단계']]},
+ {d:'07-16',s:'반도체',t:'D램 고정거래가 3개월 연속 상승',
+  it:[['삼성전자','UP',1.85,1,'D램 생산 · 1단계'],['SK하이닉스','UP',2.94,1,'D램 주력 생산 · 1단계'],
+      ['리노공업','UP',1.06,1,'테스트 소켓 · 2단계']]},
+ {d:'07-15',s:'방산',t:'루마니아, K9 자주포 도입 검토 보도',
+  it:[['한화에어로스페이스','UP',4.86,1,'K9 생산 · 1단계'],['풍산','UP',2.03,1,'탄약 공급 · 2단계'],
+      ['현대로템','UP',1.42,1,'방산 수출 · 2단계'],['LIG넥스원','DOWN',-0.55,1,'경쟁 관계 · 2단계']]},
+ {d:'07-15',s:'반도체',t:'파운드리 선단공정 수율 개선 발표',
+  it:[['삼성전자','UP',0.74,1,'파운드리 영위 · 1단계'],['동진쎄미켐','UP',2.21,1,'포토레지스트 · 2단계'],
+      ['주성엔지니어링','UP',1.55,1,'장비 공급 · 2단계']]},
+ {d:'07-14',s:'2차전지',t:'리튬 현물가 반등, 3주 만에 상승 전환',
+  it:[['에코프로비엠','UP',1.77,1,'양극재 판가 연동 · 2단계'],['포스코퓨처엠','UP',1.31,1,'양극재 판가 연동 · 2단계'],
+      ['LG에너지솔루션','DOWN',0.42,0,'원가 상승 부담 · 3단계']]},
+ {d:'07-14',s:'방산',t:'중동 방산 전시회서 수출 상담 확대',
+  it:[['LIG넥스원','UP',1.24,1,'방산 수출 · 1단계'],['한국항공우주','UP',0.66,1,'방산 수출 · 1단계'],
+      ['풍산','UP',-0.31,0,'탄약 수출 · 1단계']]},
+ {d:'07-11',s:'반도체',t:'국내 파운드리 신규 수주 소식',
+  it:[['DB하이텍','UP',2.68,1,'파운드리 영위 · 1단계'],['삼성전자','UP',1.12,1,'파운드리 영위 · 1단계'],
+      ['주성엔지니어링','UP',-0.92,0,'장비 공급 · 2단계']]},
+ {d:'07-11',s:'2차전지',t:'현대차 전용 전기차 플랫폼 증산 계획',
+  it:[['현대차','UP',1.44,1,'뉴스 직접 언급'],['LG에너지솔루션','UP',1.02,1,'배터리 공급 · 2단계'],
+      ['천보','UP',0.58,1,'첨가제 조달 · 3단계']]},
+ {d:'07-10',s:'방산',t:'중동 지역 유도무기 수출 협상 개시',
+  it:[['LIG넥스원','UP',3.55,1,'유도무기 생산 · 1단계'],['한화에어로스페이스','DOWN',-0.64,1,'경쟁 관계 · 1단계'],
+      ['한국항공우주','UP',0.71,1,'방산 수출 · 2단계']]},
+ {d:'07-10',s:'반도체',t:'HBM 후공정 장비 발주 확대 관측',
+  it:[['한미반도체','UP',2.86,1,'TC본더 필수 · 1단계'],['이오테크닉스','UP',1.33,1,'레이저 장비 · 2단계'],
+      ['티씨케이','UP',-0.28,0,'소모품 공급 · 2단계']]},
+ {d:'07-09',s:'방산',t:'국방예산 증액안 국회 제출',
+  it:[['현대로템','UP',1.18,1,'방산 수출 · 1단계'],['한화에어로스페이스','UP',0.92,1,'수출 주도 · 1단계'],
+      ['풍산','UP',1.47,1,'탄약 수출 · 1단계']]},
+ {d:'07-08',s:'2차전지',t:'양극재 신규 증설 계획 발표',
+  it:[['포스코퓨처엠','UP',2.34,1,'양극재 생산 · 1단계'],['엘앤에프','UP',-1.06,0,'양극재 생산 · 1단계'],
+      ['에코프로비엠','UP',0.85,1,'양극재 생산 · 1단계']]}];
+var DAILY=[.62,.71,.55,.68,.74,.66,.58,.7,.77,.64,.6,.72,.69,.75,.58,.63,.71,.8,.66,.61,.73,.68,.7,.59,.76,.72,.65,.7,.74,.69];
+
+/* ═════════ 헬퍼 ═════════ */
+var IDX={},ADJ={},REL={};
+N.forEach(function(d){IDX[d.id]=d;ADJ[d.id]=[]});
+E.forEach(function(e){ADJ[e[0]].push(e[1]);ADJ[e[1]].push(e[0]);
+  REL[[e[0],e[1]].sort().join('|')]={l:e[2],p:e[3]}});
+function arw(d){return d==='UP'?'▲':'▼'}
+function dirKo(d){return d==='UP'?'상승':'하락'}
+function impactOf(hop){
+  if(hop<=0)return {t:'뉴스 직접 대상',c:'t1'};
+  if(hop===1)return {t:'직접 영향',c:'t1'};
+  if(hop===2)return {t:'간접 영향',c:'t2'};
+  return {t:'확산 영향',c:''};
+}
+function sizeOf(d){
+  if(!d.cap)return {w:Math.max(104,d.n.length*15+32),h:44};
+  if(d.cap>=300000)return {w:172,h:60};
+  if(d.cap>=50000)return {w:150,h:58};
+  return {w:134,h:56};
+}
+var $=function(id){return document.getElementById(id)};
+
+/* ═════════ 레이아웃 ═════════ */
+var SECC={'반도체':{x:-820,y:-60},'2차전지':{x:760,y:-100},'방산':{x:-40,y:660}};
+var FULLPOS=(function(){
+  var pos={};
+  Object.keys(SECC).forEach(function(s){
+    var c=SECC[s];
+    var list=N.filter(function(d){return d.s===s})
+              .sort(function(a,b){return ADJ[b.id].length-ADJ[a.id].length});
+    pos[list[0].id]={x:c.x,y:c.y};
+    var rest=list.slice(1),r1=rest.slice(0,6),r2=rest.slice(6);
+    function ring(arr,R,off){arr.forEach(function(d,i){
+      var a=off+i*2*Math.PI/Math.max(arr.length,1);
+      pos[d.id]={x:c.x+Math.cos(a)*R,y:c.y+Math.sin(a)*R*0.8}})}
+    ring(r1,275,-Math.PI/2);
+    ring(r2,480,-Math.PI/2+Math.PI/Math.max(r2.length,1));
+  });
+  return pos;
+})();
+
+function radialPos(ids,lv,maxLv){
+  var byLv={};ids.forEach(function(i){(byLv[lv[i]]=byLv[lv[i]]||[]).push(i)});
+  var R=[0,300,520,700],pos={};
+  Object.keys(byLv).forEach(function(lk){
+    var l=+lk,arr=byLv[lk];
+    if(l===0){pos[arr[0]]={x:0,y:0};return}
+    var step=2*Math.PI/arr.length,off=-Math.PI/2+(l%2?0:step/2);
+    arr.forEach(function(id,i){var a=off+step*i;
+      pos[id]={x:Math.cos(a)*R[Math.min(l,3)],y:Math.sin(a)*R[Math.min(l,3)]*0.76}})});
+  return pos;
+}
+
+/* 노드 기점 파급 탐색 (BFS 2단계) */
+function nodeBuild(origin,maxHop){
+  maxHop=maxHop||2;
+  var lv={},pairs=[],seen={},q=[origin];
+  lv[origin]=0;
+  while(q.length){
+    var cn=q.shift();
+    if(lv[cn]>=maxHop)continue;
+    ADJ[cn].forEach(function(nb){
+      var key=[cn,nb].sort().join('|');
+      if(lv[nb]===undefined){lv[nb]=lv[cn]+1;q.push(nb)}
+      if(lv[nb]===lv[cn]+1&&!seen[key]){
+        seen[key]=1;
+        var m=REL[key]||{l:'연관',p:1};
+        pairs.push({s:cn,t:nb,label:m.l,pol:m.p,lv:lv[nb]})}
+    });
+  }
+  var ids=Object.keys(lv),maxLv=0;
+  ids.forEach(function(i){if(lv[i]>maxLv)maxLv=lv[i]});
+  return {ids:ids,pairs:pairs,lv:lv,maxLv:maxLv,pos:radialPos(ids,lv,maxLv)};
+}
+
+function focusBuild(nw){
+  var lv={};lv[nw.main.id]=0;
+  var set={},pairs=[],seen={};
+  set[nw.main.id]=1;
+  nw.rel.forEach(function(r){r.chain.forEach(function(id,k){
+    set[id]=1;
+    if(lv[id]===undefined||k<lv[id])lv[id]=k;
+    if(k>0){var a=r.chain[k-1],key=a+'>'+id;
+      if(!seen[key]){seen[key]=1;
+        var m=REL[[a,id].sort().join('|')]||{l:'연관',p:1};
+        pairs.push({s:a,t:id,label:m.l,pol:m.p,lv:k})}}})});
+  var ids=Object.keys(set);
+  var maxLv=0;ids.forEach(function(i){if(lv[i]>maxLv)maxLv=lv[i]});
+  return {ids:ids,pairs:pairs,lv:lv,maxLv:maxLv,pos:radialPos(ids,lv,maxLv)};
+}
+
+/* ═════════ 그래프 렌더러 ═════════ */
+var OFF=3000,SVGNS='http://www.w3.org/2000/svg';
+var canvas=$('canvas'),vp=$('vp'),esvg=$('esvg'),tipEl=$('tip'),stageEl=$('stage');
+var G={nodes:[],edges:[],els:{},paths:{},labels:{}};
+var T={x:0,y:0,k:1};
+
+function applyT(){vp.style.transform='translate('+T.x+'px,'+T.y+'px) scale('+T.k+')'}
+
+function clearGraph(){
+  Array.prototype.slice.call(vp.querySelectorAll('.nd,.elabel')).forEach(function(e){e.remove()});
+  Array.prototype.slice.call(vp.querySelectorAll('.seclab')).forEach(function(e){e.remove()});
+  Array.prototype.slice.call(esvg.querySelectorAll('path.ep')).forEach(function(e){e.remove()});
+  G={nodes:[],edges:[],els:{},paths:{},labels:{}};
+}
+
+function rectPt(a,b){
+  var dx=b.x-a.x,dy=b.y-a.y;
+  var hw=a.w/2+7,hh=a.h/2+7;
+  var t=Math.min(Math.abs(hw/(dx||1e-6)),Math.abs(hh/(dy||1e-6)));
+  return {x:a.x+dx*t,y:a.y+dy*t};
+}
+function bez(a,b){
+  var p1=rectPt(a,b),p2=rectPt(b,a);
+  var dx=p2.x-p1.x,dy=p2.y-p1.y,c=0.4;
+  var hz=Math.abs(dx)>Math.abs(dy);
+  var c1=hz?{x:p1.x+dx*c,y:p1.y}:{x:p1.x,y:p1.y+dy*c};
+  var c2=hz?{x:p2.x-dx*c,y:p2.y}:{x:p2.x,y:p2.y-dy*c};
+  return 'M'+(p1.x+OFF)+','+(p1.y+OFF)+' C'+(c1.x+OFF)+','+(c1.y+OFF)+' '+
+         (c2.x+OFF)+','+(c2.y+OFF)+' '+(p2.x+OFF)+','+(p2.y+OFF);
+}
+
+function buildGraph(nodes,edges){
+  clearGraph();
+  G.nodes=nodes;G.edges=edges;
+  var byId={};nodes.forEach(function(n){byId[n.id]=n});G.byId=byId;
+
+  edges.forEach(function(e){
+    var a=byId[e.s],b=byId[e.t];if(!a||!b)return;
+    var p=document.createElementNS(SVGNS,'path');
+    p.setAttribute('d',bez(a,b));
+    p.setAttribute('class','ep '+e.state);
+    esvg.appendChild(p);G.paths[e.id]=p;
+    var lb=document.createElement('div');
+    lb.className='elabel';lb.textContent=e.label;
+    var L=p.getTotalLength(),mid=p.getPointAtLength(L/2);
+    lb.style.left=(mid.x-OFF)+'px';lb.style.top=(mid.y-OFF)+'px';
+    vp.appendChild(lb);G.labels[e.id]=lb;
+    e.len=L;
+  });
+
+  nodes.forEach(function(n){
+    var el=document.createElement('div');
+    el.className='nd '+(n.abs?'abs ':'')+(n.tier?n.tier+' ':'')+n.state;
+    el.style.left=n.x+'px';el.style.top=n.y+'px';
+    el.style.width=n.w+'px';el.style.height=n.h+'px';
+    el.innerHTML='<div class="ring"></div>'+
+      (n.badge?'<span class="nbadge '+n.badge.toLowerCase()+'">'+arw(n.badge)+'</span>':'')+
+      '<div class="nd-name">'+n.label+'</div>'+(n.ticker?'<div class="nd-tk">'+n.ticker+'</div>':'');
+    el.addEventListener('mouseenter',function(ev){showTip(ev,n)});
+    el.addEventListener('mousemove',moveTip);
+    el.addEventListener('mouseleave',function(){tipEl.classList.remove('on');if(mode==='all')unhoverEdges(n.id)});
+    if(mode==='all')el.addEventListener('mouseenter',function(){hoverEdges(n.id)});
+    el.addEventListener('click',function(){onNodeClick(n.id)});
+    vp.appendChild(el);G.els[n.id]=el;
+  });
+  fitView(0);
+}
+
+function setNodeState(id,state,opts){
+  var n=G.byId&&G.byId[id];if(!n)return;
+  n.state=state;if(opts&&opts.badge!==undefined)n.badge=opts.badge;
+  var el=G.els[id];if(!el)return;
+  el.className='nd '+(n.abs?'abs ':'')+(n.tier?n.tier+' ':'')+state+(opts&&opts.main?' main':'');
+  var old=el.querySelector('.nbadge');if(old)old.remove();
+  if(n.badge){var b=document.createElement('span');
+    b.className='nbadge '+n.badge.toLowerCase();b.textContent=arw(n.badge);
+    el.insertBefore(b,el.firstChild.nextSibling)}
+  if(opts&&opts.pulse){var r=el.querySelector('.ring');r.classList.remove('go');void r.offsetWidth;r.classList.add('go')}
+}
+function setEdgeState(e,state,draw){
+  var p=G.paths[e.id],lb=G.labels[e.id];if(!p)return;
+  p.setAttribute('class','ep '+state);
+  if(draw){var L=e.len||p.getTotalLength();
+    p.style.transition='none';p.style.strokeDasharray=L;p.style.strokeDashoffset=L;
+    p.setAttribute('marker-end','url(#ar-'+(state.indexOf('down')===0?'down':'up')+')');
+    requestAnimationFrame(function(){
+      p.style.transition='stroke-dashoffset .5s cubic-bezier(.33,0,.2,1)';
+      p.style.strokeDashoffset=0})}
+  if(lb){lb.className='elabel '+(state==='near'?'':state)+
+    ((state==='up'||state==='down'||state==='near')?' show':'')}
+}
+
+function fitView(dur){
+  if(!G.nodes.length)return;
+  var x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  G.nodes.forEach(function(n){
+    x0=Math.min(x0,n.x-n.w/2);x1=Math.max(x1,n.x+n.w/2);
+    y0=Math.min(y0,n.y-n.h/2);y1=Math.max(y1,n.y+n.h/2)});
+  var pad=60,cw=canvas.clientWidth,ch=canvas.clientHeight;
+  var k=Math.min((cw-pad*2)/(x1-x0||1),(ch-pad*2)/(y1-y0||1));
+  k=Math.max(.18,Math.min(1.25,k));
+  T.k=k;T.x=cw/2-(x0+x1)/2*k;T.y=ch/2-(y0+y1)/2*k;
+  vp.style.transition=dur?'transform '+dur+'ms cubic-bezier(.32,0,.2,1)':'none';
+  applyT();
+  if(dur)setTimeout(function(){vp.style.transition='none'},dur+30);
+}
+function zoomBy(f){
+  var cw=canvas.clientWidth/2,ch=canvas.clientHeight/2;
+  var nk=Math.max(.15,Math.min(2.2,T.k*f));
+  T.x=cw-(cw-T.x)*(nk/T.k);T.y=ch-(ch-T.y)*(nk/T.k);T.k=nk;applyT();
+}
+$('zin').onclick=function(){zoomBy(1.2)};
+$('zout').onclick=function(){zoomBy(.83)};
+$('zfit').onclick=function(){fitView(420)};
+canvas.addEventListener('wheel',function(ev){
+  ev.preventDefault();
+  var r=canvas.getBoundingClientRect(),mx=ev.clientX-r.left,my=ev.clientY-r.top;
+  var f=ev.deltaY>0?.9:1.11,nk=Math.max(.15,Math.min(2.2,T.k*f));
+  T.x=mx-(mx-T.x)*(nk/T.k);T.y=my-(my-T.y)*(nk/T.k);T.k=nk;applyT();
+},{passive:false});
+var pan=null;
+canvas.addEventListener('pointerdown',function(ev){
+  pan={x:ev.clientX,y:ev.clientY,tx:T.x,ty:T.y};canvas.classList.add('grab');
+  canvas.setPointerCapture(ev.pointerId)});
+canvas.addEventListener('pointermove',function(ev){
+  if(!pan)return;T.x=pan.tx+(ev.clientX-pan.x);T.y=pan.ty+(ev.clientY-pan.y);applyT()});
+canvas.addEventListener('pointerup',function(){pan=null;canvas.classList.remove('grab')});
+
+function showTip(ev,n){
+  var d=IDX[n.id];
+  tipEl.innerHTML='<b>'+d.n+'</b> '+(d.t?'· '+d.t:'· '+d.k)+'<br>연결 관계 '+ADJ[n.id].length+'건';
+  tipEl.classList.add('on');moveTip(ev)}
+function moveTip(ev){
+  var r=canvas.getBoundingClientRect();
+  tipEl.style.left=(ev.clientX-r.left+16)+'px';
+  tipEl.style.top=(ev.clientY-r.top-10)+'px'}
+function hoverEdges(id){if(hlNode)return;G.edges.forEach(function(e){
+  if(e.s===id||e.t===id)setEdgeState(e,'near',false)})}
+function unhoverEdges(id){if(hlNode)return;G.edges.forEach(function(e){
+  if((e.s===id||e.t===id)&&e.state!=='dim')setEdgeState(e,'idle',false)})}
+/* ═════════ 모드 ═════════ */
+var mode='focus',cur=null,timers=[],backTo={m:'focus'},hlNode=null;
+function clr(){timers.forEach(clearTimeout);timers=[]}
+function at(ms,f){timers.push(setTimeout(f,ms))}
+
+function tierOf(id){
+  var d=ADJ[id].length;
+  return d>=7?'t1':(d>=4?'t2':'t3');
+}
+function showFull(anim){
+  clr();hlNode=null;stageEl.classList.remove('on');$('backchip').classList.remove('on');
+  var nodes=N.map(function(d){var sz=sizeOf(d);
+    return {id:d.id,x:FULLPOS[d.id].x,y:FULLPOS[d.id].y,w:sz.w,h:sz.h,
+      label:d.n,ticker:d.t||'',abs:!!d.k,tier:tierOf(d.id),state:anim?'hide':'idle'}});
+  var edges=E.map(function(e,i){return {id:'e'+i,s:e[0],t:e[1],label:e[2],pol:e[3],
+    state:anim?'hide':'idle'}});
+  buildGraph(nodes,edges);
+  setLegend('all');
+
+  Object.keys(SECC).forEach(function(sc){
+    var lb=document.createElement('div');lb.className='seclab';lb.textContent=sc;
+    lb.style.left=SECC[sc].x+'px';lb.style.top=(SECC[sc].y-330)+'px';
+    if(anim){lb.style.opacity=0;lb.style.transition='opacity .5s'}
+    vp.appendChild(lb)});
+
+  function overlayNews(delay){
+    if(!cur)return;
+    var f=focusBuild(cur);
+    var dirOf={};dirOf[cur.main.id]=cur.main.dir;
+    cur.rel.forEach(function(r){dirOf[r.id]=r.dir});
+    var inSet={};f.ids.forEach(function(id){inSet[id]=1});
+    var hot={};f.pairs.forEach(function(pr){hot[[pr.s,pr.t].sort().join('|')]=pr.pol});
+    at(delay,function(){
+      if(anim){stageEl.textContent='선택한 뉴스의 파급 위치';stageEl.classList.add('on')}
+      edges.forEach(function(e){
+        var k=[e.s,e.t].sort().join('|');
+        if(hot[k]!==undefined){e.state=hot[k]===-1?'down':'up';setEdgeState(e,e.state,!!anim)}});
+      f.ids.forEach(function(id,k){
+        at(k*70,function(){
+          var dd=dirOf[id];
+          if(id===cur.main.id)setNodeState(id,dd==='UP'?'up':'down',{main:true,pulse:!!anim,badge:dd});
+          else if(dd)setNodeState(id,dd==='UP'?'up':'down',{badge:dd});
+          else setNodeState(id,'via')})});
+      at(f.ids.length*70+900,function(){stageEl.classList.remove('on')});
+    });
+    $('ghint').textContent='선택한 뉴스의 파급이 전체 망에서 차지하는 위치 · 노드를 클릭하면 그 종목 기점으로 탐색합니다';
+  }
+
+  if(!anim){
+    if(cur)overlayNews(0);
+    else $('ghint').textContent='진한 카드일수록 연결이 많은 핵심 노드입니다 · 노드를 클릭해 보세요';
+    return;
+  }
+
+  /* 섹터별 순차 등장 */
+  stageEl.textContent='전체 관계망 구성 중';stageEl.classList.add('on');
+  var order=['반도체','2차전지','방산'],t0=180;
+  order.forEach(function(sec,si){
+    var ns=nodes.filter(function(n){return IDX[n.id].s===sec});
+    at(t0+si*300,function(){
+      stageEl.textContent=sec+' 클러스터';
+      var lbs=vp.querySelectorAll('.seclab');
+      if(lbs[si])lbs[si].style.opacity=1;
+    });
+    ns.forEach(function(n,k){at(t0+si*300+k*26,function(){setNodeState(n.id,'idle')})});
+  });
+  var tEdge=t0+order.length*300+120;
+  at(tEdge,function(){
+    stageEl.textContent='관계 연결';
+    edges.forEach(function(e,i){at(i*10,function(){setEdgeState(e,'idle',false)})})});
+  var tEnd=tEdge+edges.length*10+320;
+  at(tEnd,function(){stageEl.classList.remove('on');fitView(420)});
+  if(cur)overlayNews(tEnd+260);
+  else at(tEnd,function(){
+    $('ghint').textContent='진한 카드일수록 연결이 많은 핵심 노드입니다 · 노드를 클릭해 보세요'});
+}
+
+/* 전체 관계망 제자리 파급 하이라이트 (배치 유지) */
+function highlightPath(id){
+  clr();
+  hlNode=id;
+  var f=nodeBuild(id,2),lv=f.lv;
+  var bc=$('backchip');bc.classList.add('on');bc.textContent='← 전체 보기';
+  backTo={m:'reset'};
+
+  /* 전체 소거 (뉴스 하이라이트 잔상 · 방향 배지까지 제거) */
+  G.nodes.forEach(function(n){setNodeState(n.id,'dim',{badge:null})});
+  G.edges.forEach(function(e){e.state='dim';setEdgeState(e,'dim',false)});
+
+  /* 실제 그래프에서 경로에 해당하는 엣지 찾기 */
+  var byKey={};
+  f.pairs.forEach(function(pr){byKey[[pr.s,pr.t].sort().join('|')]=pr});
+  var e1=[],e2=[];
+  G.edges.forEach(function(e){
+    var pr=byKey[[e.s,e.t].sort().join('|')];
+    if(!pr)return;
+    e._pr=pr;
+    (pr.lv===1?e1:e2).push(e)});
+
+  stageEl.textContent=IDX[id].n+' 기점 파급';stageEl.classList.add('on');
+  at(180,function(){setNodeState(id,'origin',{pulse:true})});
+
+  /* 1단계 */
+  at(520,function(){
+    stageEl.textContent='1단계 직접 관계 '+e1.length+'건';
+    e1.forEach(function(e,k){at(k*70,function(){
+      e.state=e._pr.pol===-1?'down':'up';
+      setEdgeState(e,e.state,true);
+      at(260,function(){
+        var other=(e.s===id)?e.t:e.s;
+        if(lv[other]===1)setNodeState(other,'via')})})})});
+
+  /* 2단계 */
+  var t2=520+e1.length*70+520;
+  at(t2,function(){
+    stageEl.textContent='2단계 파급 '+e2.length+'건';
+    e2.forEach(function(e,k){at(k*38,function(){
+      e.state=e._pr.pol===-1?'down2':'up2';
+      setEdgeState(e,e.state,true);
+      at(220,function(){
+        var tgt=(lv[e.t]===2)?e.t:((lv[e.s]===2)?e.s:null);
+        if(tgt)setNodeState(tgt,'via2')})})})});
+
+  at(t2+e2.length*38+900,function(){stageEl.classList.remove('on')});
+
+  var n1=0,n2=0;
+  Object.keys(lv).forEach(function(k){if(lv[k]===1)n1++;else if(lv[k]===2)n2++});
+  $('ghint').textContent=IDX[id].n+' · 1단계 '+n1+'개, 2단계 '+n2+'개로 파급';
+}
+
+/* 노드 기점 관계 탐색 */
+function onNodeClick(id){
+  if(mode==='all'){
+    if(hlNode===id)return;                      /* 같은 기점 재클릭 무시 */
+    highlightPath(id);return;                   /* 배치 유지, 제자리 강조 */
+  }
+  var n=G.byId&&G.byId[id];
+  if(n&&n.state==='origin')return;
+  if(mode!=='node')backTo={m:'focus'};
+  showNodeFocus(id);
+}
+function goBack(){
+  if(backTo.m==='reset'){mode='all';segUI();showFull(false);return}
+  if(backTo.m==='focus'&&cur){mode='focus';segUI();showFocus(cur)}
+  else{mode='all';segUI();showFull(true)}
+}
+function showNodeFocus(id){
+  clr();hlNode=null;mode='node';segUI();
+  var bc=$('backchip');bc.classList.add('on');
+  bc.textContent=(backTo.m==='focus'&&cur)?'← 뉴스 파급 경로':'← 전체 관계망';
+  var f=nodeBuild(id,2);
+  var nodes=f.ids.map(function(nid){var d=IDX[nid],sz=sizeOf(d);
+    return {id:nid,x:f.pos[nid].x,y:f.pos[nid].y,w:sz.w,h:sz.h,
+      label:d.n,ticker:d.t||'',abs:!!d.k,state:'hide',lv:f.lv[nid]}});
+  var edges=f.pairs.map(function(pr,i){
+    return {id:'g'+i,s:pr.s,t:pr.t,label:pr.label,pol:pr.pol,lv:pr.lv,state:'hide'}});
+  buildGraph(nodes,edges);
+  setLegend('node');
+  $('ghint').textContent=IDX[id].n+' 기점 · 1단계 '+ADJ[id].length+'개, 2단계까지 '+(f.ids.length-1)+
+    '개 · 다른 노드를 클릭하면 그 종목으로 이동합니다';
+
+  stageEl.textContent='관계 탐색 중';stageEl.classList.add('on');
+  at(260,function(){setNodeState(id,'origin',{pulse:true})});
+  [1,2].forEach(function(l,li){
+    var es=edges.filter(function(e){return e.lv===l});
+    es.forEach(function(e,k){
+      at(700+li*520+k*55,function(){
+        if(li===0&&k===0)stageEl.textContent='1단계 관계';
+        if(li===1&&k===0)stageEl.textContent='2단계 파급';
+        e.state=e.pol===-1?'down':'up';
+        setEdgeState(e,e.state,true);
+        at(260,function(){
+          var n=G.byId[e.t];
+          if(n&&n.state==='hide')setNodeState(e.t,l===1?'via':'idle')})})})});
+  at(2400,function(){
+    stageEl.classList.remove('on');
+    G.nodes.forEach(function(n){if(n.state==='hide')setNodeState(n.id,'idle')});
+    fitView(500)});
+}
+
+function setLegend(m){
+  var L=$('legend');
+  if(m==='node'){
+    L.innerHTML='<span><i style="background:#F26722"></i>동조 관계</span>'+
+      '<span><i style="background:#0E6E96"></i>반대 관계</span>'+
+      '<span><i style="background:#fff;border:2px solid #FCA271"></i>1단계</span>'+
+      '<span style="color:#B4AFAA">바깥 원 = 2단계</span>'}
+  else if(m==='all'){
+    L.innerHTML='<span><i style="background:#44403C"></i>핵심 노드</span>'+
+      '<span><i style="background:#EDEBE8"></i>중간</span>'+
+      '<span><i style="background:#FCFCFB;border:1px solid #E3E0DC"></i>말단</span>'+
+      '<span style="color:#B4AFAA">노드 클릭 = 그 종목 기점 파급 강조</span>'}
+  else{
+    L.innerHTML='<span><i style="background:#F26722"></i>상승</span>'+
+      '<span><i style="background:#0E6E96"></i>하락</span>'+
+      '<span><i style="background:#fff;border:2px solid #FCA271"></i>경유</span>'+
+      '<span><i style="background:#F4F3F1;border:1.5px dashed #D6D3D1"></i>테마·제품</span>'}
+}
+
+function showFocus(nw){
+  clr();hlNode=null;$('backchip').classList.remove('on');setLegend('focus');backTo={m:'focus'};
+  var f=focusBuild(nw);
+  var dirOf={};dirOf[nw.main.id]=nw.main.dir;
+  nw.rel.forEach(function(r){dirOf[r.id]=r.dir});
+  var nodes=f.ids.map(function(id){var d=IDX[id],s=sizeOf(d);
+    return {id:id,x:f.pos[id].x,y:f.pos[id].y,w:s.w,h:s.h,
+      label:d.n,ticker:d.t||'',abs:!!d.k,state:'hide',lv:f.lv[id]}});
+  var edges=f.pairs.map(function(p,i){
+    return {id:'f'+i,s:p.s,t:p.t,label:p.label,pol:p.pol,lv:p.lv,state:'hide'}});
+  buildGraph(nodes,edges);
+
+  stageEl.textContent='관계 추론 중';stageEl.classList.add('on');
+
+  at(300,function(){
+    stageEl.textContent='영향 기점 확인';
+    setNodeState(nw.main.id,nw.main.dir==='UP'?'up':'down',
+      {main:true,pulse:true,badge:nw.main.dir});
+  });
+
+  var lvs=[];f.pairs.forEach(function(p){if(lvs.indexOf(p.lv)<0)lvs.push(p.lv)});
+  lvs.sort();
+  lvs.forEach(function(l,li){
+    var es=edges.filter(function(e){return e.lv===l});
+    es.forEach(function(e,k){
+      at(800+li*440+k*110,function(){
+        if(li===0&&k===0)stageEl.textContent='관계 경로 추적';
+        e.state=e.pol===-1?'down':'up';
+        setEdgeState(e,e.state,true);
+        at(300,function(){
+          var n=G.byId[e.t];
+          if(n&&n.state==='hide'){
+            var dd=dirOf[e.t];
+            setNodeState(e.t,dd?(dd==='UP'?'up':'down'):'via',{badge:dd||null})}
+        })})})});
+
+  var s3=1600;
+  at(s3,function(){stageEl.textContent='영향 종목 산출';
+    nw.rel.forEach(function(r,k){at(k*210,function(){
+      setNodeState(r.id,r.dir==='UP'?'up':'down',{badge:r.dir});
+      var c=document.querySelector('.rcard[data-id="'+r.id+'"]');
+      if(c){c.classList.add('hl');at(850,function(){c.classList.remove('hl')})}
+    })})});
+
+  at(s3+nw.rel.length*210+800,function(){
+    stageEl.classList.remove('on');
+    G.nodes.forEach(function(n){if(n.state==='hide')setNodeState(n.id,'via')});
+    fitView(500);
+  });
+}
+
+$('mFocus').onclick=function(){if(!cur)return;mode='focus';segUI();$('backchip').classList.remove('on');showFocus(cur)};
+$('backchip').onclick=goBack;
+$('mAll').onclick=function(){mode='all';segUI();showFull(true)};
+function segUI(){$('mFocus').className=mode==='focus'?'on':'';$('mAll').className=(mode==='all')?'on':''}
+
+/* ═════════ 뉴스 ═════════ */
+var filter='전체';
+['전체','반도체','2차전지','방산'].forEach(function(s){
+  var b=document.createElement('button');
+  b.className='chip'+(s===filter?' on':'');b.textContent=s;
+  b.onclick=function(){filter=s;
+    Array.prototype.slice.call($('chips').children).forEach(function(c){
+      c.className='chip'+(c.textContent===s?' on':'')});
+    renderNews();syncBar()};
+  $('chips').appendChild(b)});
+
+function renderNews(){
+  var box=$('newsList');box.innerHTML='';
+  NEWS.filter(function(n){return filter==='전체'||n.s===filter}).forEach(function(n){
+    var b=document.createElement('button');
+    b.className='ncard'+(cur&&cur.id===n.id?' on':'');
+    b.innerHTML='<div class="ntop"><span class="sec-b">'+n.s+'</span></div>'+
+      '<div class="ntitle">'+n.t+'</div>'+
+      '<div class="nmeta"><b>'+n.p+'</b> · '+n.ago+'</div>';
+    b.onclick=function(){select(n)};
+    box.appendChild(b)})}
+
+/* 바텀시트 (반응형 전용) */
+function sheetOpen(){$('colnews').classList.add('open');$('nscrim').classList.add('on')}
+function sheetClose(){$('colnews').classList.remove('open');$('nscrim').classList.remove('on')}
+$('nbCur').onclick=sheetOpen;
+$('sheetX').onclick=sheetClose;
+$('nscrim').onclick=sheetClose;
+$('nbPrev').onclick=function(){stepNews(-1)};
+$('nbNext').onclick=function(){stepNews(1)};
+
+function visibleNews(){
+  return NEWS.filter(function(n){return filter==='전체'||n.s===filter})}
+function stepNews(d){
+  var list=visibleNews(),i=0;
+  for(var k=0;k<list.length;k++)if(cur&&list[k].id===cur.id){i=k;break}
+  var t=i+d;if(t<0||t>=list.length)return;
+  select(list[t]);
+}
+function syncBar(){
+  var list=visibleNews(),i=-1;
+  for(var k=0;k<list.length;k++)if(cur&&list[k].id===cur.id){i=k;break}
+  if(!cur||i<0){$('nbTitle').textContent='뉴스를 선택해 주세요';
+    $('nbSec').textContent='전체';$('nbCnt').textContent='0 / '+list.length;
+    $('nbPrev').disabled=true;$('nbNext').disabled=true;return}
+  $('nbSec').textContent=cur.s;
+  $('nbTitle').textContent=cur.t;
+  $('nbCnt').textContent=(i+1)+' / '+list.length;
+  $('nbPrev').disabled=(i===0);
+  $('nbNext').disabled=(i===list.length-1);
+}
+
+function select(n){
+  cur=n;mode='focus';segUI();renderNews();renderAnalysis();syncBar();sheetClose();
+  var mx=0;n.rel.forEach(function(r){mx=Math.max(mx,r.chain.length-1)});
+  $('apsub').textContent=n.s+' · 영향 종목 '+(n.rel.length+1)+'개';
+  $('ghint').textContent='기점에서 최대 '+mx+'단계까지 파급 · 노드를 클릭하면 그 종목 기점으로 탐색합니다';
+  showFocus(n);
+}
+
+/* ═════════ 분석 패널 ═════════ */
+function renderAnalysis(){
+  var box=$('analysis');
+  if(!cur){box.innerHTML='<div class="empty"><b>뉴스를 선택해 주세요</b>'+
+    '<p>선택한 뉴스가 어떤 종목까지<br>이어지는지 단계별로 보여드립니다</p></div>';return}
+  var n=cur,m=n.main,mn=IDX[m.id],dn=m.dir==='DOWN'?' down':'';
+  var html='';
+  html+='<div class="s"><div class="lab">기사 요약</div><div class="sumbox">';
+  n.sum.forEach(function(s,i){html+='<p><b>'+(i+1)+'</b>'+s+'</p>'});
+  html+='</div><div class="srcline"><b>'+n.p+'</b><span>·</span><span>'+n.pub+'</span>'+
+    '<button data-url="'+n.url+'">원문 열기 ↗</button></div></div>';
+  html+='<div class="s"><div class="lab">영향 기점</div><div class="mstock'+dn+'">'+
+    '<div class="msrow"><div class="msname">'+mn.n+(mn.t?'<small>'+mn.t+'</small>':'')+'</div>'+
+    '<span class="dbadge '+m.dir.toLowerCase()+'">'+arw(m.dir)+' '+dirKo(m.dir)+'</span></div>'+
+    '<div class="imp"><b>'+impactOf(0).t+'</b></div>'+
+    '<p class="msr'+dn+'">'+m.r+'</p></div></div>';
+  html+='<div class="s"><div class="lab">관계로 이어진 종목 '+n.rel.length+'</div><div class="rel">';
+  n.rel.slice().sort(function(a,b){
+    return (a.chain.length-b.chain.length)||(a.dir===b.dir?0:a.dir==='UP'?-1:1)})
+   .forEach(function(r){
+    var d=IDX[r.id],hop=r.chain.length-1,im=impactOf(hop);
+    html+='<div class="rcard" data-id="'+r.id+'"><div class="rtop">'+
+      '<span class="rname">'+d.n+'</span>'+
+      '<span class="rnum '+r.dir.toLowerCase()+'">'+arw(r.dir)+' '+dirKo(r.dir)+'</span></div>'+
+      '<div class="rwhy"><span class="rtag '+im.c+'">'+im.t+'</span><b>'+r.rel+'</b> 관계</div>'+
+      '<div class="rchain">'+r.chain.map(function(c){return IDX[c].n}).join(' → ')+'</div></div>'});
+  html+='</div></div>';
+  html+='<div class="s"><div class="why"><h3>판단 근거</h3>'+
+    '<div class="wrow"><div class="wkey">이벤트</div><div class="wval">'+n.why.e+'</div></div>'+
+    '<div class="wrow"><div class="wkey">파급 경로</div><div class="wval">'+n.why.p+'</div></div>'+
+    '<div class="wrow"><div class="wkey">과거 사례</div><div class="wval">'+n.why.h+'</div></div></div></div>';
+  html+='<div class="s"><button class="gvbtn" id="gv">이 종목들의 지난 예측 적중률 보기 →</button></div>';
+  box.innerHTML=html;
+  var ob=box.querySelector('[data-url]');if(ob)ob.onclick=function(){window.open(this.dataset.url,'_blank')};
+  $('gv').onclick=function(){openVerifyFor(cur)};
+}
+
+/* ═════════ 검증 ═════════ */
+var vFil='전체', vSel=0, vCtx=null;   /* vCtx = {label, names[]} */
+
+['전체','반도체','2차전지','방산'].forEach(function(s){
+  var b=document.createElement('button');
+  b.className='chip'+(s===vFil?' on':'');b.textContent=s;
+  b.onclick=function(){vFil=s;vSel=0;
+    Array.prototype.slice.call($('vfil').children).forEach(function(c){
+      c.className='chip'+(c.textContent===s?' on':'')});
+    renderVerify()};
+  $('vfil').appendChild(b)});
+
+$('ctxclear').onclick=function(){vCtx=null;vSel=0;renderVerify()};
+
+function verifyRows(){
+  return VERIFY.filter(function(v){
+    if(vFil!=='전체'&&v.s!==vFil)return false;
+    if(vCtx){
+      var hit=false;
+      v.it.forEach(function(r){if(vCtx.names.indexOf(r[0])>=0)hit=true});
+      if(!hit)return false;
+    }
+    return true;
+  });
+}
+function hitCount(v){var c=0;v.it.forEach(function(r){if(r[3])c++});return c}
+
+/* 뉴스 상세에서 진입 — 이번 예측 종목이 등장한 과거 검증만 */
+function openVerifyFor(news){
+  var names=[IDX[news.main.id].n];
+  news.rel.forEach(function(r){names.push(IDX[r.id].n)});
+  vCtx={label:news.t,names:names};
+  vFil='전체';vSel=0;
+  Array.prototype.slice.call($('vfil').children).forEach(function(c){
+    c.className='chip'+(c.textContent==='전체'?' on':'')});
+  switchView('verify');renderVerify();
+}
+
+function renderVerify(){
+  var rows=verifyRows();
+
+  /* 컨텍스트 배너 */
+  if(vCtx){
+    $('ctxbar').classList.remove('hidden');
+    $('ctxtext').innerHTML='이번 예측에 등장한 <b>'+vCtx.names.slice(0,3).join(' · ')+
+      (vCtx.names.length>3?' 외 '+(vCtx.names.length-3)+'종목':'')+
+      '</b>이 포함된 과거 검증 <b>'+rows.length+'건</b>만 보고 있습니다';
+    $('vlsub').textContent='이번 예측 종목과 겹치는 건만 표시 중';
+    $('mNewsSub').textContent='관련 검증 건수';
+  }else{
+    $('ctxbar').classList.add('hidden');
+    $('vlsub').textContent='뉴스를 선택하면 오른쪽에 상세가 나옵니다';
+    $('mNewsSub').textContent='최근 30일 기준';
+  }
+
+  /* 지표 */
+  var hitN=0,tot=0,hitS=0;
+  rows.forEach(function(v){var x=hitCount(v);tot+=v.it.length;hitS+=x;
+    if(x/v.it.length>=0.5)hitN++});
+  $('mHit').innerHTML=(rows.length?Math.round(hitN/rows.length*100):0)+'<em>%</em>';
+  $('mStock').innerHTML=(tot?Math.round(hitS/tot*100):0)+'<em>%</em>';
+  $('mNews').innerHTML=rows.length+'<em>건</em>';
+
+  /* 목록 */
+  if(vSel>=rows.length)vSel=0;
+  var html='';
+  rows.forEach(function(v,i){
+    var x=hitCount(v),p=Math.round(x/v.it.length*100);
+    html+='<button class="vitem'+(i===vSel?' on':'')+'" data-i="'+i+'">'+
+      '<span class="vbar-mini"><b>'+p+'%</b><i><span style="width:'+p+'%"></span></i></span>'+
+      '<span class="vitxt"><span class="tt">'+v.t+'</span>'+
+      '<span class="mm"><span class="sec-b">'+v.s+'</span>'+v.d+' · '+v.it.length+'종목</span></span></button>'});
+  if(!rows.length)html='<div class="vdempty"><b>검증 결과가 없습니다</b><p>필터를 바꾸거나 전체 검증을 확인해 주세요</p></div>';
+  $('vrowsbox').innerHTML=html;
+  Array.prototype.slice.call($('vrowsbox').querySelectorAll('.vitem')).forEach(function(b){
+    b.onclick=function(){vSel=+b.dataset.i;renderVerify()}});
+
+  renderDetail(rows[vSel]);
+  drawChart();
+}
+
+function renderDetail(v){
+  var box=$('vdet');
+  if(!v){box.innerHTML='<div class="vdempty"><b>선택된 뉴스가 없습니다</b>'+
+    '<p>왼쪽 목록에서 뉴스를 골라 주세요</p></div>';return}
+  var x=hitCount(v),p=Math.round(x/v.it.length*100),C=2*Math.PI*27;
+  var html='<div class="vdhead">'+
+    '<div class="vdmeta"><span class="sec-b">'+v.s+'</span>'+
+    '<span class="vdate">'+v.d+' 예측 · 익일 종가로 평가</span></div>'+
+    '<div class="vdtitle">'+v.t+'</div>'+
+    '<div class="vdscore"><div class="vdring">'+
+    '<svg viewBox="0 0 64 64" width="64" height="64">'+
+    '<circle cx="32" cy="32" r="27" fill="none" stroke="#FFE4D3" stroke-width="6"/>'+
+    '<circle cx="32" cy="32" r="27" fill="none" stroke="#F26722" stroke-width="6" stroke-linecap="round" '+
+    'stroke-dasharray="'+C+'" stroke-dashoffset="'+(C*(1-p/100))+'" transform="rotate(-90 32 32)"/></svg>'+
+    '<b>'+p+'%</b></div>'+
+    '<div class="vdsx">예측한 <b>'+v.it.length+'종목</b> 가운데 <b>'+x+'종목</b>의 방향이 맞았습니다'+
+    '<br>온톨로지 경로를 따라 예측한 관련주도 함께 평가했습니다</div></div></div>'+
+    '<div class="vdtable">'+
+    '<div class="vdth"><span style="flex:1">종목 · 관계 경로</span>'+
+    '<span style="width:56px">예측</span><span style="width:68px;text-align:right">실제 등락</span>'+
+    '<span style="width:50px;text-align:center">결과</span></div>';
+  v.it.forEach(function(r){
+    html+='<div class="vrow"><span class="vname">'+r[0]+'<i>'+(r[4]||'')+'</i></span>'+
+      '<span class="vpred '+r[1].toLowerCase()+'">'+arw(r[1])+' '+dirKo(r[1])+'</span>'+
+      '<span class="vact" style="color:'+(r[2]>=0?'#DD5410':'#0A5878')+'">'+
+      (r[2]>0?'+':'')+r[2].toFixed(2)+'%</span>'+
+      '<span class="hitb '+(r[3]?'y':'n')+'">'+(r[3]?'적중':'미적중')+'</span></div>'});
+  html+='</div>';
+  box.innerHTML=html;
+}
+
+function drawChart(){
+  var c=$('chart');c.innerHTML='';
+  function mk(t,a){var e=document.createElementNS(SVGNS,t);
+    for(var k in a)e.setAttribute(k,a[k]);return e}
+  var w=980,hh=200,pl=44,pr=16,pt=18,pb=30;
+  function X(i){return pl+i*(w-pl-pr)/29}
+  function Y(v){return pt+(1-(v-.4)/.5)*(hh-pt-pb)}
+  [0,.5,1].forEach(function(g){var v=.4+g*.5,y=Y(v);
+    c.appendChild(mk('line',{x1:pl,x2:w-pr,y1:y,y2:y,stroke:'#F4F3F1','stroke-width':1}));
+    var t=mk('text',{x:pl-10,y:y+4,'text-anchor':'end','font-size':11,fill:'#B4AFAA'});
+    t.textContent=Math.round(v*100)+'%';c.appendChild(t)});
+  var pts=DAILY.map(function(v,i){return X(i)+','+Y(v)}).join(' ');
+  c.appendChild(mk('polygon',{points:pl+','+(hh-pb)+' '+pts+' '+(w-pr)+','+(hh-pb),fill:'#FFF4ED'}));
+  c.appendChild(mk('polyline',{points:pts,fill:'none',stroke:'#F26722','stroke-width':2.4,'stroke-linejoin':'round'}));
+  DAILY.forEach(function(v,i){if(i%5===0||i===29)
+    c.appendChild(mk('circle',{cx:X(i),cy:Y(v),r:3.6,fill:'#fff',stroke:'#F26722','stroke-width':2}))});
+  ['30일 전','20일 전','10일 전','어제'].forEach(function(s,k){
+    var i=Math.min(k*10,29);
+    var t=mk('text',{x:X(i),y:hh-9,'font-size':11,fill:'#B4AFAA',
+      'text-anchor':k===0?'start':k===3?'end':'middle'});
+    t.textContent=s;c.appendChild(t)});
+}
+
+/* ═════════ 뷰 ═════════ */
+function switchView(v){
+  Array.prototype.slice.call(document.querySelectorAll('.tab')).forEach(function(t){
+    t.className='tab'+(t.dataset.v===v?' on':'')});
+  $('vmap').classList.toggle('hidden',v!=='map');
+  $('vverify').classList.toggle('hidden',v!=='verify');
+  window.scrollTo({top:0});
+  if(v==='map')setTimeout(function(){fitView(0)},60);
+}
+Array.prototype.slice.call(document.querySelectorAll('.tab')).forEach(function(t){
+  t.onclick=function(){switchView(t.dataset.v)}});
+window.addEventListener('resize',function(){fitView(0)});
+
+/* ═════════ 브리핑 ═════════ */
+var B={picked:[],result:null,ranAt:null};
+$('openBrief').onclick=function(){$('drawer').classList.add('on');$('scrim').classList.add('on')};
+$('closeBrief').onclick=closeD;$('scrim').onclick=closeD;
+function closeD(){$('drawer').classList.remove('on');$('scrim').classList.remove('on')}
+var COMP=N.filter(function(d){return d.cap});
+$('sugg').innerHTML=['한미반도체','삼성전자','에코프로비엠','풍산','LG에너지솔루션']
+  .map(function(n){return '<button data-n="'+n+'">+ '+n+'</button>'}).join('');
+Array.prototype.slice.call($('sugg').querySelectorAll('button')).forEach(function(b){
+  b.onclick=function(){addT(b.dataset.n)}});
+function addT(name){
+  var c=null;
+  for(var i=0;i<COMP.length;i++){
+    if(COMP[i].n===name||COMP[i].t===name||COMP[i].n.indexOf(name)>=0){c=COMP[i];break}}
+  if(!c||B.picked.indexOf(c.id)>=0||B.picked.length>=5)return;
+  B.picked.push(c.id);chipsUI();$('tin').value=''}
+function chipsUI(){
+  Array.prototype.slice.call($('tbox').querySelectorAll('.tchip')).forEach(function(e){e.remove()});
+  B.picked.forEach(function(id){
+    var s=document.createElement('span');s.className='tchip';
+    s.innerHTML=IDX[id].n+'<button>×</button>';
+    s.querySelector('button').onclick=function(){
+      B.picked=B.picked.filter(function(p){return p!==id});chipsUI()};
+    $('tbox').insertBefore(s,$('tin'))})}
+$('tin').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){e.preventDefault();addT(this.value.trim())}});
+$('runBrief').onclick=function(){
+  if(!B.picked.length){$('result').innerHTML=
+    '<div class="bnone">종목을 1개 이상 추가해 주세요. 위 추천 버튼을 눌러도 됩니다.</div>';return}
+  var matched=[],none=[];
+  B.picked.forEach(function(id){
+    var f=null;
+    for(var i=0;i<NEWS.length;i++){var n=NEWS[i];
+      if(n.main.id===id){f={n:n,dir:n.main.dir,c:n.main.c,rel:'뉴스에서 직접 언급',hop:0,chain:[id]};break}
+      var r=null;
+      for(var j=0;j<n.rel.length;j++)if(n.rel[j].id===id){r=n.rel[j];break}
+      if(r){f={n:n,dir:r.dir,c:r.c,rel:r.rel,hop:r.chain.length-1,chain:r.chain};break}}
+    if(f){matched.push({id:id,f:f})}else{none.push(id)}});
+  B.result={matched:matched,none:none};
+  B.ranAt=new Date().toTimeString().slice(0,5);paintResult()};
+function paintResult(){
+  var r=B.result;
+  if(!r){$('result').innerHTML='';$('fabCnt').classList.add('hidden');return}
+  $('fabCnt').textContent=r.matched.length;
+  $('fabCnt').classList.toggle('hidden',!r.matched.length);
+  var html='<div class="savedbar">마지막 조회 <b>'+B.ranAt+'</b><button id="clearB">비우기</button></div>'+
+    '<p class="rsum">오늘 뉴스 '+NEWS.length+'건 중 <b>'+r.matched.length+'건</b>이 관심종목에 영향을 줍니다</p>';
+  r.matched.forEach(function(m){var f=m.f;
+    html+='<div class="bcard"><div class="btop"><span class="bname">'+IDX[m.id].n+'</span>'+
+      '<span class="rnum '+f.dir.toLowerCase()+'">'+arw(f.dir)+' '+dirKo(f.dir)+'</span></div>'+
+      '<p class="bnews">'+f.n.t+'</p><p class="bpath">'+
+      '<span class="rtag '+impactOf(f.hop).c+'">'+impactOf(f.hop).t+'</span>'+f.rel+
+      (f.hop?' · '+f.chain.map(function(c){return IDX[c].n}).join(' → '):'')+'</p>'+
+      '<button class="bgo" data-news="'+f.n.id+'">이 뉴스의 파급 경로 보기 →</button></div>'});
+  if(r.none.length)html+='<div class="bnone">'+r.none.map(function(i){return IDX[i].n}).join(' · ')+
+    ' 는 오늘 뉴스와 2단계 이내로 연결되지 않았습니다.</div>';
+  $('result').innerHTML=html;
+  var cb=$('clearB');
+  if(cb)cb.onclick=function(){B={picked:[],result:null,ranAt:null};chipsUI();paintResult()};
+  Array.prototype.slice.call($('result').querySelectorAll('.bgo')).forEach(function(b){
+    b.onclick=function(){closeD();switchView('map');
+      for(var i=0;i<NEWS.length;i++)if(NEWS[i].id===b.dataset.news){select(NEWS[i]);break}}});
+}
+
+/* ═════════ 시작 ═════════ */
+renderNews();renderVerify();syncBar();
+setTimeout(function(){select(NEWS[0])},300);
+</script>
+</body>
+</html>
