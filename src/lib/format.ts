@@ -8,6 +8,17 @@ export function directionLabel(direction: Direction): '상승' | '하락' {
   return direction === 'UP' ? '상승' : '하락'
 }
 
+/** relativeTime이 없는(실 API) 뉴스를 위한 폴백. 정적 목데이터는 저장된 relativeTime을 그대로 쓴다. */
+export function formatRelativeTime(publishedAt: string): string {
+  const diffMs = Date.now() - new Date(publishedAt).getTime()
+  const minutes = Math.floor(diffMs / 60000)
+  if (minutes < 1) return '방금 전'
+  if (minutes < 60) return `${minutes}분 전`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}시간 전`
+  return `${Math.floor(hours / 24)}일 전`
+}
+
 export type ImpactTier = 't1' | 't2' | 't3' | ''
 
 export interface Impact {
