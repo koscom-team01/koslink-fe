@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { Provider as JotaiProvider } from 'jotai'
 import Header from '../components/Header'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
@@ -48,8 +49,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere]">
-        <Header />
-        {children}
+        {/* Provider 없이 기본 store를 쓰면 SSR에서 요청 간 상태가 새는 모듈
+            전역 store가 되므로, 렌더마다 새 store를 만드는 Provider로 감싼다. */}
+        <JotaiProvider>
+          <Header />
+          {children}
+        </JotaiProvider>
         <TanStackDevtools
           config={{
             position: 'bottom-right',
