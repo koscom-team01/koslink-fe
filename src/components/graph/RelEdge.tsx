@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react'
 import {
   EdgeLabelRenderer,
   Position,
@@ -7,6 +8,11 @@ import {
 import type { EdgeProps, InternalNode } from '@xyflow/react'
 import { cn } from '#/lib/utils'
 import type { RelFlowEdge, StockFlowNode } from './types'
+
+// graph.css의 .ep.draw 애니메이션(0.48s)과 맞춘 값. 실제 path 길이보다 넉넉하게 잡아
+// 어떤 엣지든 dashoffset을 0으로 보내면 완전히 그려진다.
+const DASH_LEN = 1400
+const DRAW_DURATION_MS = 480
 
 /**
  * 기본 엣지는 Handle 위치에 고정돼 방사형 배치에서 카드 옆구리에 어긋나 붙는다.
@@ -62,6 +68,31 @@ export default function RelEdge({
 }: EdgeProps<RelFlowEdge>) {
   const sourceNode = useInternalNode<StockFlowNode>(source)
   const targetNode = useInternalNode<StockFlowNode>(target)
+  const pathRef = useRef<SVGPathElement>(null)
+
+  // draw가 켜진 시각(drawAt) 기준으로 "지금 몇 초 지났는지"를 계산해 그 지점부터
+  // 이어 그린다. React Flow가 연결된 노드가 갱신될 때 이 컴포넌트를 다시 마운트하는
+  // 경우가 있는데, 클래스 토글로 애니메이션을 트는 방식은 그때마다 처음부터 다시
+  // 그려져(엣지가 깜빡이는 원인) 리마운트에도 안전한 경과 시간 기반으로 바꿨다.
+  useLayoutEffect(() => {
+    const el = pathRef.current
+    if (!el || !data?.draw || data.drawAt == null) return
+    const elapsed = performance.now() - data.drawAt
+    if (elapsed >= DRAW_DURATION_MS) return
+
+    el.style.transition = 'none'
+    el.style.strokeDasharray = String(DASH_LEN)
+    el.style.strokeDashoffset = String(DASH_LEN * (1 - elapsed / DRAW_DURATION_MS))
+    el.getBoundingClientRect() // 강제 리플로우 — 시작값을 반영시킨 뒤에 트랜지션을 건다
+
+    const remaining = (DRAW_DURATION_MS - elapsed) / 1000
+    const frame = requestAnimationFrame(() => {
+      el.style.transition = `stroke-dashoffset ${remaining}s cubic-bezier(0.33, 0, 0.2, 1)`
+      el.style.strokeDashoffset = '0'
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [data?.draw, data?.drawAt])
+
   if (!sourceNode || !targetNode || !data) return null
 
   const a = box(sourceNode)
@@ -83,10 +114,11 @@ export default function RelEdge({
   return (
     <>
       <path
+        ref={pathRef}
         id={id}
         d={path}
         markerEnd={markerEnd}
-        className={cn('ep', data.state, data.draw && 'draw')}
+        className={cn('ep', data.state)}
       />
       {showLabel && (
         <EdgeLabelRenderer>

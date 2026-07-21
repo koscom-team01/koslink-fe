@@ -97,6 +97,16 @@
   box-sizing: border-box;
 }
 
+/* Tailwind v4 preflight은 button의 커서를 pointer로 되돌려주지 않는다 — 클릭 가능한
+   요소는 마우스를 올렸을 때 손가락 커서가 보여야 하므로 여기서 전역으로 맞춘다. */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']) {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
 html,
 body,
 #app {
@@ -240,6 +250,7 @@ body {
     background: rgba(28, 25, 23, 0.36);
     z-index: 52;
     opacity: 0;
+    cursor: pointer;
     pointer-events: none;
     transition: opacity 0.25s;
   }

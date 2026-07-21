@@ -261,17 +261,9 @@
   stroke: var(--o-300);
   stroke-width: 2.4;
 }
-/* 1회 재생 후 멈춘다(animation-fill-mode: forwards) — React Flow의 animated:true는 무한 반복이라 쓰지 않는다 */
-.ep.draw {
-  stroke-dasharray: 1400;
-  stroke-dashoffset: 1400;
-  animation: koslink-draw 0.48s cubic-bezier(0.33, 0, 0.2, 1) forwards;
-}
-@keyframes koslink-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
+/* 그리기 애니메이션은 RelEdge.tsx에서 drawAt(경과 시간) 기준으로 인라인 스타일에
+   직접 stroke-dasharray/dashoffset + transition을 건다 — 클래스 토글 방식은 리마운트 시
+   처음부터 다시 재생돼(엣지 깜빡임) 경과 시간 기반으로 바꿨다. */
 
 .elabel {
   padding: 3px 8px;

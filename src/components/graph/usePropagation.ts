@@ -29,6 +29,7 @@ export interface RevealEdge {
 export interface Scene {
   key: string
   originId: string
+  originName: string
   originState: NodeVisualState
   nodes: RevealNode[]
   edges: RevealEdge[]
@@ -43,6 +44,7 @@ interface NodeRuntime {
 interface EdgeRuntime {
   state: EdgeVisualState
   draw: boolean
+  drawAt: number
 }
 
 export interface PropagationResult {
@@ -50,6 +52,15 @@ export interface PropagationResult {
   edgeOverrides: Map<string, EdgeRuntime>
   active: boolean
   settled: boolean
+  /** 그래프 상단에 뜨는 상태 칩 문구. 리빌 시퀀스가 끝나면 빈 문자열로 돌아가 칩이 사라진다. */
+  stageText: string
+  /**
+   * 리빌 타이머가 실제로 override를 갱신할 때만 증가한다. nodeOverrides/edgeOverrides는
+   * ref라 내용이 바뀌어도 참조가 그대로라, 호출부가 노드/엣지 배열을 useMemo로 캐싱할 때
+   * 이 값을 의존성에 넣어야 무관한 리렌더(예: 툴팁 이동)에서 엣지 draw 애니메이션이
+   * 재시작되지 않는다.
+   */
+  tick: number
 }
 
 const ORIGIN_DELAY = 180
@@ -60,11 +71,12 @@ const NODE_REVEAL_DELAY = 260
 const SETTLE_BUFFER = 500
 
 export function usePropagation(scene: Scene | null): PropagationResult {
-  const [, forceTick] = useState(0)
+  const [tick, forceTick] = useState(0)
   const nodeOverridesRef = useRef(new Map<string, NodeRuntime>())
   const edgeOverridesRef = useRef(new Map<string, EdgeRuntime>())
   const activeRef = useRef(false)
   const settledRef = useRef(false)
+  const stageTextRef = useRef('')
   const timersRef = useRef<number[]>([])
   const pulseCounterRef = useRef(0)
 
@@ -75,6 +87,7 @@ export function usePropagation(scene: Scene | null): PropagationResult {
     edgeOverridesRef.current = new Map()
     activeRef.current = !!scene
     settledRef.current = !scene
+    stageTextRef.current = scene ? '관계 추론 중' : ''
     forceTick((t) => t + 1)
 
     if (!scene) return
@@ -96,6 +109,7 @@ export function usePropagation(scene: Scene | null): PropagationResult {
         badge: null,
         pulseToken,
       })
+      stageTextRef.current = `${scene.originName} 확인`
     })
 
     const levels = Array.from(new Set(scene.edges.map((e) => e.level))).sort(
@@ -106,12 +120,16 @@ export function usePropagation(scene: Scene | null): PropagationResult {
     levels.forEach((level, groupIdx) => {
       const edgesAtLevel = scene.edges.filter((e) => e.level === level)
       const groupStart = HOP_BASE + groupIdx * HOP_GAP
+      at(groupStart, () => {
+        stageTextRef.current = `${level}단계 ${level === 1 ? '관계' : '파급'} ${edgesAtLevel.length}건`
+      })
       edgesAtLevel.forEach((edge, k) => {
         const t = groupStart + k * EDGE_STAGGER
         at(t, () => {
           edgeOverridesRef.current.set(edge.id, {
             state: edge.state,
             draw: true,
+            drawAt: performance.now(),
           })
         })
         at(t + NODE_REVEAL_DELAY, () => {
@@ -131,6 +149,7 @@ export function usePropagation(scene: Scene | null): PropagationResult {
     at(lastEventEnd + SETTLE_BUFFER, () => {
       activeRef.current = false
       settledRef.current = true
+      stageTextRef.current = ''
     })
 
     return () => {
@@ -144,5 +163,7 @@ export function usePropagation(scene: Scene | null): PropagationResult {
     edgeOverrides: edgeOverridesRef.current,
     active: activeRef.current,
     settled: settledRef.current,
+    stageText: stageTextRef.current,
+    tick,
   }
 }

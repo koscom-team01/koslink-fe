@@ -11,12 +11,10 @@ export const viewAtom = atom<'map' | 'verify'>('map')
 
 export const selectedNewsIdAtom = atom<string | null>(null)
 
-export const graphModeAtom = atom<'focus' | 'all' | 'node'>('focus')
+export const graphModeAtom = atom<'focus' | 'all'>('focus')
 
 /** 전체 관계망에서 배치를 유지한 채 특정 노드 기점으로 제자리 강조할 때의 대상 */
 export const highlightedNodeAtom = atom<string | null>(null)
-
-export const backToAtom = atom<'focus' | 'all' | 'reset'>('focus')
 
 export const sectorFilterAtom = atom<string>('전체')
 
