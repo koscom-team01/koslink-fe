@@ -7,15 +7,15 @@
 
 ## 1. 핵심 전제
 
-| 항목            | 내용                                                                                       |
-| --------------- | ------------------------------------------------------------------------------------------ |
-| 인증            | **없음.** 로그인, 회원가입, 마이페이지 구현 안 함                                          |
-| 데이터          | 뉴스, 그래프, 분석, 검증 **전부 서버 API에서 조회**                                        |
-| 클라이언트 저장 | 없음. localStorage 등 영속 저장 사용 안 함                                                 |
-| 관심종목        | 사용자가 입력한 종목과 브리핑 결과만 **세션 메모리(Zustand)** 에 유지. 새로고침하면 사라짐 |
-| 플랫폼          | 데스크탑 웹 우선, 태블릿·모바일 반응형 대응                                                |
-| 페이지          | SPA 단일 페이지. 라우터 없이 탭 전환                                                       |
-| 언어            | 한국어 전용                                                                                |
+| 항목            | 내용                                                                                     |
+| --------------- | ---------------------------------------------------------------------------------------- |
+| 인증            | **없음.** 로그인, 회원가입, 마이페이지 구현 안 함                                        |
+| 데이터          | 뉴스, 그래프, 분석, 검증 **전부 서버 API에서 조회**                                      |
+| 클라이언트 저장 | 없음. localStorage 등 영속 저장 사용 안 함                                               |
+| 관심종목        | 사용자가 입력한 종목과 브리핑 결과만 **세션 메모리(Jotai)** 에 유지. 새로고침하면 사라짐 |
+| 플랫폼          | 데스크탑 웹 우선, 태블릿·모바일 반응형 대응                                              |
+| 페이지          | SPA 단일 페이지. 라우터 없이 탭 전환                                                     |
+| 언어            | 한국어 전용                                                                              |
 
 ---
 
@@ -25,12 +25,12 @@
 React 18 + TypeScript + Vite
 @xyflow/react (v12)        그래프
 Tailwind CSS + shadcn/ui   tabs, badge, sheet, tooltip, command, scroll-area, separator
-Zustand                    UI 상태 + 관심종목 메모리
+Jotai                      UI 상태 + 관심종목 메모리
 TanStack Query             서버 상태 캐싱
 ```
 
 ```bash
-npm i @xyflow/react zustand @tanstack/react-query
+npm i @xyflow/react jotai @tanstack/react-query
 npx shadcn@latest add tabs badge sheet tooltip command scroll-area separator
 ```
 
@@ -547,29 +547,39 @@ const onNodeMouseLeave = () => {
 
 ---
 
-## 7. 상태 (Zustand)
+## 7. 상태 (Jotai)
+
+Jotai는 단일 스토어 객체가 아니라 atom 단위로 상태를 쪼갠다. 문서 전체에서
+언급하는 슬라이스를 각각 독립 atom으로 선언한다 (`lib/atoms.ts`):
 
 ```ts
-interface Store {
-  view: 'map' | 'verify'
-  selectedNewsId: string | null
-  graphMode: 'focus' | 'all' | 'node'
-  highlightedNode: string | null // 전체 관계망 제자리 강조
-  backTo: 'focus' | 'all' | 'reset'
-  sectorFilter: string // '전체' | '반도체' | ...
-  verifyContext: string[] | null // 뉴스에서 진입 시 종목명 배열
-  briefing: {
-    // 메모리 전용, 영속 저장 없음
-    tickers: string[]
-    result: BriefingResponse | null
-    ranAt: string | null
-  }
-  newsSheetOpen: boolean // 모바일 바텀시트
-}
+import { atom } from 'jotai'
+
+export const viewAtom = atom<'map' | 'verify'>('map')
+export const selectedNewsIdAtom = atom<string | null>(null)
+export const graphModeAtom = atom<'focus' | 'all' | 'node'>('focus')
+export const highlightedNodeAtom = atom<string | null>(null) // 전체 관계망 제자리 강조
+export const backToAtom = atom<'focus' | 'all' | 'reset'>('focus')
+export const sectorFilterAtom = atom<string>('전체') // '전체' | '반도체' | ...
+export const verifyContextAtom = atom<{
+  label: string
+  names: string[]
+} | null>(null) // 뉴스에서 진입 시 종목명 배열
+export const newsSheetOpenAtom = atom(false) // 모바일 바텀시트
+
+// 브리핑 — 메모리 전용, 영속 저장 없음
+export const briefingTickersAtom = atom<string[]>([])
+export const briefingResultAtom = atom<BriefingResponse | null>(null)
+export const briefingRanAtAtom = atom<string | null>(null)
 ```
 
-서버 데이터(뉴스, 그래프, 분석, 검증)는 Zustand에 넣지 않는다. TanStack Query가 관리한다.
-Zustand는 **UI 상태와 관심종목 메모리**만 담당한다.
+서버 데이터(뉴스, 그래프, 분석, 검증)는 atom에 넣지 않는다. TanStack Query가
+관리한다(백엔드 연결 전까지는 `lib/api.ts`가 로컬 데이터를 동기적으로
+반환한다). Jotai atom은 **UI 상태와 관심종목 메모리**만 담당한다.
+
+파생 상태가 필요하면(예: 선택된 뉴스 객체, 필터링된 뉴스 목록) 각 atom을
+`get`으로 조합하는 파생 atom(`atom((get) => ...)`)을 추가로 선언해 컴포넌트
+안에서 매번 다시 계산하지 않도록 한다.
 
 `verifyContext`가 있으면 검증 화면은 그 종목이 포함된 과거 검증만 보여주고 상단에 배너를 띄운다.
 뉴스 상세의 "이 종목들의 지난 예측 적중률 보기" 버튼이 이 값을 채운다.
@@ -641,7 +651,6 @@ Zustand는 **UI 상태와 관심종목 메모리**만 담당한다.
 src/
 ├── app/
 │   ├── App.tsx
-│   ├── store.ts                 # Zustand
 │   └── queryClient.ts
 ├── components/
 │   ├── ui/                      # shadcn
@@ -667,6 +676,7 @@ src/
 │       └── BriefingSheet.tsx
 ├── lib/
 │   ├── api.ts                   # fetch 래퍼 + Query 훅
+│   ├── atoms.ts                 # Jotai atom (UI 상태 + 관심종목 메모리)
 │   ├── layout.ts                # focusBuild, nodeBuild, radialLayout, fullLayout
 │   └── format.ts                # 방향 라벨, 영향 태그(직접/간접/확산)
 └── types/index.ts
