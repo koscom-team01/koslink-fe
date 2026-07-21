@@ -7,6 +7,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { Provider as JotaiProvider } from 'jotai'
 import Header from '../components/Header'
+import BriefingSheet from '../components/briefing/BriefingSheet'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
@@ -54,6 +55,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <JotaiProvider>
           <Header />
           {children}
+          <BriefingSheet />
         </JotaiProvider>
         <TanStackDevtools
           config={{
