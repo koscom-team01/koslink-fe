@@ -1,6 +1,6 @@
 import { useAtom, useAtomValue } from 'jotai'
 import { selectedNewsIdAtom, verifyContextAtom, viewAtom } from '#/lib/atoms'
-import { getNews, getNewsAnalysis } from '#/lib/api'
+import { useNewsAnalysisQuery, useNewsQuery } from '#/lib/queries'
 import MainStockCard from './MainStockCard'
 import RelatedList from './RelatedList'
 import RationaleBox from './RationaleBox'
@@ -10,10 +10,11 @@ export default function AnalysisPanel() {
   const [, setVerifyContext] = useAtom(verifyContextAtom)
   const [, setView] = useAtom(viewAtom)
 
+  const { data: newsList = [] } = useNewsQuery('전체')
+  const { data: analysis } = useNewsAnalysisQuery(selectedNewsId)
   const newsItem = selectedNewsId
-    ? getNews().find((n) => n.id === selectedNewsId)
+    ? newsList.find((n) => n.id === selectedNewsId)
     : undefined
-  const analysis = selectedNewsId ? getNewsAnalysis(selectedNewsId) : null
 
   function openVerifyForThisNews() {
     if (!analysis || !newsItem) return

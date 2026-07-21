@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai'
 import { viewAtom } from '#/lib/atoms'
-import { ONTOLOGY_EDGES, ONTOLOGY_NODES } from '#/lib/data'
+import { useGraphQuery } from '#/lib/queries'
 
 const TABS = [
   { value: 'map', label: '뉴스맵' },
@@ -9,6 +9,7 @@ const TABS = [
 
 export default function Header() {
   const [view, setView] = useAtom(viewAtom)
+  const { data: graph } = useGraphQuery()
 
   return (
     <header
@@ -60,7 +61,8 @@ export default function Header() {
           className="inline-block h-1.5 w-1.5 rounded-full"
           style={{ background: '#0f8a5f' }}
         />
-        온톨로지 {ONTOLOGY_NODES.length}개 노드 · {ONTOLOGY_EDGES.length}개 관계
+        온톨로지 {graph?.nodes.length ?? 0}개 노드 · {graph?.edges.length ?? 0}
+        개 관계
       </div>
     </header>
   )

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useAtom } from 'jotai'
 import { verifyContextAtom } from '#/lib/atoms'
-import { getVerify } from '#/lib/api'
+import { useVerifyQuery } from '#/lib/queries'
 import type { VerifyDaily } from '#/types'
 import VerifyList, { hitCount } from './VerifyList'
 import VerifyDetail from './VerifyDetail'
@@ -95,7 +95,9 @@ export default function VerifyView() {
   const [sector, setSector] = useState('전체')
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  const { daily, news } = useMemo(() => getVerify(), [])
+  const { data } = useVerifyQuery()
+  const daily = data?.daily ?? []
+  const news = data?.news ?? []
 
   const rows = useMemo(
     () =>

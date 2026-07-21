@@ -11,9 +11,12 @@ import type { Node, NodeMouseHandler } from '@xyflow/react'
 import '@xyflow/react/dist/style.css' // 필수 — 빠뜨리면 노드가 겹쳐 보인다
 import { useAtom, useAtomValue } from 'jotai'
 import { cn } from '#/lib/utils'
-import { graphModeAtom, highlightedNodeAtom, selectedNewsIdAtom } from '#/lib/atoms'
-import { getNewsAnalysis } from '#/lib/api'
-import { ONTOLOGY_EDGES, ONTOLOGY_NODES } from '#/lib/data'
+import {
+  graphModeAtom,
+  highlightedNodeAtom,
+  selectedNewsIdAtom,
+} from '#/lib/atoms'
+import { useGraphQuery, useNewsAnalysisQuery } from '#/lib/queries'
 import { sizeOf } from '#/lib/format'
 import {
   focusBuild,
@@ -23,7 +26,12 @@ import {
   tierOf,
 } from '#/lib/layout'
 import type { LayoutPoint } from '#/lib/layout'
-import type { Direction, OntologyNode } from '#/types'
+import type {
+  Direction,
+  NewsAnalysis,
+  OntologyEdge,
+  OntologyNode,
+} from '#/types'
 import StockNode from './StockNode'
 import RelEdge from './RelEdge'
 import { usePropagation } from './usePropagation'
@@ -79,10 +87,7 @@ function polarityEdgeState(polarity: 1 | -1, tier: 1 | 2): EdgeVisualState {
 }
 
 /** 뉴스 파급 경로: 기점 중앙, related[].chain 기반 동심원 배치 */
-function buildFocusScene(newsId: string): Scene2 | null {
-  const analysis = getNewsAnalysis(newsId)
-  if (!analysis) return null
-
+function buildFocusScene(analysis: NewsAnalysis): Scene2 {
   const built = focusBuild(analysis.main.nodeId, analysis.related)
   const dirOf = new Map<string, Direction>()
   dirOf.set(analysis.main.nodeId, analysis.main.direction)
@@ -135,7 +140,7 @@ function buildFocusScene(newsId: string): Scene2 | null {
     nodes,
     edges,
     scene: {
-      key: `focus:${newsId}`,
+      key: `focus:${analysis.newsId}`,
       originId: analysis.main.nodeId,
       originName: graphIndex.byId.get(analysis.main.nodeId)?.name ?? '',
       originState: analysis.main.direction === 'UP' ? 'up' : 'down',
@@ -149,9 +154,12 @@ function buildFocusScene(newsId: string): Scene2 | null {
 }
 
 /** 전체 관계망: 섹터 3클러스터 고정 좌표. highlightId가 있으면 배치는 그대로 두고 그 자리에서 2단계 파급만 강조. */
-function buildAllScene(highlightId: string | null): Scene2 {
+function buildAllScene(
+  highlightId: string | null,
+  graph: { nodes: OntologyNode[]; edges: OntologyEdge[] },
+): Scene2 {
   const { pos } = FULL_LAYOUT
-  const ids = ONTOLOGY_NODES.map((n) => n.id)
+  const ids = graph.nodes.map((n) => n.id)
 
   if (!highlightId) {
     const nodes: NodeSpec[] = ids.map((id) => ({
@@ -161,7 +169,7 @@ function buildAllScene(highlightId: string | null): Scene2 {
       badge: null,
       tier: tierOf(id),
     }))
-    const edges: EdgeSpec[] = ONTOLOGY_EDGES.map((e) => ({
+    const edges: EdgeSpec[] = graph.edges.map((e) => ({
       id: e.id,
       source: e.source,
       target: e.target,
@@ -186,7 +194,7 @@ function buildAllScene(highlightId: string | null): Scene2 {
   const origin = graphIndex.byId.get(highlightId)!
 
   function ontologyEdgeId(source: string, target: string): string {
-    const match = ONTOLOGY_EDGES.find(
+    const match = graph.edges.find(
       (e) =>
         (e.source === source && e.target === target) ||
         (e.source === target && e.target === source),
@@ -201,7 +209,7 @@ function buildAllScene(highlightId: string | null): Scene2 {
     badge: null,
     tier: tierOf(id),
   }))
-  const edges: EdgeSpec[] = ONTOLOGY_EDGES.map((e) => ({
+  const edges: EdgeSpec[] = graph.edges.map((e) => ({
     id: e.id,
     source: e.source,
     target: e.target,
@@ -601,6 +609,8 @@ export default function GraphPanel() {
   const [mode, setMode] = useAtom(graphModeAtom)
   const [highlightedNode, setHighlightedNode] = useAtom(highlightedNodeAtom)
   const selectedNewsId = useAtomValue(selectedNewsIdAtom)
+  const { data: graph } = useGraphQuery()
+  const { data: analysis } = useNewsAnalysisQuery(selectedNewsId)
 
   // 뉴스가 바뀌면 제자리 강조 상태를 초기화하고 파급 경로 뷰로 돌아간다
   useEffect(() => {
@@ -609,10 +619,11 @@ export default function GraphPanel() {
   }, [selectedNewsId, setHighlightedNode, setMode])
 
   const scene2: Scene2 | null = useMemo(() => {
-    if (mode === 'all') return buildAllScene(highlightedNode)
-    if (selectedNewsId) return buildFocusScene(selectedNewsId)
+    if (mode === 'all')
+      return graph ? buildAllScene(highlightedNode, graph) : null
+    if (selectedNewsId && analysis) return buildFocusScene(analysis)
     return null
-  }, [mode, highlightedNode, selectedNewsId])
+  }, [mode, highlightedNode, selectedNewsId, graph, analysis])
 
   return (
     <section className="panel col-graph">

@@ -25,8 +25,7 @@ export const queryKeys = {
 }
 
 async function fetchNews(sector?: string): Promise<NewsListItem[]> {
-  const searchParams =
-    sector && sector !== '전체' ? { sector } : undefined
+  const searchParams = sector && sector !== '전체' ? { sector } : undefined
   const { items } = await http
     .get('news', { searchParams })
     .json<{ items: NewsListItem[] }>()

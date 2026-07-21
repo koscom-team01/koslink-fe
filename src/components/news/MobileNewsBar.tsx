@@ -5,7 +5,7 @@ import {
   sectorFilterAtom,
   selectedNewsIdAtom,
 } from '#/lib/atoms'
-import { getNews } from '#/lib/api'
+import { useNewsQuery } from '#/lib/queries'
 
 /** ≤1080px에서만 보이는 상단 현재뉴스 바 + 바텀시트 배경 스크림. CSS가 그 이상 폭에서는 숨긴다. */
 export default function MobileNewsBar() {
@@ -13,7 +13,7 @@ export default function MobileNewsBar() {
   const [selectedId, setSelectedId] = useAtom(selectedNewsIdAtom)
   const [sheetOpen, setSheetOpen] = useAtom(newsSheetOpenAtom)
 
-  const list = getNews().filter((n) => sector === '전체' || n.sector === sector)
+  const { data: list = [] } = useNewsQuery(sector)
   const index = list.findIndex((n) => n.id === selectedId)
   const current = index >= 0 ? list[index] : null
 

@@ -4,7 +4,7 @@ import {
   sectorFilterAtom,
   selectedNewsIdAtom,
 } from '#/lib/atoms'
-import { getNews } from '#/lib/api'
+import { useNewsQuery } from '#/lib/queries'
 import NewsCard from './NewsCard'
 
 const SECTORS = ['전체', '반도체', '2차전지', '방산']
@@ -15,7 +15,7 @@ export default function NewsList() {
   const [selectedId, setSelectedId] = useAtom(selectedNewsIdAtom)
   const setSheetOpen = useSetAtom(newsSheetOpenAtom)
 
-  const news = getNews().filter((n) => sector === '전체' || n.sector === sector)
+  const { data: news = [] } = useNewsQuery(sector)
 
   return (
     <>
