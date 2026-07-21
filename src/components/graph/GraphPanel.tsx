@@ -46,6 +46,10 @@ import './graph.css'
 const nodeTypes = { stock: StockNode }
 const edgeTypes = { rel: RelEdge }
 
+// 정적 온톨로지 기준으로 결정적으로 계산되는 좌표라 모듈 스코프에서 한 번만
+// 계산해 캐시한다. 뷰를 오갈 때마다 재계산하면(성능 낭비는 물론) 노드가 튈 수 있다.
+const FULL_LAYOUT = fullLayout()
+
 interface EdgeSpec {
   id: string
   source: string
@@ -210,7 +214,7 @@ function buildNodeScene(originId: string, backLabel: string): Scene2 {
 
 /** 전체 관계망: 섹터 3클러스터 고정 좌표. highlightId가 있으면 배치는 그대로 두고 그 자리에서 2단계 파급만 강조. */
 function buildAllScene(highlightId: string | null): Scene2 {
-  const { pos } = fullLayout()
+  const { pos } = FULL_LAYOUT
   const ids = ONTOLOGY_NODES.map((n) => n.id)
 
   if (!highlightId) {
