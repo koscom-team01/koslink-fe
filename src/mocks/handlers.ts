@@ -15,8 +15,11 @@ import {
 export const handlers = [
   http.get('/api/news', async ({ request }) => {
     await delay(300)
-    const sector = new URL(request.url).searchParams.get('sector') ?? undefined
-    return HttpResponse.json({ items: getNews(sector) })
+    const searchParams = new URL(request.url).searchParams
+    const sector = searchParams.get('sector') ?? undefined
+    const cursor = searchParams.get('cursor') ?? undefined
+    const limit = Number(searchParams.get('limit')) || undefined
+    return HttpResponse.json(getNews({ sector, cursor, limit }))
   }),
 
   http.get('/api/news/:id/analysis', async ({ params }) => {

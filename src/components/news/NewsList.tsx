@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import {
   newsSheetOpenAtom,
@@ -15,7 +16,23 @@ export default function NewsList() {
   const [selectedId, setSelectedId] = useAtom(selectedNewsIdAtom)
   const setSheetOpen = useSetAtom(newsSheetOpenAtom)
 
-  const { data: news = [] } = useNewsQuery(sector)
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useNewsQuery(sector)
+  const news = data?.pages.flatMap((p) => p.items) ?? []
+
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el || !hasNextPage) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !isFetchingNextPage) fetchNextPage()
+      },
+      { rootMargin: '120px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   return (
     <>
@@ -59,6 +76,15 @@ export default function NewsList() {
               }}
             />
           ))}
+          {hasNextPage && (
+            <div
+              ref={sentinelRef}
+              className="py-3 text-center text-xs"
+              style={{ color: 'var(--n-400)' }}
+            >
+              {isFetchingNextPage ? '더 불러오는 중…' : ''}
+            </div>
+          )}
         </div>
       </div>
     </>

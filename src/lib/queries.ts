@@ -1,10 +1,10 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query'
 import { http } from '#/lib/http'
 import { getGraph, getNews, getNewsAnalysis, getVerify } from '#/lib/api'
 import type {
   BriefingResult,
   NewsAnalysis,
-  NewsListItem,
+  NewsListPage,
   OntologyEdge,
   OntologyNode,
   VerifyResponse,
@@ -24,12 +24,14 @@ export const queryKeys = {
   verify: () => ['verify'] as const,
 }
 
-async function fetchNews(sector?: string): Promise<NewsListItem[]> {
-  const searchParams = sector && sector !== '전체' ? { sector } : undefined
-  const { items } = await http
-    .get('news', { searchParams })
-    .json<{ items: NewsListItem[] }>()
-  return items
+async function fetchNews(
+  sector: string,
+  cursor?: string,
+): Promise<NewsListPage> {
+  const searchParams: Record<string, string> = {}
+  if (sector && sector !== '전체') searchParams.sector = sector
+  if (cursor) searchParams.cursor = cursor
+  return http.get('news', { searchParams }).json<NewsListPage>()
 }
 
 async function fetchNewsAnalysis(newsId: string): Promise<NewsAnalysis> {
@@ -51,11 +53,17 @@ async function postBriefing(tickers: string[]): Promise<BriefingResult> {
   return http.post('briefing', { json: { tickers } }).json<BriefingResult>()
 }
 
+/** 뉴스 목록 — 무한 스크롤용 커서 기반 페이징. `data.pages.flatMap(p => p.items)`로 펼쳐 쓴다. */
 export function useNewsQuery(sector: string) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: queryKeys.news(sector),
-    queryFn: () => fetchNews(sector),
-    placeholderData: () => getNews(sector),
+    queryFn: ({ pageParam }) => fetchNews(sector, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    placeholderData: () => ({
+      pages: [getNews({ sector })],
+      pageParams: [undefined],
+    }),
   })
 }
 

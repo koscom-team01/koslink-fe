@@ -13,13 +13,21 @@ export default function MobileNewsBar() {
   const [selectedId, setSelectedId] = useAtom(selectedNewsIdAtom)
   const [sheetOpen, setSheetOpen] = useAtom(newsSheetOpenAtom)
 
-  const { data: list = [] } = useNewsQuery(sector)
+  const { data, fetchNextPage, hasNextPage } = useNewsQuery(sector)
+  const list = data?.pages.flatMap((p) => p.items) ?? []
   const index = list.findIndex((n) => n.id === selectedId)
   const current = index >= 0 ? list[index] : null
 
-  function step(delta: number) {
+  async function step(delta: number) {
     const next = index + delta
-    if (next < 0 || next >= list.length) return
+    if (next < 0) return
+    if (next >= list.length) {
+      if (!hasNextPage) return
+      const result = await fetchNextPage()
+      const freshList = result.data?.pages.flatMap((p) => p.items) ?? list
+      if (next < freshList.length) setSelectedId(freshList[next].id)
+      return
+    }
     setSelectedId(list[next].id)
   }
 
@@ -61,7 +69,7 @@ export default function MobileNewsBar() {
         <button
           type="button"
           className="nb-nav"
-          disabled={index < 0 || index >= list.length - 1}
+          disabled={index < 0 || (index >= list.length - 1 && !hasNextPage)}
           onClick={() => step(1)}
           aria-label="다음 뉴스"
         >

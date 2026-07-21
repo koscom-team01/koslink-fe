@@ -10,7 +10,7 @@ import type {
   BriefingResult,
   BriefingUnmatched,
   NewsAnalysis,
-  NewsListItem,
+  NewsListPage,
   OntologyEdge,
   OntologyNode,
   VerifyResponse,
@@ -31,17 +31,43 @@ function requireNode(id: string): OntologyNode {
   return node
 }
 
-export function getNews(sector?: string): NewsListItem[] {
-  return NEWS_RECORDS.filter(
+export interface GetNewsParams {
+  sector?: string
+  /** 이전 응답의 nextCursor. 첫 페이지는 생략한다. */
+  cursor?: string
+  limit?: number
+}
+
+const DEFAULT_NEWS_LIMIT = 20
+
+/** 커서 기반 페이징. cursor는 "마지막으로 받은 항목의 id" 관례를 쓰지만
+ * 클라이언트는 이 값을 해석하지 않고 nextCursor를 그대로 되돌려주기만 한다. */
+export function getNews({
+  sector,
+  cursor,
+  limit = DEFAULT_NEWS_LIMIT,
+}: GetNewsParams = {}): NewsListPage {
+  const filtered = NEWS_RECORDS.filter(
     (n) => !sector || sector === '전체' || n.sector === sector,
-  ).map((n) => ({
-    id: n.id,
-    title: n.title,
-    press: n.press,
-    publishedAt: n.publishedAt,
-    sector: n.sector,
-    relativeTime: n.relativeTime,
-  }))
+  )
+  const startIndex = cursor
+    ? Math.max(filtered.findIndex((n) => n.id === cursor) + 1, 0)
+    : 0
+  const page = filtered.slice(startIndex, startIndex + limit)
+  const nextCursor =
+    startIndex + limit < filtered.length ? (page.at(-1)?.id ?? null) : null
+
+  return {
+    items: page.map((n) => ({
+      id: n.id,
+      title: n.title,
+      press: n.press,
+      publishedAt: n.publishedAt,
+      sector: n.sector,
+      relativeTime: n.relativeTime,
+    })),
+    nextCursor,
+  }
 }
 
 export function getNewsAnalysis(newsId: string): NewsAnalysis | null {
@@ -50,6 +76,8 @@ export function getNewsAnalysis(newsId: string): NewsAnalysis | null {
   const mainNode = requireNode(record.main.nodeId)
   return {
     newsId: record.id,
+    title: record.title,
+    sector: record.sector,
     article: {
       summary: record.summary,
       originUrl: record.originUrl,
