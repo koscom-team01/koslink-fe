@@ -1,3 +1,5 @@
+import { useRef } from 'react'
+import { useInfiniteScrollTrigger } from '#/lib/useInfiniteScrollTrigger'
 import type { VerifyEntry } from '#/types'
 
 const SECTORS = ['전체', '반도체', '2차전지', '방산']
@@ -13,9 +15,12 @@ interface VerifyListProps {
   selectedNewsId: string | null
   onSelect: (newsId: string) => void
   subtitle: string
+  hasNextPage: boolean
+  isFetchingNextPage: boolean
+  fetchNextPage: () => void
 }
 
-/** 검증 목록 — 섹터 필터 + 스크롤 목록. 페이지네이션 없음(목록은 스크롤, 상세는 우측 고정). */
+/** 검증 목록 — 섹터 필터 + 커서 기반 무한 스크롤. 상세는 우측 고정. */
 export default function VerifyList({
   rows,
   sector,
@@ -23,7 +28,17 @@ export default function VerifyList({
   selectedNewsId,
   onSelect,
   subtitle,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
 }: VerifyListProps) {
+  const scrollRootRef = useRef<HTMLDivElement>(null)
+  const sentinelRef = useInfiniteScrollTrigger(
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    scrollRootRef,
+  )
   return (
     <div
       className="vlist flex flex-col overflow-hidden rounded-2xl border bg-white"
@@ -59,7 +74,10 @@ export default function VerifyList({
           )
         })}
       </div>
-      <div className="flex flex-col gap-1 overflow-y-auto px-2.5 pt-1.5 pb-3">
+      <div
+        ref={scrollRootRef}
+        className="flex flex-col gap-1 overflow-y-auto px-2.5 pt-1.5 pb-3"
+      >
         {rows.length === 0 && (
           <div
             className="px-3.5 py-16 text-center"
@@ -131,6 +149,15 @@ export default function VerifyList({
             </button>
           )
         })}
+        {hasNextPage && (
+          <div
+            ref={sentinelRef}
+            className="py-3 text-center text-xs"
+            style={{ color: 'var(--n-400)' }}
+          >
+            {isFetchingNextPage ? '더 불러오는 중…' : ''}
+          </div>
+        )}
       </div>
     </div>
   )

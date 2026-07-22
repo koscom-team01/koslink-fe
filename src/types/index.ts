@@ -90,9 +90,11 @@ export interface VerifyDaily {
   hitRate: number
 }
 
+/** GET /api/verify 응답. news는 커서 기반 페이지, daily는 필터와 무관한 전체 추이라 페이징하지 않는다. */
 export interface VerifyResponse {
   daily: VerifyDaily[]
   news: VerifyEntry[]
+  nextCursor: string | null
 }
 
 export interface BriefingMatch {

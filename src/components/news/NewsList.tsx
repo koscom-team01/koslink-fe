@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
 import {
   newsSheetOpenAtom,
@@ -6,6 +6,7 @@ import {
   selectedNewsIdAtom,
 } from '#/lib/atoms'
 import { useNewsQuery } from '#/lib/queries'
+import { useInfiniteScrollTrigger } from '#/lib/useInfiniteScrollTrigger'
 import NewsCard from './NewsCard'
 
 const SECTORS = ['전체', '반도체', '2차전지', '방산']
@@ -19,20 +20,13 @@ export default function NewsList() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useNewsQuery(sector)
   const news = data?.pages.flatMap((p) => p.items) ?? []
-
-  const sentinelRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = sentinelRef.current
-    if (!el || !hasNextPage) return
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && !isFetchingNextPage) fetchNextPage()
-      },
-      { rootMargin: '120px' },
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+  const scrollRootRef = useRef<HTMLDivElement>(null)
+  const sentinelRef = useInfiniteScrollTrigger(
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    scrollRootRef,
+  )
 
   return (
     <>
@@ -55,7 +49,7 @@ export default function NewsList() {
           )
         })}
       </div>
-      <div className="pbody">
+      <div className="pbody" ref={scrollRootRef}>
         <div className="flex flex-col gap-1.5 px-3 pt-2 pb-4">
           {news.length === 0 && (
             <p

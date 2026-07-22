@@ -31,6 +31,36 @@ function requireNode(id: string): OntologyNode {
   return node
 }
 
+function bySector<T extends { sector: string }>(
+  items: T[],
+  sector?: string,
+): T[] {
+  return items.filter(
+    (n) => !sector || sector === '전체' || n.sector === sector,
+  )
+}
+
+/**
+ * 목록 커서 페이징 공통 로직. cursor는 "마지막으로 받은 항목의 커서 키" 관례를
+ * 쓰지만, 클라이언트는 이 값을 해석하지 않고 nextCursor를 그대로 되돌려주기만
+ * 한다. GET /api/news, GET /api/verify가 함께 쓴다.
+ */
+function paginate<T>(
+  items: T[],
+  cursor: string | undefined,
+  limit: number,
+  cursorOf: (item: T) => string,
+): { page: T[]; nextCursor: string | null } {
+  const startIndex = cursor
+    ? Math.max(items.findIndex((item) => cursorOf(item) === cursor) + 1, 0)
+    : 0
+  const page = items.slice(startIndex, startIndex + limit)
+  const last = page.at(-1)
+  const nextCursor =
+    startIndex + limit < items.length && last ? cursorOf(last) : null
+  return { page, nextCursor }
+}
+
 export interface GetNewsParams {
   sector?: string
   /** 이전 응답의 nextCursor. 첫 페이지는 생략한다. */
@@ -40,22 +70,17 @@ export interface GetNewsParams {
 
 const DEFAULT_NEWS_LIMIT = 20
 
-/** 커서 기반 페이징. cursor는 "마지막으로 받은 항목의 id" 관례를 쓰지만
- * 클라이언트는 이 값을 해석하지 않고 nextCursor를 그대로 되돌려주기만 한다. */
 export function getNews({
   sector,
   cursor,
   limit = DEFAULT_NEWS_LIMIT,
 }: GetNewsParams = {}): NewsListPage {
-  const filtered = NEWS_RECORDS.filter(
-    (n) => !sector || sector === '전체' || n.sector === sector,
+  const { page, nextCursor } = paginate(
+    bySector(NEWS_RECORDS, sector),
+    cursor,
+    limit,
+    (n) => n.id,
   )
-  const startIndex = cursor
-    ? Math.max(filtered.findIndex((n) => n.id === cursor) + 1, 0)
-    : 0
-  const page = filtered.slice(startIndex, startIndex + limit)
-  const nextCursor =
-    startIndex + limit < filtered.length ? (page.at(-1)?.id ?? null) : null
 
   return {
     items: page.map((n) => ({
@@ -110,8 +135,28 @@ export function getGraph(): { nodes: OntologyNode[]; edges: OntologyEdge[] } {
   return { nodes: ONTOLOGY_NODES, edges: ONTOLOGY_EDGES }
 }
 
-export function getVerify(): VerifyResponse {
-  return { daily: buildVerifyDaily(), news: VERIFY_ENTRIES }
+export interface GetVerifyParams {
+  sector?: string
+  /** 이전 응답의 nextCursor. 첫 페이지는 생략한다. */
+  cursor?: string
+  limit?: number
+}
+
+const DEFAULT_VERIFY_LIMIT = 10
+
+export function getVerify({
+  sector,
+  cursor,
+  limit = DEFAULT_VERIFY_LIMIT,
+}: GetVerifyParams = {}): VerifyResponse {
+  const { page, nextCursor } = paginate(
+    bySector(VERIFY_ENTRIES, sector),
+    cursor,
+    limit,
+    (v) => v.newsId,
+  )
+  // daily 추이는 섹터/페이지와 무관한 전체 집계라 페이징하지 않는다.
+  return { daily: buildVerifyDaily(), news: page, nextCursor }
 }
 
 /** 종목명·티커·노드ID 어느 것으로 들어와도 온톨로지 COMPANY 노드를 찾는다. */

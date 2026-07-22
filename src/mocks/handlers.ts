@@ -12,14 +12,21 @@ import {
  * 응답 바디는 lib/api.ts의 기존 동기 함수를 그대로 호출해 만든다 — 이 "서버"와
  * TanStack Query의 placeholderData가 항상 같은 데이터 소스(lib/data.ts)를 본다.
  */
+
+/** /api/news, /api/verify가 함께 쓰는 sector/cursor/limit 쿼리스트링 파싱. */
+function readPageParams(url: string) {
+  const searchParams = new URL(url).searchParams
+  return {
+    sector: searchParams.get('sector') ?? undefined,
+    cursor: searchParams.get('cursor') ?? undefined,
+    limit: Number(searchParams.get('limit')) || undefined,
+  }
+}
+
 export const handlers = [
   http.get('/api/news', async ({ request }) => {
     await delay(300)
-    const searchParams = new URL(request.url).searchParams
-    const sector = searchParams.get('sector') ?? undefined
-    const cursor = searchParams.get('cursor') ?? undefined
-    const limit = Number(searchParams.get('limit')) || undefined
-    return HttpResponse.json(getNews({ sector, cursor, limit }))
+    return HttpResponse.json(getNews(readPageParams(request.url)))
   }),
 
   http.get('/api/news/:id/analysis', async ({ params }) => {
@@ -42,8 +49,8 @@ export const handlers = [
     return HttpResponse.json(runBriefing(tickers))
   }),
 
-  http.get('/api/verify', async () => {
+  http.get('/api/verify', async ({ request }) => {
     await delay(300)
-    return HttpResponse.json(getVerify())
+    return HttpResponse.json(getVerify(readPageParams(request.url)))
   }),
 ]

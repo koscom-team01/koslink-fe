@@ -21,16 +21,22 @@ export const queryKeys = {
   news: (sector: string) => ['news', sector] as const,
   newsAnalysis: (newsId: string) => ['news', newsId, 'analysis'] as const,
   graph: () => ['graph'] as const,
-  verify: () => ['verify'] as const,
+  verify: (sector: string) => ['verify', sector] as const,
+}
+
+/** GET /api/news, GET /api/verify가 공유하는 커서 페이지 쿼리스트링. */
+function pageSearchParams(sector: string, cursor?: string) {
+  const searchParams: Record<string, string> = {}
+  if (sector && sector !== '전체') searchParams.sector = sector
+  if (cursor) searchParams.cursor = cursor
+  return searchParams
 }
 
 async function fetchNews(
   sector: string,
   cursor?: string,
 ): Promise<NewsListPage> {
-  const searchParams: Record<string, string> = {}
-  if (sector && sector !== '전체') searchParams.sector = sector
-  if (cursor) searchParams.cursor = cursor
+  const searchParams = pageSearchParams(sector, cursor)
   return http.get('news', { searchParams }).json<NewsListPage>()
 }
 
@@ -45,8 +51,12 @@ async function fetchGraph(): Promise<{
   return http.get('graph').json()
 }
 
-async function fetchVerify(): Promise<VerifyResponse> {
-  return http.get('verify').json<VerifyResponse>()
+async function fetchVerify(
+  sector: string,
+  cursor?: string,
+): Promise<VerifyResponse> {
+  const searchParams = pageSearchParams(sector, cursor)
+  return http.get('verify', { searchParams }).json<VerifyResponse>()
 }
 
 async function postBriefing(tickers: string[]): Promise<BriefingResult> {
@@ -86,11 +96,17 @@ export function useGraphQuery() {
   })
 }
 
-export function useVerifyQuery() {
-  return useQuery({
-    queryKey: queryKeys.verify(),
-    queryFn: fetchVerify,
-    placeholderData: getVerify,
+/** 검증 목록 — 무한 스크롤용 커서 기반 페이징. `data.pages.flatMap(p => p.news)`로 펼쳐 쓴다. */
+export function useVerifyQuery(sector: string) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.verify(sector),
+    queryFn: ({ pageParam }) => fetchVerify(sector, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    placeholderData: () => ({
+      pages: [getVerify({ sector })],
+      pageParams: [undefined],
+    }),
   })
 }
 
