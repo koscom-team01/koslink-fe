@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useAtom } from 'jotai'
 import { verifyContextAtom } from '#/lib/atoms'
-import { getVerify } from '#/lib/api'
+import { useVerifyQuery } from '#/lib/queries'
 import type { VerifyDaily } from '#/types'
 import VerifyList, { hitCount } from './VerifyList'
 import VerifyDetail from './VerifyDetail'
@@ -95,16 +95,19 @@ export default function VerifyView() {
   const [sector, setSector] = useState('전체')
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  const { daily, news } = useMemo(() => getVerify(), [])
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useVerifyQuery(sector)
+  const daily = data?.pages[0]?.daily ?? []
+  const news = data?.pages.flatMap((p) => p.news) ?? []
 
+  // 섹터는 서버가 커서 페이지 단위로 이미 걸러 보낸다. ctx(관련 종목명)만 로드된
+  // 페이지 위에서 클라이언트가 한 번 더 좁힌다.
   const rows = useMemo(
     () =>
       news.filter(
-        (v) =>
-          (sector === '전체' || v.sector === sector) &&
-          (!ctx || v.items.some((item) => ctx.names.includes(item.name))),
+        (v) => !ctx || v.items.some((item) => ctx.names.includes(item.name)),
       ),
-    [news, sector, ctx],
+    [news, ctx],
   )
 
   const selectedEntry =
@@ -264,6 +267,9 @@ export default function VerifyView() {
               ? '이번 예측 종목과 겹치는 건만 표시 중'
               : '뉴스를 선택하면 오른쪽에 상세가 나옵니다'
           }
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
         />
         <VerifyDetail entry={selectedEntry} />
       </div>

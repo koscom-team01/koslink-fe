@@ -1,6 +1,6 @@
 import { useAtom, useAtomValue } from 'jotai'
 import { selectedNewsIdAtom, verifyContextAtom, viewAtom } from '#/lib/atoms'
-import { getNews, getNewsAnalysis } from '#/lib/api'
+import { useNewsAnalysisQuery } from '#/lib/queries'
 import MainStockCard from './MainStockCard'
 import RelatedList from './RelatedList'
 import RationaleBox from './RationaleBox'
@@ -10,15 +10,12 @@ export default function AnalysisPanel() {
   const [, setVerifyContext] = useAtom(verifyContextAtom)
   const [, setView] = useAtom(viewAtom)
 
-  const newsItem = selectedNewsId
-    ? getNews().find((n) => n.id === selectedNewsId)
-    : undefined
-  const analysis = selectedNewsId ? getNewsAnalysis(selectedNewsId) : null
+  const { data: analysis } = useNewsAnalysisQuery(selectedNewsId)
 
   function openVerifyForThisNews() {
-    if (!analysis || !newsItem) return
+    if (!analysis) return
     setVerifyContext({
-      label: newsItem.title,
+      label: analysis.title,
       names: [analysis.main.name, ...analysis.related.map((r) => r.name)],
     })
     setView('verify')
@@ -30,7 +27,7 @@ export default function AnalysisPanel() {
         <h2>영향 분석</h2>
         <p>
           {analysis
-            ? `${newsItem?.sector ?? ''} · 영향 종목 ${analysis.related.length + 1}개`
+            ? `${analysis.sector} · 영향 종목 ${analysis.related.length + 1}개`
             : '뉴스 선택 대기 중'}
         </p>
       </div>

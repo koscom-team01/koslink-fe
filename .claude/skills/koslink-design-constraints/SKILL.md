@@ -1,6 +1,6 @@
 ---
 name: koslink-design-constraints
-description: Use when writing or reviewing UI code that touches color, shadcn/ui components, confidence/percentage displays, article text, or the graph node visual language in this repo — e.g. adding a shadcn component, choosing a Tailwind color class, rendering impact/confidence, showing article summaries, or building the mobile news list. Encodes KOSLINK's hard constraints: orange (#F26722) is reserved exclusively for graph "impact" states and must never be used decoratively (buttons, tabs, GNB); impact is expressed only via hop-count labels (direct/indirect/propagated), never confidence percentages; article content is 3-line summary + source link only, never full text; Korean-only UI (no i18n); shadcn's default theme must be overridden with the KOSLINK warm-neutral/orange/deep-azure token set; never wrap a shadcn Card inside a React Flow node; no horizontal-scroll news list on mobile; no pagination on the verification screen. Do NOT use for React Flow mechanics/animation code (see react-flow-graph) or for route/data-fetching wiring (see tanstack-route-data).
+description: Use when writing or reviewing UI code that touches color, shadcn/ui components, confidence/percentage displays, article text, or the graph node visual language in this repo — e.g. adding a shadcn component, choosing a Tailwind color class, rendering impact/confidence, showing article summaries, or building the mobile news list. Encodes KOSLINK's hard constraints: orange (#F26722) is reserved exclusively for graph "impact" states and must never be used decoratively (buttons, tabs, GNB); impact is expressed only via hop-count labels (direct/indirect/propagated), never confidence percentages; article content is 3-line summary + source link only, never full text; Korean-only UI (no i18n); shadcn's default theme must be overridden with the KOSLINK warm-neutral/orange/deep-azure token set; never wrap a shadcn Card inside a React Flow node; no horizontal-scroll news list on mobile; no numbered-page pagination UI on the news list or verification screen (both use cursor-based infinite scroll). Do NOT use for React Flow mechanics/animation code (see react-flow-graph) or for route/data-fetching wiring (see tanstack-route-data).
 ---
 
 # Design & content constraints (KOSLINK)
@@ -49,8 +49,9 @@ and `docs/KOSLINK-FRONTEND.md` §8–§9.
 
 - No horizontal-scroll news list on mobile — under ~1080px it becomes a top
   "current news" bar + bottom sheet with prev/next arrows instead.
-- No pagination on the verification screen — the list scrolls, detail stays
-  fixed.
+- No numbered-page pagination UI on the news list or verification screen —
+  both fetch via cursor-based infinite scroll (`useInfiniteScrollTrigger`),
+  detail/graph stays fixed alongside the scrolling list.
 - No login, signup, settings, or "my page" screens, and no `localStorage` or
   other client-side persistence anywhere in the app.
 

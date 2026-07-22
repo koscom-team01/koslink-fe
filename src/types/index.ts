@@ -28,6 +28,12 @@ export interface NewsListItem {
   relativeTime?: string
 }
 
+/** GET /api/news의 커서 기반 페이지 응답. cursor는 클라이언트가 해석하지 않는 opaque 값이다. */
+export interface NewsListPage {
+  items: NewsListItem[]
+  nextCursor: string | null
+}
+
 export interface NewsRelatedStock {
   nodeId: string
   name: string
@@ -39,6 +45,9 @@ export interface NewsRelatedStock {
 
 export interface NewsAnalysis {
   newsId: string
+  /** 뉴스 목록은 페이지네이션되므로, 목록을 다시 훑지 않고도 헤더에 표시할 수 있게 여기 포함한다. */
+  title: string
+  sector: string
   article: {
     summary: string[] // 3줄
     originUrl: string
@@ -81,9 +90,11 @@ export interface VerifyDaily {
   hitRate: number
 }
 
+/** GET /api/verify 응답. news는 커서 기반 페이지, daily는 필터와 무관한 전체 추이라 페이징하지 않는다. */
 export interface VerifyResponse {
   daily: VerifyDaily[]
   news: VerifyEntry[]
+  nextCursor: string | null
 }
 
 export interface BriefingMatch {

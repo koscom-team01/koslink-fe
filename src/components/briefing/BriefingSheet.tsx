@@ -7,7 +7,7 @@ import {
   selectedNewsIdAtom,
   viewAtom,
 } from '#/lib/atoms'
-import { runBriefing } from '#/lib/api'
+import { useBriefingMutation } from '#/lib/queries'
 import { impactOf } from '#/lib/format'
 import { graphIndex } from '#/lib/layout'
 import {
@@ -37,6 +37,7 @@ export default function BriefingSheet() {
   const setView = useSetAtom(viewAtom)
   const [inputValue, setInputValue] = useState('')
   const [open, setOpen] = useState(false)
+  const briefingMutation = useBriefingMutation()
 
   function addTicker(raw: string) {
     const value = raw.trim()
@@ -52,13 +53,17 @@ export default function BriefingSheet() {
 
   function run() {
     if (tickers.length === 0) return
-    setResult(runBriefing(tickers))
-    setRanAt(
-      new Date().toLocaleTimeString('ko-KR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-    )
+    briefingMutation.mutate(tickers, {
+      onSuccess: (data) => {
+        setResult(data)
+        setRanAt(
+          new Date().toLocaleTimeString('ko-KR', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        )
+      },
+    })
   }
 
   function clearAll() {
@@ -148,10 +153,11 @@ export default function BriefingSheet() {
           <button
             type="button"
             onClick={run}
-            className="mt-3.5 w-full rounded-xl py-3.5 text-[14.5px] font-bold text-white"
+            disabled={briefingMutation.isPending}
+            className="mt-3.5 w-full rounded-xl py-3.5 text-[14.5px] font-bold text-white disabled:opacity-60"
             style={{ background: 'var(--o-500)' }}
           >
-            오늘 뉴스에서 찾기
+            {briefingMutation.isPending ? '조회 중…' : '오늘 뉴스에서 찾기'}
           </button>
 
           {!result && tickers.length === 0 && (

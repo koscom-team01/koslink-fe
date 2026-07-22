@@ -75,7 +75,7 @@ import '@xyflow/react/dist/style.css' // 필수. 빠뜨리면 노드가 겹쳐 �
 └─────────────────────────────────────────────────────┘
 ```
 
-페이지네이션 없음. 목록은 스크롤, 상세는 우측 고정.
+페이지 번호 UI 없음. 목록은 커서 기반 무한 스크롤(뉴스 목록과 동일한 방식), 상세는 우측 고정.
 
 ### SC-03 관심종목 브리핑
 
@@ -126,10 +126,10 @@ interface OntologyEdge {
 
 베이스 `/api`. 인증 헤더 없음. 전부 TanStack Query로 감싼다.
 
-### 5.1 뉴스 목록
+### 5.1 뉴스 목록 (커서 기반 페이징 · 무한 스크롤)
 
 ```
-GET /api/news?limit=20&sector=반도체
+GET /api/news?limit=20&sector=반도체&cursor=n3
 ```
 
 ```jsonc
@@ -143,8 +143,14 @@ GET /api/news?limit=20&sector=반도체
       "sector": "반도체",
     },
   ],
+  "nextCursor": "n1", // 다음 페이지 요청 시 그대로 실어 보낸다. 마지막 페이지면 null
 }
 ```
+
+`cursor`는 클라이언트가 값을 해석하지 않는 opaque 문자열이다 — 이전 응답의
+`nextCursor`를 다음 요청의 `cursor`에 그대로 담아 보낸다. 첫 요청은 `cursor`를
+생략한다. 프론트는 `useInfiniteQuery`로 페이지를 쌓고, 목록 하단 sentinel이
+뷰포트에 들어오면 다음 페이지를 요청한다(`lib/queries.ts`의 `useNewsQuery`).
 
 ### 5.2 뉴스 영향 분석 — 화면의 핵심
 
@@ -155,6 +161,8 @@ GET /api/news/{id}/analysis
 ```jsonc
 {
   "newsId": "n1",
+  "title": "SK하이닉스, HBM4 양산 위해 청주 M15X 증설 확정",
+  "sector": "반도체",
   "article": {
     "summary": ["요약 1", "요약 2", "요약 3"],
     "originUrl": "https://www.yna.co.kr/...",
@@ -199,6 +207,9 @@ GET /api/news/{id}/analysis
 - 영향의 크기는 `chain.length - 1` (hop 수)로만 표현한다
 - `chain`은 기점부터 대상까지의 노드 ID 배열. 그래프 배치와 애니메이션 순서가 전부 여기서 나온다
 - `rationale.propagation`은 서버가 그래프 경로에서 템플릿 생성한다
+- `title`/`sector`는 뉴스 목록(§5.1)이 페이지네이션되어 선택된 뉴스가 이미
+  로드된 페이지에 없을 수 있으므로, 분석 패널이 목록을 다시 훑지 않고도
+  헤더에 표시할 수 있게 여기 포함한다
 
 ### 5.3 전체 그래프
 
@@ -234,15 +245,15 @@ POST /api/briefing
 
 요청에 담는 `tickers`는 서버에 저장되지 않는다. 매번 클라이언트 메모리에서 보낸다.
 
-### 5.5 예측 검증
+### 5.5 예측 검증 (news는 커서 기반 페이징)
 
 ```
-GET /api/verify?days=30
+GET /api/verify?days=30&sector=반도체&cursor=v10&limit=10
 ```
 
 ```jsonc
 {
-  "daily": [{ "date": "2026-07-17", "hitRate": 0.71 }],
+  "daily": [{ "date": "2026-07-17", "hitRate": 0.71 }], // 섹터/페이지와 무관한 전체 추이, 페이징하지 않음
   "news": [
     {
       "newsId": "v1",
@@ -260,10 +271,13 @@ GET /api/verify?days=30
       ],
     },
   ],
+  "nextCursor": "v10", // §5.1과 동일한 opaque 커서 관례. 마지막 페이지면 null
 }
 ```
 
-사전 배치로 계산된 정적 결과. 프론트는 읽기만 한다.
+`daily`(적중률 추이 차트)는 사전 배치로 계산된 정적 결과이며 페이징 대상이
+아니다. `news`(검증 목록)만 §5.1과 동일한 커서 페이징을 적용해 무한
+스크롤로 받는다. 프론트는 읽기만 한다.
 
 ---
 
@@ -638,7 +652,7 @@ export const briefingRanAtAtom = atom<string | null>(null)
 - `nodeTypes` / `edgeTypes`를 컴포넌트 안에서 선언
 - dagre·elkjs 등 레이아웃 라이브러리 추가
 - 모바일 가로 스크롤 뉴스 리스트
-- 검증 화면 페이지네이션
+- 뉴스 목록·검증 목록에 페이지 번호(1, 2, 3 …) UI 추가 — 둘 다 커서 기반 무한 스크롤만 쓴다
 - 기사 본문 전문 저장·표시 (저작권. 요약 3줄 + 원문 링크만)
 - 그래프 노드 안에 shadcn `Card` 사용 (래퍼가 크기 계산을 방해)
 - 장식 목적의 주황색 사용
