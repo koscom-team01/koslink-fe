@@ -26,7 +26,7 @@ pnpm dlx shadcn@latest add <component>
 
 ## Tech Stack
 
-- **Framework**: TanStack Start (React 19 + Vite SSR)
+- **Framework**: React 19 + Vite (CSR)
 - **Routing**: TanStack Router with file-based routing (`src/routes/`)
 - **Data Fetching**: TanStack Query
 - **Styling**: Tailwind CSS v4 + shadcn/ui (new-york style)

@@ -13,7 +13,7 @@
 
 ## Tech Stack
 
-- **Framework**: TanStack Start (React 19 + Vite SSR)
+- **Framework**: React 19 + Vite (CSR)
 - **Routing**: TanStack Router (파일 기반)
 - **Data Fetching**: TanStack Query
 - **Styling**: Tailwind CSS v4 + shadcn/ui
