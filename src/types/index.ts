@@ -1,21 +1,36 @@
-export type NodeKind = 'COMPANY' | 'PRODUCT' | 'THEME' | 'MATERIAL'
+/**
+ * 실제 온톨로지(Neo4j)는 Stock/Role/Theme 3계층 + BELONGS_TO/SUPPLY_TO/RELATED_TO
+ * 관계로 이뤄져 있지만, 프론트는 "거래 가능한 종목인지" 여부만 렌더링에 쓴다
+ * (카드 크기·티커 표시 여부). 그래서 Role/Theme는 CONCEPT 하나로 뭉뚱그려 받는다.
+ */
+export type NodeKind = 'STOCK' | 'CONCEPT'
 export type Direction = 'UP' | 'DOWN'
 
 export interface OntologyNode {
   id: string
   name: string
   kind: NodeKind
-  ticker?: string // COMPANY만
+  ticker?: string // STOCK만
   sector: string // '반도체' | '2차전지' | '방산'
-  marketCap?: number // 억원, COMPANY만
+  marketCap?: number // 억원, STOCK만
 }
+
+/** 실제 RELATED_TO 엣지의 relation_type 값 중 일부. STOCK-STOCK 엣지에만 존재한다. */
+export type RelationType =
+  | 'EQUITY_INVESTMENT'
+  | 'AFFILIATE'
+  | 'LICENSING'
+  | 'COMPETITOR'
+  | 'MNA'
+  | 'OTHER'
 
 export interface OntologyEdge {
   id: string
   source: string
   target: string
-  relation: string // '장비 공급', '경쟁', '양극재 조달' ...
-  polarity: 1 | -1 // 1 동조 / -1 반대(경쟁·대체)
+  relation: string // 화면에 보여줄 관계 레이블 — '장비 공급', '경쟁', '양극재 조달' ...
+  /** SUPPLY_TO·BELONGS_TO 등 relation_type이 없는 엣지는 생략된다(항상 동조로 취급). */
+  relationType?: RelationType
 }
 
 export interface NewsListItem {
@@ -40,7 +55,6 @@ export interface NewsRelatedStock {
   ticker?: string
   direction: Direction
   relation: string
-  chain: string[] // 기점부터 대상까지의 노드 ID 배열
 }
 
 export interface NewsAnalysis {
@@ -67,6 +81,22 @@ export interface NewsAnalysis {
     propagation: string
     precedent: string
   }
+}
+
+/** 파급 경로 그래프의 노드. direction은 이 뉴스의 파급 경로에 포함된 STOCK에만 붙는다. */
+export interface ImpactGraphNode extends OntologyNode {
+  direction?: Direction
+}
+
+/**
+ * GET /api/news/{id}/graph 응답. 좌표는 내려주지 않는다 — 화면에 그릴 위치는
+ * 프론트가 hop 레벨(originId부터의 BFS 거리)로 계산한다.
+ */
+export interface NewsImpactGraph {
+  newsId: string
+  originId: string
+  nodes: ImpactGraphNode[]
+  edges: OntologyEdge[]
 }
 
 export interface VerifyItem {

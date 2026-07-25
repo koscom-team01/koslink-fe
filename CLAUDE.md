@@ -102,8 +102,9 @@ When implementing the graph visualization:
 Base path is `/api`. No authentication. All endpoints wrapped with TanStack Query:
 
 - `GET /api/news` - News list, cursor-paginated (`sector?`, `cursor?`, `limit?` → `{ items, nextCursor }`), infinite scroll
-- `GET /api/news/{id}/analysis` - Impact analysis with propagation chains (includes `title`/`sector` so the panel doesn't need the paginated list)
-- `GET /api/graph` - Full ontology graph
+- `GET /api/news/{id}/analysis` - Impact analysis text panel (article summary, main stock, related stocks, rationale). Includes `title`/`sector` so the panel doesn't need the paginated list. No graph/coordinate data — see the next endpoint
+- `GET /api/news/{id}/graph` - Propagation subgraph for this news (`{ newsId, originId, nodes, edges }`), Neo4j-derived. Nodes carry `direction` only where relevant; no coordinates — the frontend computes hop-based layout itself (`lib/graphIndex.ts`'s `bfsBuild` + `lib/layout.ts`'s `radialLayout`)
+- `GET /api/graph` - Full ontology graph, same trimmed node/edge shape as above (`kind: 'STOCK' | 'CONCEPT'`, edges carry `relationType` only for competitor/affiliate-type relations)
 - `POST /api/briefing` - Watchlist reverse lookup
 - `GET /api/verify` - Prediction verification data; `news` is cursor-paginated the same way as `/api/news`, `daily` is not
 

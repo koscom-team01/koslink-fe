@@ -1,17 +1,27 @@
 import { arrow, directionLabel, impactOf } from '#/lib/format'
-import { graphIndex } from '#/lib/layout'
+import { bfsBuild, buildGraphIndex, pathTo } from '#/lib/graphIndex'
+import { useNewsImpactGraphQuery } from '#/lib/queries'
 import type { NewsAnalysis, NewsRelatedStock } from '#/types'
 
-function sortRelated(a: NewsRelatedStock, b: NewsRelatedStock) {
-  const hopDiff = a.chain.length - b.chain.length
-  if (hopDiff !== 0) return hopDiff
-  if (a.direction === b.direction) return 0
-  return a.direction === 'UP' ? -1 : 1
+function sortRelated(hopOf: (nodeId: string) => number) {
+  return (a: NewsRelatedStock, b: NewsRelatedStock) => {
+    const hopDiff = hopOf(a.nodeId) - hopOf(b.nodeId)
+    if (hopDiff !== 0) return hopDiff
+    if (a.direction === b.direction) return 0
+    return a.direction === 'UP' ? -1 : 1
+  }
 }
 
-/** 관계로 이어진 종목 — 기점에서 chain을 따라 파급되는 관련주 목록 */
+/** 관계로 이어진 종목 — 기점에서 파급 경로 그래프(BFS)를 따라 이어지는 관련주 목록 */
 export default function RelatedList({ analysis }: { analysis: NewsAnalysis }) {
-  const sorted = [...analysis.related].sort(sortRelated)
+  const { data: impactGraph } = useNewsImpactGraphQuery(analysis.newsId)
+  if (!impactGraph) return null
+
+  const index = buildGraphIndex(impactGraph.nodes, impactGraph.edges)
+  const built = bfsBuild(index, impactGraph.originId)
+  const hopOf = (nodeId: string) => built.level[nodeId] ?? 0
+
+  const sorted = [...analysis.related].sort(sortRelated(hopOf))
 
   return (
     <div>
@@ -23,7 +33,7 @@ export default function RelatedList({ analysis }: { analysis: NewsAnalysis }) {
       </div>
       <div className="flex flex-col gap-[7px]">
         {sorted.map((r) => {
-          const hop = r.chain.length - 1
+          const hop = hopOf(r.nodeId)
           const impact = impactOf(hop)
           const down = r.direction === 'DOWN'
           return (
@@ -66,8 +76,8 @@ export default function RelatedList({ analysis }: { analysis: NewsAnalysis }) {
                 className="mt-[7px] text-[11.5px]"
                 style={{ color: 'var(--n-400)' }}
               >
-                {r.chain
-                  .map((id) => graphIndex.byId.get(id)?.name ?? id)
+                {pathTo(built, r.nodeId)
+                  .map((id) => index.byId.get(id)?.name ?? id)
                   .join(' → ')}
               </div>
             </div>

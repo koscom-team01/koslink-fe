@@ -9,7 +9,9 @@ import type {
   BriefingMatch,
   BriefingResult,
   BriefingUnmatched,
+  ImpactGraphNode,
   NewsAnalysis,
+  NewsImpactGraph,
   NewsListPage,
   OntologyEdge,
   OntologyNode,
@@ -124,7 +126,6 @@ export function getNewsAnalysis(newsId: string): NewsAnalysis | null {
         ticker: node.ticker,
         direction: r.direction,
         relation: r.relation,
-        chain: r.chain,
       }
     }),
     rationale: record.rationale,
@@ -133,6 +134,50 @@ export function getNewsAnalysis(newsId: string): NewsAnalysis | null {
 
 export function getGraph(): { nodes: OntologyNode[]; edges: OntologyEdge[] } {
   return { nodes: ONTOLOGY_NODES, edges: ONTOLOGY_EDGES }
+}
+
+function findOntologyEdge(a: string, b: string): OntologyEdge | undefined {
+  return ONTOLOGY_EDGES.find(
+    (e) =>
+      (e.source === a && e.target === b) ||
+      (e.source === b && e.target === a),
+  )
+}
+
+/**
+ * GET /api/news/{id}/graph. 뉴스별 파급 경로에 등장하는 노드·엣지만 추려서
+ * 내려준다 — 좌표는 포함하지 않는다(프론트가 hop 레벨로 계산한다).
+ */
+export function getNewsImpactGraph(newsId: string): NewsImpactGraph | null {
+  const record = NEWS_RECORDS.find((n) => n.id === newsId)
+  if (!record) return null
+
+  const nodeIds = new Set<string>([record.main.nodeId])
+  const edgeById = new Map<string, OntologyEdge>()
+  record.related.forEach((r) => {
+    r.chain.forEach((id) => nodeIds.add(id))
+    for (let i = 1; i < r.chain.length; i++) {
+      const edge = findOntologyEdge(r.chain[i - 1], r.chain[i])
+      if (edge) edgeById.set(edge.id, edge)
+    }
+  })
+
+  const directionById = new Map<string, typeof record.main.direction>()
+  directionById.set(record.main.nodeId, record.main.direction)
+  record.related.forEach((r) => directionById.set(r.nodeId, r.direction))
+
+  const nodes: ImpactGraphNode[] = Array.from(nodeIds).map((id) => {
+    const node = requireNode(id)
+    const direction = directionById.get(id)
+    return direction ? { ...node, direction } : { ...node }
+  })
+
+  return {
+    newsId: record.id,
+    originId: record.main.nodeId,
+    nodes,
+    edges: Array.from(edgeById.values()),
+  }
 }
 
 export interface GetVerifyParams {
@@ -163,7 +208,7 @@ export function getVerify({
 function findCompanyNode(query: string): OntologyNode | undefined {
   return ONTOLOGY_NODES.find(
     (n) =>
-      n.kind === 'COMPANY' &&
+      n.kind === 'STOCK' &&
       (n.ticker === query ||
         n.id === query ||
         n.name === query ||
