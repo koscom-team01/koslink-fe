@@ -16,19 +16,14 @@ import {
   highlightedNodeAtom,
   selectedNewsIdAtom,
 } from '#/lib/atoms'
-import { useGraphQuery, useNewsAnalysisQuery } from '#/lib/queries'
+import { useGraphQuery, useNewsImpactGraphQuery } from '#/lib/queries'
 import { sizeOf } from '#/lib/format'
-import {
-  focusBuild,
-  fullLayout,
-  graphIndex,
-  nodeBuild,
-  tierOf,
-} from '#/lib/layout'
+import { fullLayout, graphIndex, radialLayout, tierOf } from '#/lib/layout'
 import type { LayoutPoint } from '#/lib/layout'
+import { bfsBuild, buildGraphIndex } from '#/lib/graphIndex'
 import type {
   Direction,
-  NewsAnalysis,
+  NewsImpactGraph,
   OntologyEdge,
   OntologyNode,
 } from '#/types'
@@ -86,21 +81,25 @@ function polarityEdgeState(polarity: 1 | -1, tier: 1 | 2): EdgeVisualState {
   return polarity === -1 ? 'down2' : 'up2'
 }
 
-/** 뉴스 파급 경로: 기점 중앙, related[].chain 기반 동심원 배치 */
-function buildFocusScene(analysis: NewsAnalysis): Scene2 {
-  const built = focusBuild(analysis.main.nodeId, analysis.related)
+/** 뉴스 파급 경로: 기점 중앙, GET /api/news/{id}/graph로 받은 서브그래프를 BFS로 펼쳐 동심원 배치 */
+function buildFocusScene(impactGraph: NewsImpactGraph): Scene2 {
+  const index = buildGraphIndex(impactGraph.nodes, impactGraph.edges)
+  const built = bfsBuild(index, impactGraph.originId)
+  const pos = radialLayout(built.ids, built.level)
+
   const dirOf = new Map<string, Direction>()
-  dirOf.set(analysis.main.nodeId, analysis.main.direction)
-  analysis.related.forEach((r) => dirOf.set(r.nodeId, r.direction))
+  impactGraph.nodes.forEach((n) => {
+    if (n.direction) dirOf.set(n.id, n.direction)
+  })
 
   const nodes: NodeSpec[] = built.ids.map((id) => {
-    const isMain = id === analysis.main.nodeId
+    const isMain = id === impactGraph.originId
     const dir = dirOf.get(id)
     return {
       id,
       isMain,
       restingState: 'hide',
-      badge: isMain ? analysis.main.direction : (dir ?? null),
+      badge: dir ?? null,
       tier: undefined,
     }
   })
@@ -115,7 +114,7 @@ function buildFocusScene(analysis: NewsAnalysis): Scene2 {
   }))
 
   const revealNodes: RevealNode[] = built.ids
-    .filter((id) => id !== analysis.main.nodeId)
+    .filter((id) => id !== impactGraph.originId)
     .map((id) => {
       const dir = dirOf.get(id)
       return {
@@ -133,17 +132,18 @@ function buildFocusScene(analysis: NewsAnalysis): Scene2 {
   }))
 
   const maxHop = built.pairs.reduce((m, p) => Math.max(m, p.level), 0)
+  const originDirection = dirOf.get(impactGraph.originId) ?? 'UP'
 
   return {
     ids: built.ids,
-    positions: built.pos,
+    positions: pos,
     nodes,
     edges,
     scene: {
-      key: `focus:${analysis.newsId}`,
-      originId: analysis.main.nodeId,
-      originName: graphIndex.byId.get(analysis.main.nodeId)?.name ?? '',
-      originState: analysis.main.direction === 'UP' ? 'up' : 'down',
+      key: `focus:${impactGraph.newsId}`,
+      originId: impactGraph.originId,
+      originName: index.byId.get(impactGraph.originId)?.name ?? '',
+      originState: originDirection === 'UP' ? 'up' : 'down',
       nodes: revealNodes,
       edges: revealEdges,
     },
@@ -190,7 +190,7 @@ function buildAllScene(
     }
   }
 
-  const built = nodeBuild(highlightId, 2)
+  const built = bfsBuild(graphIndex, highlightId, 2)
   const origin = graphIndex.byId.get(highlightId)!
 
   function ontologyEdgeId(source: string, target: string): string {
@@ -327,7 +327,7 @@ function GraphCanvas({ scene2 }: GraphCanvasProps) {
         data: {
           label: ontologyNode.name,
           ticker: ontologyNode.ticker,
-          abstract: ontologyNode.kind !== 'COMPANY',
+          abstract: ontologyNode.kind !== 'STOCK',
           tier: spec.tier,
           state,
           // .main은 파급 경로 뷰의 상승/하락 색 위에 강조 링을 더하는 용도라
@@ -610,7 +610,7 @@ export default function GraphPanel() {
   const [highlightedNode, setHighlightedNode] = useAtom(highlightedNodeAtom)
   const selectedNewsId = useAtomValue(selectedNewsIdAtom)
   const { data: graph } = useGraphQuery()
-  const { data: analysis } = useNewsAnalysisQuery(selectedNewsId)
+  const { data: impactGraph } = useNewsImpactGraphQuery(selectedNewsId)
 
   // 뉴스가 바뀌면 제자리 강조 상태를 초기화하고 파급 경로 뷰로 돌아간다
   useEffect(() => {
@@ -621,9 +621,9 @@ export default function GraphPanel() {
   const scene2: Scene2 | null = useMemo(() => {
     if (mode === 'all')
       return graph ? buildAllScene(highlightedNode, graph) : null
-    if (selectedNewsId && analysis) return buildFocusScene(analysis)
+    if (selectedNewsId && impactGraph) return buildFocusScene(impactGraph)
     return null
-  }, [mode, highlightedNode, selectedNewsId, graph, analysis])
+  }, [mode, highlightedNode, selectedNewsId, graph, impactGraph])
 
   return (
     <section className="panel col-graph">

@@ -1,9 +1,16 @@
 import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query'
 import { http } from '#/lib/http'
-import { getGraph, getNews, getNewsAnalysis, getVerify } from '#/lib/api'
+import {
+  getGraph,
+  getNews,
+  getNewsAnalysis,
+  getNewsImpactGraph,
+  getVerify,
+} from '#/lib/api'
 import type {
   BriefingResult,
   NewsAnalysis,
+  NewsImpactGraph,
   NewsListPage,
   OntologyEdge,
   OntologyNode,
@@ -20,6 +27,7 @@ import type {
 export const queryKeys = {
   news: (sector: string) => ['news', sector] as const,
   newsAnalysis: (newsId: string) => ['news', newsId, 'analysis'] as const,
+  newsImpactGraph: (newsId: string) => ['news', newsId, 'graph'] as const,
   graph: () => ['graph'] as const,
   verify: (sector: string) => ['verify', sector] as const,
 }
@@ -42,6 +50,10 @@ async function fetchNews(
 
 async function fetchNewsAnalysis(newsId: string): Promise<NewsAnalysis> {
   return http.get(`news/${newsId}/analysis`).json<NewsAnalysis>()
+}
+
+async function fetchNewsImpactGraph(newsId: string): Promise<NewsImpactGraph> {
+  return http.get(`news/${newsId}/graph`).json<NewsImpactGraph>()
 }
 
 async function fetchGraph(): Promise<{
@@ -84,6 +96,17 @@ export function useNewsAnalysisQuery(newsId: string | null) {
     enabled: !!newsId,
     placeholderData: () =>
       newsId ? (getNewsAnalysis(newsId) ?? undefined) : undefined,
+  })
+}
+
+/** 뉴스 파급 경로 그래프 — 좌표 없이 노드/엣지만 온다, 배치는 프론트(lib/graphIndex.ts)가 계산한다. */
+export function useNewsImpactGraphQuery(newsId: string | null) {
+  return useQuery({
+    queryKey: queryKeys.newsImpactGraph(newsId ?? ''),
+    queryFn: () => fetchNewsImpactGraph(newsId as string),
+    enabled: !!newsId,
+    placeholderData: () =>
+      newsId ? (getNewsImpactGraph(newsId) ?? undefined) : undefined,
   })
 }
 

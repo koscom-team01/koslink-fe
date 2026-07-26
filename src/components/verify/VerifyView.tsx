@@ -128,7 +128,7 @@ export default function VerifyView() {
   const mStock = totalItems ? Math.round((hitItems / totalItems) * 100) : 0
 
   return (
-    <div className="flex flex-col gap-3.5">
+    <div className="flex h-full min-h-0 flex-col gap-3.5">
       {ctx && (
         <div
           className="flex items-center gap-3 rounded-2xl border px-[13px] py-[13px]"

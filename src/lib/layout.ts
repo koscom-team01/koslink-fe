@@ -1,4 +1,5 @@
 import { ONTOLOGY_EDGES, ONTOLOGY_NODES } from './data'
+import { buildGraphIndex } from './graphIndex'
 import type { OntologyNode } from '#/types'
 
 /**
@@ -11,57 +12,8 @@ export interface LayoutPoint {
   y: number
 }
 
-export interface GraphPair {
-  source: string
-  target: string
-  relation: string
-  polarity: 1 | -1
-  level: number
-}
-
-export interface BuiltGraph {
-  ids: string[]
-  pairs: GraphPair[]
-  level: Record<string, number>
-  maxLevel: number
-  pos: Record<string, LayoutPoint>
-}
-
-function edgeKey(a: string, b: string) {
-  return [a, b].sort().join('|')
-}
-
-/** 노드/인접 리스트/관계 조회용 인덱스. 정적 온톨로지 기준으로 한 번만 계산한다. */
-export const graphIndex = (() => {
-  const byId = new Map(ONTOLOGY_NODES.map((n) => [n.id, n]))
-  const adjacency = new Map<string, string[]>()
-  ONTOLOGY_NODES.forEach((n) => adjacency.set(n.id, []))
-  const relationByKey = new Map<
-    string,
-    { relation: string; polarity: 1 | -1 }
-  >()
-  ONTOLOGY_EDGES.forEach((e) => {
-    adjacency.get(e.source)?.push(e.target)
-    adjacency.get(e.target)?.push(e.source)
-    relationByKey.set(edgeKey(e.source, e.target), {
-      relation: e.relation,
-      polarity: e.polarity,
-    })
-  })
-  return { byId, adjacency, relationByKey }
-})()
-
-function lookupRelation(
-  a: string,
-  b: string,
-): { relation: string; polarity: 1 | -1 } {
-  return (
-    graphIndex.relationByKey.get(edgeKey(a, b)) ?? {
-      relation: '연관',
-      polarity: 1,
-    }
-  )
-}
+/** 전체 온톨로지 인덱스. 정적 데이터 기준으로 한 번만 계산해 캐시한다. */
+export const graphIndex = buildGraphIndex(ONTOLOGY_NODES, ONTOLOGY_EDGES)
 
 const RADIUS = [0, 300, 520, 700]
 
@@ -92,94 +44,6 @@ export function radialLayout(
     })
   })
   return pos
-}
-
-/** 뉴스 분석의 related[].chain을 펼쳐 노드·엣지·hop 레벨을 산출한다. */
-export function focusBuild(
-  mainNodeId: string,
-  related: { nodeId: string; chain: string[] }[],
-): BuiltGraph {
-  const level = new Map<string, number>([[mainNodeId, 0]])
-  const set = new Set<string>([mainNodeId])
-  const pairs: GraphPair[] = []
-  const seen = new Set<string>()
-
-  related.forEach((r) => {
-    r.chain.forEach((id, k) => {
-      set.add(id)
-      const existing = level.get(id)
-      if (existing === undefined || k < existing) level.set(id, k)
-      if (k > 0) {
-        const a = r.chain[k - 1]
-        const key = `${a}>${id}`
-        if (!seen.has(key)) {
-          seen.add(key)
-          const rel = lookupRelation(a, id)
-          pairs.push({
-            source: a,
-            target: id,
-            relation: rel.relation,
-            polarity: rel.polarity,
-            level: k,
-          })
-        }
-      }
-    })
-  })
-
-  const ids = Array.from(set)
-  const levelObj = Object.fromEntries(level)
-  const maxLevel = ids.reduce((m, id) => Math.max(m, levelObj[id] ?? 0), 0)
-  return {
-    ids,
-    pairs,
-    level: levelObj,
-    maxLevel,
-    pos: radialLayout(ids, levelObj),
-  }
-}
-
-/** 특정 노드 기점 BFS(기본 2단계) */
-export function nodeBuild(originId: string, maxHop = 2): BuiltGraph {
-  const level = new Map<string, number>([[originId, 0]])
-  const pairs: GraphPair[] = []
-  const seen = new Set<string>()
-  const queue = [originId]
-
-  while (queue.length) {
-    const current = queue.shift()!
-    const currentLevel = level.get(current) ?? 0
-    if (currentLevel >= maxHop) continue
-    for (const neighbor of graphIndex.adjacency.get(current) ?? []) {
-      const key = edgeKey(current, neighbor)
-      if (!level.has(neighbor)) {
-        level.set(neighbor, currentLevel + 1)
-        queue.push(neighbor)
-      }
-      if (level.get(neighbor) === currentLevel + 1 && !seen.has(key)) {
-        seen.add(key)
-        const rel = lookupRelation(current, neighbor)
-        pairs.push({
-          source: current,
-          target: neighbor,
-          relation: rel.relation,
-          polarity: rel.polarity,
-          level: currentLevel + 1,
-        })
-      }
-    }
-  }
-
-  const levelObj = Object.fromEntries(level)
-  const ids = Object.keys(levelObj)
-  const maxLevel = ids.reduce((m, id) => Math.max(m, levelObj[id]), 0)
-  return {
-    ids,
-    pairs,
-    level: levelObj,
-    maxLevel,
-    pos: radialLayout(ids, levelObj),
-  }
 }
 
 const SECTOR_CENTERS: Record<string, LayoutPoint> = {

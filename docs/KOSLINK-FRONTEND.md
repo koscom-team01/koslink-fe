@@ -97,28 +97,46 @@ import '@xyflow/react/dist/style.css' // 필수. 빠뜨리면 노드가 겹쳐 �
 
 ## 4. 데이터 모델
 
+실제 온톨로지(Neo4j)는 Stock/Role/Theme 3계층 + BELONGS_TO/SUPPLY_TO/RELATED_TO
+관계로 이뤄져 있다. 프론트는 이 중 렌더링에 실제로 쓰는 최소 필드만 받는다 —
+거래 가능 여부(STOCK/CONCEPT), 화면에 표시할 관계 레이블, 경쟁 관계 여부뿐이다.
+좌표는 절대 내려주지 않는다. hop 레벨 기반 배치는 항상 프론트가 계산한다
+(`lib/graphIndex.ts`의 `bfsBuild`, `lib/layout.ts`의 `radialLayout`).
+
 ```ts
-type NodeKind = 'COMPANY' | 'PRODUCT' | 'THEME' | 'MATERIAL'
+type NodeKind = 'STOCK' | 'CONCEPT' // Role/Theme는 CONCEPT로 통칭 — 프론트는 거래 가능 여부만 구분하면 된다
 
 interface OntologyNode {
   id: string // 'sk'
   name: string // 'SK하이닉스'
   kind: NodeKind
-  ticker?: string // COMPANY만
+  ticker?: string // STOCK만
   sector: string // '반도체' | '2차전지' | '방산'
-  marketCap?: number // 억원, COMPANY만
+  marketCap?: number // 억원, STOCK만
 }
+
+// 실제 RELATED_TO.relation_type 중 일부. STOCK-STOCK 엣지에만 존재한다.
+type RelationType =
+  | 'EQUITY_INVESTMENT'
+  | 'AFFILIATE'
+  | 'LICENSING'
+  | 'COMPETITOR'
+  | 'MNA'
+  | 'OTHER'
 
 interface OntologyEdge {
   id: string
   source: string
   target: string
-  relation: string // '장비 공급', '경쟁', '양극재 조달'
-  polarity: 1 | -1 // 1 동조 / -1 반대(경쟁·대체)
+  relation: string // 화면에 보여줄 관계 레이블 — '장비 공급', '경쟁', '양극재 조달'
+  relationType?: RelationType // SUPPLY_TO·BELONGS_TO 등은 생략(= 항상 동조)
 }
 ```
 
-`polarity: -1`이 핵심이다. 같은 뉴스에서 상승주와 하락주가 동시에 나오는 근거다.
+`relationType === 'COMPETITOR'`가 핵심이다. 같은 뉴스에서 상승주와 하락주가
+동시에 나오는 근거이며, 프론트는 이 값으로 극성(동조/반대)을 계산한다 —
+`polarity`라는 별도 필드를 서버에 요청하지 않는다(`lib/graphIndex.ts`의
+`polarityOf`).
 
 ---
 
@@ -183,14 +201,12 @@ GET /api/news/{id}/analysis
       "ticker": "042700",
       "direction": "UP",
       "relation": "장비 공급",
-      "chain": ["sk", "hanmi"],
     },
     {
       "nodeId": "ss",
       "name": "삼성전자",
       "direction": "DOWN",
       "relation": "경쟁 관계",
-      "chain": ["sk", "ss"],
     },
   ],
   "rationale": {
@@ -204,21 +220,56 @@ GET /api/news/{id}/analysis
 **주의**
 
 - `confidence` 같은 확률값은 받지도, 표시하지도 않는다
-- 영향의 크기는 `chain.length - 1` (hop 수)로만 표현한다
-- `chain`은 기점부터 대상까지의 노드 ID 배열. 그래프 배치와 애니메이션 순서가 전부 여기서 나온다
+- 그래프 경로(`chain`)는 이 응답에 없다 — §5.3 파급 경로 그래프에서 받는다.
+  hop 수는 그 응답의 노드/엣지를 기점부터 BFS로 펼쳐서 프론트가 계산한다
 - `rationale.propagation`은 서버가 그래프 경로에서 템플릿 생성한다
 - `title`/`sector`는 뉴스 목록(§5.1)이 페이지네이션되어 선택된 뉴스가 이미
   로드된 페이지에 없을 수 있으므로, 분석 패널이 목록을 다시 훑지 않고도
   헤더에 표시할 수 있게 여기 포함한다
 
-### 5.3 전체 그래프
+### 5.3 뉴스 파급 경로 그래프
+
+```
+GET /api/news/{id}/graph
+```
+
+```jsonc
+{
+  "newsId": "n1",
+  "originId": "sk",
+  "nodes": [
+    { "id": "sk", "name": "SK하이닉스", "kind": "STOCK", "ticker": "000660", "sector": "반도체", "marketCap": 1200000, "direction": "UP" },
+    { "id": "hanmi", "name": "한미반도체", "kind": "STOCK", "ticker": "042700", "sector": "반도체", "marketCap": 120000, "direction": "UP" },
+    { "id": "ss", "name": "삼성전자", "kind": "STOCK", "ticker": "005930", "sector": "반도체", "marketCap": 4600000, "direction": "DOWN" },
+  ],
+  "edges": [
+    { "id": "e2", "source": "sk", "target": "hanmi", "relation": "장비 공급" },
+    { "id": "e3", "source": "sk", "target": "ss", "relation": "경쟁", "relationType": "COMPETITOR" },
+  ],
+}
+```
+
+**주의**
+
+- 뉴스 클릭 시 그래프 패널이 그리는 서브그래프는 전부 이 응답에서 나온다 —
+  §5.2 analysis 응답과는 독립적으로 조회된다(`lib/queries.ts`의
+  `useNewsImpactGraphQuery`)
+- `direction`은 이 파급 경로에 포함된 노드에만 붙는다. CONCEPT 노드나 파급
+  경로 밖의 노드에는 없다
+- **좌표를 내려주지 않는다.** 배치는 `originId`에서 BFS로 계산한 hop
+  레벨을 기준으로 프론트가 동심원으로 계산한다(`lib/graphIndex.ts`의
+  `bfsBuild` + `lib/layout.ts`의 `radialLayout`)
+- 노드가 5개면 응답에도 5개만 온다 — 전체 온톨로지가 아니라 이 뉴스의
+  파급 경로에 해당하는 서브그래프만 내려준다
+
+### 5.4 전체 그래프
 
 ```
 GET /api/graph
 → { "nodes": OntologyNode[], "edges": OntologyEdge[] }
 ```
 
-### 5.4 관심종목 브리핑
+### 5.5 관심종목 브리핑
 
 ```
 POST /api/briefing
@@ -245,7 +296,7 @@ POST /api/briefing
 
 요청에 담는 `tickers`는 서버에 저장되지 않는다. 매번 클라이언트 메모리에서 보낸다.
 
-### 5.5 예측 검증 (news는 커서 기반 페이징)
+### 5.6 예측 검증 (news는 커서 기반 페이징)
 
 ```
 GET /api/verify?days=30&sector=반도체&cursor=v10&limit=10

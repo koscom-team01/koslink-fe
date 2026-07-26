@@ -3,6 +3,7 @@ import {
   getGraph,
   getNews,
   getNewsAnalysis,
+  getNewsImpactGraph,
   getVerify,
   runBriefing,
 } from '#/lib/api'
@@ -36,6 +37,15 @@ export const handlers = [
       return new HttpResponse(null, { status: 404 })
     }
     return HttpResponse.json(analysis)
+  }),
+
+  http.get('/api/news/:id/graph', async ({ params }) => {
+    await delay(250)
+    const impactGraph = getNewsImpactGraph(params.id as string)
+    if (!impactGraph) {
+      return new HttpResponse(null, { status: 404 })
+    }
+    return HttpResponse.json(impactGraph)
   }),
 
   http.get('/api/graph', async () => {

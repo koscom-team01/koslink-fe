@@ -23,7 +23,7 @@ function KoslinkApp() {
 
   if (view === 'verify') {
     return (
-      <main className="view">
+      <main className="view verify">
         <VerifyView />
       </main>
     )

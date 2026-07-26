@@ -309,9 +309,18 @@ body {
 }
 
 /* ── 예측 검증 레이아웃 (SC-02) ── */
+/* 뉴스맵(.map)과 동일하게 화면 높이에 딱 맞추고, 내부 카드에서만 스크롤되게 한다. */
+.verify {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--gnb-h) - 42px);
+  min-height: 640px;
+  overflow: hidden;
+}
 .vsumcard {
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
+  flex: none;
 }
 .vmets {
   border-right: 1px solid var(--n-100);
@@ -320,10 +329,11 @@ body {
   display: grid;
   grid-template-columns: 392px minmax(0, 1fr);
   gap: 14px;
-  align-items: start;
+  flex: 1;
+  min-height: 0;
 }
 .vlist {
-  max-height: 620px;
+  height: 100%;
 }
 
 @media (max-width: 1240px) {
@@ -336,10 +346,17 @@ body {
 }
 
 @media (max-width: 1080px) {
+  .verify {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
   .vsplit {
     grid-template-columns: minmax(0, 1fr);
+    flex: initial;
   }
   .vlist {
+    height: auto;
     max-height: 340px;
   }
   .vsumcard {
