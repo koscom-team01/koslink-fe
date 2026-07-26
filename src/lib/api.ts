@@ -155,6 +155,7 @@ export function getNewsImpactGraph(newsId: string): NewsImpactGraph | null {
   const nodeIds = new Set<string>([record.main.nodeId])
   const edgeById = new Map<string, OntologyEdge>()
   record.related.forEach((r) => {
+    nodeIds.add(r.nodeId)
     r.chain.forEach((id) => nodeIds.add(id))
     for (let i = 1; i < r.chain.length; i++) {
       const edge = findOntologyEdge(r.chain[i - 1], r.chain[i])
