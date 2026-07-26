@@ -7,7 +7,7 @@ export default function VerifyDetail({ entry }: { entry: VerifyEntry | null }) {
   if (!entry) {
     return (
       <div
-        className="rounded-2xl border bg-white p-16 text-center"
+        className="grid h-full place-items-center rounded-2xl border bg-white p-16 text-center"
         style={{
           borderColor: 'var(--n-150)',
           boxShadow: 'var(--shadow-md)',
@@ -34,11 +34,11 @@ export default function VerifyDetail({ entry }: { entry: VerifyEntry | null }) {
 
   return (
     <div
-      className="overflow-hidden rounded-2xl border bg-white"
+      className="flex h-full flex-col overflow-hidden rounded-2xl border bg-white"
       style={{ borderColor: 'var(--n-150)', boxShadow: 'var(--shadow-md)' }}
     >
       <div
-        className="border-b px-[22px] pt-5 pb-[18px]"
+        className="flex-none border-b px-[22px] pt-5 pb-[18px]"
         style={{ borderColor: 'var(--n-100)' }}
       >
         <div className="mb-[9px] flex items-center gap-1.5">
@@ -102,7 +102,7 @@ export default function VerifyDetail({ entry }: { entry: VerifyEntry | null }) {
         </div>
       </div>
 
-      <div className="px-3 pt-2 pb-4">
+      <div className="flex-1 overflow-y-auto px-3 pt-2 pb-4">
         <div
           className="flex items-center gap-2.5 px-2.5 pt-2.5 pb-2 text-[11px] font-bold"
           style={{ color: 'var(--n-400)' }}
