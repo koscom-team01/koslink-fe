@@ -393,6 +393,24 @@ body {
   }
 }
 
+/* 영향 기점 카드 — 뉴스 선택 후 계속 강조돼야 하는 요소. 그래프 origin 노드와 같은 톤(주황/딥애저)으로 은은하게 숨쉬듯 빛난다 */
+.origin-card-glow {
+  animation: koslink-card-glow 2.2s ease-in-out infinite;
+}
+@keyframes koslink-card-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px var(--glow-color),
+      0 4px 18px var(--glow-shadow);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px var(--glow-color),
+      0 8px 28px var(--glow-shadow);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
