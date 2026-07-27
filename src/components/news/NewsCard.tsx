@@ -1,5 +1,6 @@
 import type { MouseEvent } from 'react'
 import { useAtom } from 'jotai'
+import { Star } from 'lucide-react'
 import { cn } from '#/lib/utils'
 import { formatRelativeTime } from '#/lib/format'
 import { scrappedNewsIdsAtom } from '#/lib/atoms'
@@ -50,10 +51,14 @@ export default function NewsCard({ news, selected, onSelect }: NewsCardProps) {
         onClick={toggleScrap}
         aria-label={isScrapped ? '스크랩 해제' : '스크랩'}
         aria-pressed={isScrapped}
-        className="absolute top-2.5 right-2.5 text-xs font-bold"
+        className="absolute top-2.5 right-2.5"
         style={{ color: isScrapped ? 'var(--n-900)' : 'var(--n-300)' }}
       >
-        {isScrapped ? '★' : '☆'}
+        <Star
+          size={14}
+          strokeWidth={2}
+          fill={isScrapped ? 'currentColor' : 'none'}
+        />
       </button>
       <div className="line-clamp-2 pr-5 text-sm font-semibold leading-[1.45] tracking-[-0.022em]">
         {news.title}
