@@ -7,11 +7,9 @@ import type { BriefingResult } from '#/types'
  * 세션 메모리 전용이며 localStorage 등 영속 저장은 쓰지 않는다.
  */
 
-export const viewAtom = atom<'map' | 'verify'>('map')
+export const viewAtom = atom<'map' | 'network' | 'verify'>('map')
 
 export const selectedNewsIdAtom = atom<string | null>(null)
-
-export const graphModeAtom = atom<'focus' | 'all'>('focus')
 
 /** 전체 관계망에서 배치를 유지한 채 특정 노드 기점으로 제자리 강조할 때의 대상 */
 export const highlightedNodeAtom = atom<string | null>(null)
