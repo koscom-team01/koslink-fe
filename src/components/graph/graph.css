@@ -235,6 +235,10 @@
     stroke-width 0.3s,
     opacity 0.3s;
 }
+.ep.idle {
+  stroke: var(--n-500);
+  stroke-width: 2.4;
+}
 .ep.dim {
   opacity: 0.12;
 }
