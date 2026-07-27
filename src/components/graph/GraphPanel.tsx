@@ -11,12 +11,8 @@ import type { Node, NodeMouseHandler } from '@xyflow/react'
 import '@xyflow/react/dist/style.css' // 필수 — 빠뜨리면 노드가 겹쳐 보인다
 import { useAtom, useAtomValue } from 'jotai'
 import { cn } from '#/lib/utils'
-import {
-  graphModeAtom,
-  highlightedNodeAtom,
-  selectedNewsIdAtom,
-} from '#/lib/atoms'
-import { useGraphQuery, useNewsImpactGraphQuery } from '#/lib/queries'
+import { highlightedNodeAtom, selectedNewsIdAtom } from '#/lib/atoms'
+import { useNewsImpactGraphQuery } from '#/lib/queries'
 import { sizeOf } from '#/lib/format'
 import { fullLayout, graphIndex, radialLayout, tierOf } from '#/lib/layout'
 import type { LayoutPoint } from '#/lib/layout'
@@ -65,7 +61,7 @@ interface NodeSpec {
   badge: Direction | null
 }
 
-interface Scene2 {
+export interface Scene2 {
   ids: string[]
   positions: Record<string, LayoutPoint>
   nodes: NodeSpec[]
@@ -154,7 +150,7 @@ function buildFocusScene(impactGraph: NewsImpactGraph): Scene2 {
 }
 
 /** 전체 관계망: 섹터 3클러스터 고정 좌표. highlightId가 있으면 배치는 그대로 두고 그 자리에서 2단계 파급만 강조. */
-function buildAllScene(
+export function buildAllScene(
   highlightId: string | null,
   graph: { nodes: OntologyNode[]; edges: OntologyEdge[] },
 ): Scene2 {
@@ -257,13 +253,17 @@ function buildAllScene(
 
 interface GraphCanvasProps {
   scene2: Scene2
+  mode: 'focus' | 'all'
+  title?: string
 }
 
-function GraphCanvas({ scene2 }: GraphCanvasProps) {
+export function GraphCanvas({
+  scene2,
+  mode,
+  title = '관계 그래프',
+}: GraphCanvasProps) {
   const { zoomIn, zoomOut, fitView } = useReactFlow()
-  const [mode, setMode] = useAtom(graphModeAtom)
   const [highlightedNode, setHighlightedNode] = useAtom(highlightedNodeAtom)
-  const selectedNewsId = useAtomValue(selectedNewsIdAtom)
   const [hoverId, setHoverId] = useState<string | null>(null)
   const [tip, setTip] = useState<{
     x: number
@@ -465,30 +465,7 @@ function GraphCanvas({ scene2 }: GraphCanvasProps) {
   return (
     <>
       <div className="gbar">
-        <h2>관계 그래프</h2>
-        <div className="seg">
-          <button
-            type="button"
-            className={cn(mode === 'focus' && 'on')}
-            onClick={() => {
-              if (!selectedNewsId) return
-              setMode('focus')
-              setHighlightedNode(null)
-            }}
-          >
-            파급 경로
-          </button>
-          <button
-            type="button"
-            className={cn(mode === 'all' && 'on')}
-            onClick={() => {
-              setMode('all')
-              setHighlightedNode(null)
-            }}
-          >
-            전체 관계망
-          </button>
-        </div>
+        <h2>{title}</h2>
         {scene2.backchip && (
           <button type="button" className="backchip on" onClick={goBack}>
             {scene2.backchip}
@@ -606,30 +583,19 @@ function Legend({ mode }: { mode: 'focus' | 'all' }) {
 }
 
 export default function GraphPanel() {
-  const [mode, setMode] = useAtom(graphModeAtom)
-  const [highlightedNode, setHighlightedNode] = useAtom(highlightedNodeAtom)
   const selectedNewsId = useAtomValue(selectedNewsIdAtom)
-  const { data: graph } = useGraphQuery()
   const { data: impactGraph } = useNewsImpactGraphQuery(selectedNewsId)
 
-  // 뉴스가 바뀌면 제자리 강조 상태를 초기화하고 파급 경로 뷰로 돌아간다
-  useEffect(() => {
-    setHighlightedNode(null)
-    setMode('focus')
-  }, [selectedNewsId, setHighlightedNode, setMode])
-
   const scene2: Scene2 | null = useMemo(() => {
-    if (mode === 'all')
-      return graph ? buildAllScene(highlightedNode, graph) : null
     if (selectedNewsId && impactGraph) return buildFocusScene(impactGraph)
     return null
-  }, [mode, highlightedNode, selectedNewsId, graph, impactGraph])
+  }, [selectedNewsId, impactGraph])
 
   return (
     <section className="panel col-graph">
       <ReactFlowProvider>
         {scene2 ? (
-          <GraphCanvas scene2={scene2} />
+          <GraphCanvas scene2={scene2} mode="focus" />
         ) : (
           <div
             className="pbody flex items-center justify-center text-sm"

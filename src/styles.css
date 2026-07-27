@@ -308,6 +308,28 @@ body {
   }
 }
 
+/* ── 전체 관계망 큰 화면 (GNB "전체 관계망" 탭) ── */
+/* .map/.verify와 동일하게 화면 높이에 맞추고, 그래프 패널 하나가 전체 폭을 채운다. */
+.network {
+  display: flex;
+  height: calc(100vh - var(--gnb-h) - 42px);
+  min-height: 640px;
+}
+.network .panel {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 1080px) {
+  .network {
+    height: auto;
+    min-height: 0;
+  }
+  .network .panel {
+    min-height: 560px;
+  }
+}
+
 /* ── 예측 검증 레이아웃 (SC-02) ── */
 /* 뉴스맵(.map)과 동일하게 화면 높이에 딱 맞추고, 내부 카드에서만 스크롤되게 한다. */
 .verify {

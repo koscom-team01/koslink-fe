@@ -9,6 +9,7 @@ import BriefingSheet from '#/components/briefing/BriefingSheet'
 import NewsPanel from '#/components/news/NewsPanel'
 import MobileNewsBar from '#/components/news/MobileNewsBar'
 import GraphPanel from '#/components/graph/GraphPanel'
+import NetworkView from '#/components/graph/NetworkView'
 import AnalysisPanel from '#/components/analysis/AnalysisPanel'
 import VerifyView from '#/components/verify/VerifyView'
 
@@ -34,6 +35,10 @@ function KoslinkApp() {
       {view === 'verify' ? (
         <main className="view verify">
           <VerifyView />
+        </main>
+      ) : view === 'network' ? (
+        <main className="view network">
+          <NetworkView />
         </main>
       ) : (
         <main className="view map">
