@@ -26,8 +26,8 @@ export default function NewsList() {
       <div className="flex flex-col gap-1.5 px-3 pt-2 pb-4">
         {news.length === 0 && (
           <p
-            className="px-2 py-8 text-center text-sm"
-            style={{ color: 'var(--n-500)' }}
+            className="px-2 py-8 text-center text-sm font-medium"
+            style={{ color: 'var(--n-600)' }}
           >
             뉴스가 없습니다
           </p>
@@ -46,8 +46,8 @@ export default function NewsList() {
         {hasNextPage && (
           <div
             ref={sentinelRef}
-            className="py-3 text-center text-xs"
-            style={{ color: 'var(--n-400)' }}
+            className="py-3 text-center text-xs font-medium"
+            style={{ color: 'var(--n-500)' }}
           >
             {isFetchingNextPage ? '더 불러오는 중…' : ''}
           </div>

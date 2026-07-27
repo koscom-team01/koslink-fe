@@ -48,7 +48,7 @@ export default function ScrapSheet() {
             스크랩
           </SheetTitle>
           <SheetDescription
-            className="text-[12.5px] leading-[1.55]"
+            className="text-[12.5px] leading-[1.55] font-medium"
             style={{ color: 'var(--n-500)' }}
           >
             저장한 뉴스를 모아봅니다. 새로고침하면 사라집니다.
@@ -58,8 +58,8 @@ export default function ScrapSheet() {
         <div className="flex-1 overflow-y-auto px-[22px] py-[18px]">
           {scrappedNews.length === 0 ? (
             <div
-              className="rounded-[10px] px-3 py-2.5 text-xs"
-              style={{ background: 'var(--n-50)', color: 'var(--n-500)' }}
+              className="rounded-[10px] px-3 py-2.5 text-xs font-medium"
+              style={{ background: 'var(--n-50)', color: 'var(--n-600)' }}
             >
               뉴스 카드의 ☆ 아이콘을 눌러 스크랩해 보세요.
             </div>
@@ -71,13 +71,13 @@ export default function ScrapSheet() {
                 style={{ borderColor: 'var(--n-150)' }}
               >
                 <p
-                  className="text-[12.5px] leading-[1.5] font-semibold"
-                  style={{ color: 'var(--n-800)' }}
+                  className="text-[12.5px] leading-[1.5] font-bold"
+                  style={{ color: 'var(--n-900)' }}
                 >
                   {n.title}
                 </p>
                 <p
-                  className="mt-1.5 text-[11.5px]"
+                  className="mt-1.5 text-[11.5px] font-medium"
                   style={{ color: 'var(--n-500)' }}
                 >
                   {n.press} · {formatRelativeTime(n.publishedAt)}
@@ -87,7 +87,10 @@ export default function ScrapSheet() {
                     type="button"
                     onClick={() => goToNews(n.id)}
                     className="flex-1 rounded-[9px] border py-2.5 text-[12.5px] font-bold"
-                    style={{ borderColor: 'var(--n-200)', color: 'var(--n-600)' }}
+                    style={{
+                      borderColor: 'var(--n-200)',
+                      color: 'var(--n-600)',
+                    }}
                   >
                     이 뉴스의 파급 경로 보기 →
                   </button>
@@ -96,7 +99,10 @@ export default function ScrapSheet() {
                     onClick={() => removeScrap(n.id)}
                     aria-label="스크랩 해제"
                     className="rounded-[9px] border px-3 text-[12.5px] font-bold"
-                    style={{ borderColor: 'var(--n-200)', color: 'var(--o-600)' }}
+                    style={{
+                      borderColor: 'var(--n-200)',
+                      color: 'var(--o-600)',
+                    }}
                   >
                     ×
                   </button>

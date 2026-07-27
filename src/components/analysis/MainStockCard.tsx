@@ -37,7 +37,7 @@ function OriginCard({ stock }: { stock: OriginStock }) {
         {impactOf(0).label}
       </span>
       <p
-        className="mt-[11px] text-[12.5px] leading-[1.55] tracking-[-0.022em]"
+        className="mt-[11px] text-[12.5px] leading-[1.55] font-medium tracking-[-0.022em]"
         style={{ color: text }}
       >
         {stock.reason}

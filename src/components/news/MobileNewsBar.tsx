@@ -46,7 +46,7 @@ export default function MobileNewsBar() {
           <span className="mb-[5px] flex items-center gap-[7px]">
             <span
               className="text-[11.5px] font-bold after:ml-0.5 after:content-['▾']"
-              style={{ color: 'var(--n-500)' }}
+              style={{ color: 'var(--n-600)' }}
             >
               {index >= 0 ? index + 1 : 0} / {list.length}
             </span>

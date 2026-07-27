@@ -60,11 +60,14 @@ export default function NewsCard({ news, selected, onSelect }: NewsCardProps) {
           fill={isScrapped ? 'currentColor' : 'none'}
         />
       </button>
-      <div className="line-clamp-2 pr-5 text-sm font-semibold leading-[1.45] tracking-[-0.022em]">
+      <div className="line-clamp-2 pr-5 text-sm font-bold leading-[1.45] tracking-[-0.022em]">
         {news.title}
       </div>
-      <div className="mt-[7px] text-xs" style={{ color: 'var(--n-500)' }}>
-        <b className="font-medium" style={{ color: 'var(--n-600)' }}>
+      <div
+        className="mt-[7px] text-xs font-medium"
+        style={{ color: 'var(--n-500)' }}
+      >
+        <b className="font-semibold" style={{ color: 'var(--n-600)' }}>
           {news.press}
         </b>{' '}
         · {formatRelativeTime(news.publishedAt)}

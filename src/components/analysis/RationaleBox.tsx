@@ -20,7 +20,7 @@ export default function RationaleBox({
         최종 요약
       </h3>
       <p
-        className="text-[12.5px] leading-[1.62] tracking-[-0.022em]"
+        className="text-[12.5px] leading-[1.62] font-medium tracking-[-0.022em]"
         style={{ color: 'var(--n-700)' }}
       >
         {finalSummary}

@@ -46,7 +46,7 @@ export default function AnalysisPanel() {
             >
               뉴스를 선택해 주세요
             </b>
-            <p className="text-[13px] leading-[1.6]">
+            <p className="text-[13px] leading-[1.6] font-medium">
               선택한 뉴스가 어떤 종목까지
               <br />
               이어지는지 단계별로 보여드립니다
@@ -119,7 +119,7 @@ export default function AnalysisPanel() {
             >
               <div
                 className="mb-[9px] text-[11.5px] font-bold"
-                style={{ color: 'var(--n-500)' }}
+                style={{ color: 'var(--n-600)' }}
               >
                 영향 기점
               </div>

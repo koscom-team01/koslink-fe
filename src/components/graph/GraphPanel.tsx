@@ -599,8 +599,8 @@ export default function GraphPanel() {
           <GraphCanvas scene2={scene2} mode="focus" />
         ) : (
           <div
-            className="pbody flex items-center justify-center text-sm"
-            style={{ color: 'var(--n-500)' }}
+            className="pbody flex items-center justify-center text-sm font-medium"
+            style={{ color: 'var(--n-600)' }}
           >
             뉴스를 선택하면 파급 경로가 나타납니다
           </div>

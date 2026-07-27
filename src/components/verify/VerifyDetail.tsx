@@ -20,7 +20,7 @@ export default function VerifyDetail({ entry }: { entry: VerifyEntry | null }) {
         >
           선택된 뉴스가 없습니다
         </b>
-        <p className="text-[13px] leading-[1.6]">
+        <p className="text-[13px] leading-[1.6] font-medium">
           왼쪽 목록에서 뉴스를 골라 주세요
         </p>
       </div>
@@ -48,7 +48,10 @@ export default function VerifyDetail({ entry }: { entry: VerifyEntry | null }) {
           >
             {entry.sector}
           </span>
-          <span className="text-xs" style={{ color: 'var(--n-500)' }}>
+          <span
+            className="text-xs font-medium"
+            style={{ color: 'var(--n-500)' }}
+          >
             {entry.date} 예측 · 익일 종가로 평가
           </span>
         </div>
@@ -90,7 +93,7 @@ export default function VerifyDetail({ entry }: { entry: VerifyEntry | null }) {
             </b>
           </div>
           <div
-            className="text-[13px] leading-[1.55] tracking-[-0.022em]"
+            className="text-[13px] leading-[1.55] font-medium tracking-[-0.022em]"
             style={{ color: 'var(--o-700)' }}
           >
             예측한 <b className="font-extrabold">{entry.items.length}종목</b>{' '}
@@ -105,7 +108,7 @@ export default function VerifyDetail({ entry }: { entry: VerifyEntry | null }) {
       <div className="flex-1 overflow-y-auto px-3 pt-2 pb-4">
         <div
           className="flex items-center gap-2.5 px-2.5 pt-2.5 pb-2 text-[11px] font-bold"
-          style={{ color: 'var(--n-400)' }}
+          style={{ color: 'var(--n-600)' }}
         >
           <span className="flex-1">종목 · 관계 경로</span>
           <span className="w-14">예측</span>
@@ -122,7 +125,7 @@ export default function VerifyDetail({ entry }: { entry: VerifyEntry | null }) {
               {item.name}
               <i
                 className="mt-[3px] block text-[11px] font-medium not-italic"
-                style={{ color: 'var(--n-400)' }}
+                style={{ color: 'var(--n-500)' }}
               >
                 {item.pathLabel}
               </i>
@@ -138,7 +141,9 @@ export default function VerifyDetail({ entry }: { entry: VerifyEntry | null }) {
             </span>
             <span
               className="w-[68px] text-right text-[13.5px] font-extrabold"
-              style={{ color: item.actualReturn >= 0 ? '#DD5410' : '#0A5878' }}
+              style={{
+                color: item.actualReturn >= 0 ? 'var(--o-600)' : 'var(--d-600)',
+              }}
             >
               {item.actualReturn > 0 ? '+' : ''}
               {item.actualReturn.toFixed(2)}%

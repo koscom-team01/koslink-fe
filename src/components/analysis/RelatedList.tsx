@@ -38,7 +38,7 @@ export default function RelatedList({
     <div>
       <div
         className="mb-[9px] text-[11.5px] font-bold"
-        style={{ color: 'var(--n-500)' }}
+        style={{ color: 'var(--n-600)' }}
       >
         관계로 이어진 종목 {relatedStocks.length}
       </div>
@@ -93,14 +93,14 @@ export default function RelatedList({
                 관계
               </div>
               <div
-                className="mt-[7px] text-[11.5px]"
-                style={{ color: 'var(--n-400)' }}
+                className="mt-[7px] text-[11.5px] font-medium"
+                style={{ color: 'var(--n-500)' }}
               >
                 {r.relationPath}
               </div>
               <div
                 className="mt-2 flex items-center gap-1 text-[11px] font-medium"
-                style={{ color: isExpanded ? 'var(--n-600)' : 'var(--n-400)' }}
+                style={{ color: isExpanded ? 'var(--n-600)' : 'var(--n-500)' }}
               >
                 <span>{isExpanded ? '근거 접기' : '근거 보기'}</span>
                 <ChevronDown
@@ -114,7 +114,7 @@ export default function RelatedList({
               </div>
               {isExpanded && (
                 <div
-                  className="mt-2.5 animate-in fade-in-0 slide-in-from-top-1 rounded-lg px-3 py-2.5 text-[12px] leading-[1.55] duration-200"
+                  className="mt-2.5 animate-in fade-in-0 slide-in-from-top-1 rounded-lg px-3 py-2.5 text-[12px] leading-[1.55] font-medium duration-200"
                   style={{ background: 'var(--n-50)', color: 'var(--n-700)' }}
                 >
                   {r.propagation}
