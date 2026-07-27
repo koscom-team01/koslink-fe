@@ -321,18 +321,23 @@ export default function CoverScreen({ onEnter }: CoverScreenProps) {
     const dust = new THREE.Points(pGeo, dustMaterial)
     scene.add(dust)
 
-    /* 타이밍 */
-    const T_TIER = [0.4, 1.6, 3.2, 4.8]
-    const GROW = 0.9
+    /* 타이밍 — 노드/엣지가 자라나는 도입부 전체를 이 배율로 압축한다
+     * (1.0 = 원본 속도, 작을수록 빠르게 진행). 이 상수 하나만 바꾸면
+     * 티어 등장 간격·성장 시간·타이틀 등장 시점·카메라 접근까지 함께 빨라진다. */
+    const INTRO_SPEED = 0.65
+    const T_TIER = [0.4, 1.6, 3.2, 4.8].map((t) => t * INTRO_SPEED)
+    const GROW = 0.9 * INTRO_SPEED
     nodes.forEach((n, i) => {
-      n.birth = T_TIER[n.tier] + ((i * 0.05) % 0.9)
+      n.birth =
+        T_TIER[n.tier] + ((i * 0.05 * INTRO_SPEED) % (0.9 * INTRO_SPEED))
       n.scaleCur = 0
       n.cur = n.p.clone()
       n.flash = 0
       n.rphase = Math.random() * 6.28
     })
     edges.forEach((e) => {
-      e.birth = Math.max(nodes[e.a].birth, nodes[e.b].birth) + 0.05
+      e.birth =
+        Math.max(nodes[e.a].birth, nodes[e.b].birth) + 0.05 * INTRO_SPEED
     })
 
     /* ── 노드 = 라운드 처리된 3D 박스 (ExtrudeGeometry 베벨) ── */
@@ -479,7 +484,7 @@ export default function CoverScreen({ onEnter }: CoverScreenProps) {
       return 1 + 2.9 * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2)
     }
 
-    const TEXT_AT = 6.2
+    const TEXT_AT = 6.2 * INTRO_SPEED
     function showEl(el: HTMLElement, ms: number) {
       schedule(() => {
         el.style.transition =
@@ -542,7 +547,7 @@ export default function CoverScreen({ onEnter }: CoverScreenProps) {
 
       /* 시네마틱 카메라 (노드 빌보드보다 먼저 계산) */
       if (!entered) {
-        const approach = eIO(clamp(t / 6.5))
+        const approach = eIO(clamp(t / (6.5 * INTRO_SPEED)))
         const dist = 27 - approach * 8
         const ang = t * 0.085
         const height = Math.sin(t * 0.14) * 2.3
@@ -551,7 +556,7 @@ export default function CoverScreen({ onEnter }: CoverScreenProps) {
           height,
           Math.cos(ang * 0.6) * dist,
         )
-        const rec = eIO(clamp((t - TEXT_AT) / 1.2))
+        const rec = eIO(clamp((t - TEXT_AT) / (1.2 * INTRO_SPEED)))
         cam.position.z += rec * 4
         cam.position.y += rec * 0.8
         cam.lookAt(0, rec * 0.4, 0)
@@ -589,7 +594,7 @@ export default function CoverScreen({ onEnter }: CoverScreenProps) {
       edges.forEach((e, i) => {
         const na = nodes[e.a]
         const nb = nodes[e.b]
-        const k = eOut(clamp((t - e.birth) / 0.6))
+        const k = eOut(clamp((t - e.birth) / (0.6 * INTRO_SPEED)))
         endE.copy(na.cur).lerp(nb.cur, k)
         dirE.subVectors(endE, na.cur)
         const len = dirE.length()
@@ -615,7 +620,7 @@ export default function CoverScreen({ onEnter }: CoverScreenProps) {
       edges.forEach((e, idx) => {
         const na = nodes[e.a]
         const nb = nodes[e.b]
-        const born = clamp((t - e.birth) / 0.6)
+        const born = clamp((t - e.birth) / (0.6 * INTRO_SPEED))
         const u = (t * 0.32 + idx * 0.13) % 1
         vc.copy(na.cur).lerp(nb.cur, u * born)
         flowPos[fi++] = vc.x
@@ -623,9 +628,11 @@ export default function CoverScreen({ onEnter }: CoverScreenProps) {
         flowPos[fi++] = vc.z
       })
       flowGeo.attributes.position.needsUpdate = true
-      flowMaterial.opacity = clamp((t - 2.0) / 2) * 0.9
+      flowMaterial.opacity =
+        clamp((t - 2.0 * INTRO_SPEED) / (2 * INTRO_SPEED)) * 0.9
 
-      dustMaterial.opacity = clamp((t - 1.0) / 2) * 0.72
+      dustMaterial.opacity =
+        clamp((t - 1.0 * INTRO_SPEED) / (2 * INTRO_SPEED)) * 0.72
 
       /* 진입 → 중심으로 돌진, 블러 해제 후 화이트아웃 */
       if (entered) {
