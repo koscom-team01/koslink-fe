@@ -1,0 +1,54 @@
+name: Koslink Frontend CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Build and Push Docker Image
+      run: |
+        REGISTRY="harbor.hwangonjang.com"
+        PROJECT="library"
+        IMAGE_NAME="koslink-frontend"
+        IMAGE_TAG="${{ github.run_number }}"
+        IMAGE_FULL_NAME="${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+        # [임시 백엔드 URL] 사용자 변경 포인트 3
+        # 백엔드 URL 수정이 필요할 경우 아래 --build-arg 값(http://koslink-api.hwangonjang.com)을 수정하세요.
+        echo "Building image: $IMAGE_FULL_NAME"
+        docker build --build-arg VITE_API_BASE_URL="http://koslink-api.hwangonjang.com" -t "$IMAGE_FULL_NAME" .
+
+        echo "Logging into Harbor..."
+        docker login "$REGISTRY" -u admin -p Harbor12345
+
+        echo "Pushing image to Harbor..."
+        docker push "$IMAGE_FULL_NAME"
+
+        # 다음 스텝(GitOps 갱신)에 새 태그 넘기기
+        echo "NEW_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+
+    # GitOps 레포지토리(kosops)의 매니페스트 이미지 태그 업데이트
+    - name: Update GitOps Repository Image Tag
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "koscom Bot"
+        
+        # kosops 레포지토리 클론
+        git clone https://x-access-token:${{ secrets.KOSOPS_PAT }}@github.com/koscom-team01/kosops.git gitops-repo
+        cd gitops-repo
+        
+        # koslink-frontend-app.yaml 파일의 이미지 태그 업데이트
+        sed -i "s/tag: .*/tag: ${{ env.NEW_TAG }}/g" gitops/apps/koslink-frontend-app.yaml
+        
+        # 변경사항 커밋 & 푸시
+        git add gitops/apps/koslink-frontend-app.yaml
+        git commit -m "chore(gitops): update koslink-frontend image tag to ${{ env.NEW_TAG }} [skip ci]"
+        git push origin main
