@@ -13,10 +13,8 @@ RUN pnpm install --frozen-lockfile
 # 소스 코드 복사
 COPY . .
 
-# [임시 백엔드 URL] 사용자 변경 포인트 2
-# 빌드 시 VITE_API_BASE_URL 환경 변수가 전달되면 MSW 대신 해당 백엔드 주소를 사용합니다.
-# 기본값으로 http://koslink-api.hwangonjang.com 설정 (상대 경로인 /api 사용 시 빈 값 가능)
-ARG VITE_API_BASE_URL=http://koslink-api.hwangonjang.com
+# 쿠버네티스 Nginx 프록시(/api/)를 거치도록 기본값 설정
+ARG VITE_API_BASE_URL=/api
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 # 정적 번들 빌드 (/app/dist 가 생성됨)
