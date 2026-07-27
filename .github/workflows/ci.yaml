@@ -47,7 +47,7 @@ jobs:
         # koslink-frontend-app.yaml 파일의 이미지 태그 업데이트
         sed -i "s/tag: .*/tag: ${{ env.NEW_TAG }}/g" gitops/apps/koslink-frontend-app.yaml
         
-        # 변경사항 커밋 & 푸시
+        # 변경사항 커밋 & 푸시 (인증 토큰 명시)
         git add gitops/apps/koslink-frontend-app.yaml
         git commit -m "chore(gitops): update koslink-frontend image tag to ${{ env.NEW_TAG }} [skip ci]"
-        git push origin main
+        git push https://x-access-token:${{ secrets.KOSOPS_PAT }}@github.com/koscom-team01/kosops.git main
