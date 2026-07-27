@@ -167,6 +167,25 @@ body {
   color: var(--n-500);
   margin-top: 3px;
 }
+.phead-refresh {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  color: var(--n-500);
+}
+.phead-refresh:hover {
+  background: var(--n-100);
+  color: var(--n-900);
+}
+.phead-refresh:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
 .pbody {
   flex: 1;
   overflow-y: auto;
@@ -296,6 +315,9 @@ body {
   }
   .sheet-x:hover {
     background: var(--n-100);
+  }
+  .phead-refresh {
+    right: 50px;
   }
 }
 

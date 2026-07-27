@@ -1,6 +1,9 @@
+import { useIsFetching, useQueryClient } from '@tanstack/react-query'
 import { useAtom } from 'jotai'
+import { RefreshCw } from 'lucide-react'
 import { cn } from '#/lib/utils'
 import { newsSheetOpenAtom } from '#/lib/atoms'
+import { queryKeys } from '#/lib/queries'
 import NewsList from './NewsList'
 
 /**
@@ -10,6 +13,8 @@ import NewsList from './NewsList'
  */
 export default function NewsPanel() {
   const [sheetOpen, setSheetOpen] = useAtom(newsSheetOpenAtom)
+  const queryClient = useQueryClient()
+  const isRefreshing = useIsFetching({ queryKey: queryKeys.news() }) > 0
 
   return (
     <section className={cn('panel col-news', sheetOpen && 'open')}>
@@ -17,6 +22,17 @@ export default function NewsPanel() {
       <div className="phead">
         <h2>최신 뉴스</h2>
         <p>뉴스를 선택하면 영향받는 종목이 나타납니다</p>
+        <button
+          type="button"
+          className="phead-refresh"
+          onClick={() =>
+            queryClient.invalidateQueries({ queryKey: queryKeys.news() })
+          }
+          disabled={isRefreshing}
+          aria-label="최신 뉴스 새로고침"
+        >
+          <RefreshCw size={15} className={cn(isRefreshing && 'animate-spin')} />
+        </button>
         <button
           type="button"
           className="sheet-x"
