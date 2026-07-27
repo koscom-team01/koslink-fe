@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { ChevronDown } from 'lucide-react'
+import { cn } from '#/lib/utils'
 import { arrow, directionLabel, impactOf } from '#/lib/format'
 import { bfsBuild, buildGraphIndex } from '#/lib/graphIndex'
 import type { NewsImpactGraph, RelatedStock } from '#/types'
@@ -51,8 +53,15 @@ export default function RelatedList({
               key={r.ticker}
               type="button"
               onClick={() => setExpanded(isExpanded ? null : r.ticker)}
-              className="rounded-xl border px-[13px] py-3 text-left"
-              style={{ borderColor: 'var(--n-150)' }}
+              className={cn(
+                'rounded-xl border px-[13px] py-3 text-left transition-colors duration-200',
+                !isExpanded &&
+                  'hover:border-[var(--n-300)] hover:bg-[var(--n-25)]',
+              )}
+              style={{
+                borderColor: isExpanded ? 'var(--n-300)' : 'var(--n-150)',
+                background: isExpanded ? 'var(--n-25)' : 'transparent',
+              }}
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-bold tracking-[-0.025em]">
@@ -89,9 +98,23 @@ export default function RelatedList({
               >
                 {r.relationPath}
               </div>
+              <div
+                className="mt-2 flex items-center gap-1 text-[11px] font-medium"
+                style={{ color: isExpanded ? 'var(--n-600)' : 'var(--n-400)' }}
+              >
+                <span>{isExpanded ? '근거 접기' : '근거 보기'}</span>
+                <ChevronDown
+                  size={12}
+                  strokeWidth={2.5}
+                  className={cn(
+                    'transition-transform duration-200',
+                    isExpanded && 'rotate-180',
+                  )}
+                />
+              </div>
               {isExpanded && (
                 <div
-                  className="mt-2.5 rounded-lg px-3 py-2.5 text-[12px] leading-[1.55]"
+                  className="mt-2.5 animate-in fade-in-0 slide-in-from-top-1 rounded-lg px-3 py-2.5 text-[12px] leading-[1.55] duration-200"
                   style={{ background: 'var(--n-50)', color: 'var(--n-700)' }}
                 >
                   {r.propagation}
