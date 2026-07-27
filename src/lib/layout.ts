@@ -47,9 +47,7 @@ export function radialLayout(
 }
 
 const SECTOR_CENTERS: Record<string, LayoutPoint> = {
-  반도체: { x: -820, y: -60 },
-  '2차전지': { x: 760, y: -100 },
-  방산: { x: -40, y: 660 },
+  반도체: { x: 0, y: 0 },
 }
 
 export interface FullLayout {
@@ -58,8 +56,8 @@ export interface FullLayout {
 }
 
 /**
- * 섹터 3클러스터 고정 좌표. 클러스터 안은 연결 수 내림차순 동심원.
- * 호출부(GraphPanel)에서 useMemo로 캐시해 뷰 전환 시 재계산되지 않게 한다.
+ * 섹터별 고정 좌표(현재는 반도체 단일 클러스터, 중앙 배치). 클러스터 안은 연결 수
+ * 내림차순 동심원. 호출부(GraphPanel)에서 useMemo로 캐시해 뷰 전환 시 재계산되지 않게 한다.
  */
 export function fullLayout(): FullLayout {
   const pos: Record<string, LayoutPoint> = {}
