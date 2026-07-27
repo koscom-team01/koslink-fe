@@ -71,7 +71,7 @@ export default function AnalysisPanel() {
                 {impact.newsSummary.map((line, i) => (
                   <p
                     key={i}
-                    className="flex gap-2 text-[13px] leading-[1.6] tracking-[-0.022em]"
+                    className="flex gap-2 text-[13px] leading-[1.6] tracking-[-0.022em] font-medium"
                     style={{ color: 'var(--n-700)' }}
                   >
                     <b
