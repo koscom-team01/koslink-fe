@@ -21,10 +21,9 @@ jobs:
         IMAGE_TAG="${{ github.run_number }}"
         IMAGE_FULL_NAME="${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${IMAGE_TAG}"
 
-        # [임시 백엔드 URL] 사용자 변경 포인트 3
-        # 백엔드 URL 수정이 필요할 경우 아래 --build-arg 값(http://koslink-api.hwangonjang.com)을 수정하세요.
+        # 쿠버네티스 Nginx 프록시(/api/)로 빌드
         echo "Building image: $IMAGE_FULL_NAME"
-        docker build --build-arg VITE_API_BASE_URL="http://koslink-api.hwangonjang.com" -t "$IMAGE_FULL_NAME" .
+        docker build --build-arg VITE_API_BASE_URL="/api" -t "$IMAGE_FULL_NAME" .
 
         echo "Logging into Harbor..."
         docker login "$REGISTRY" -u admin -p Harbor12345
