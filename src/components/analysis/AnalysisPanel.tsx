@@ -60,7 +60,7 @@ export default function AnalysisPanel() {
             >
               <div
                 className="mb-[9px] text-[11.5px] font-bold"
-                style={{ color: 'var(--n-500)' }}
+                style={{ color: 'var(--n-600)' }}
               >
                 기사 요약
               </div>
@@ -72,11 +72,11 @@ export default function AnalysisPanel() {
                   <p
                     key={i}
                     className="flex gap-2 text-[13px] leading-[1.6] tracking-[-0.022em]"
-                    style={{ color: 'var(--n-600)' }}
+                    style={{ color: 'var(--n-700)' }}
                   >
                     <b
                       className="flex-none font-bold"
-                      style={{ color: 'var(--n-400)' }}
+                      style={{ color: 'var(--n-700)' }}
                     >
                       {i + 1}
                     </b>
@@ -86,7 +86,7 @@ export default function AnalysisPanel() {
               </div>
               <div
                 className="mt-2.5 flex items-center gap-[7px] text-xs"
-                style={{ color: 'var(--n-500)' }}
+                style={{ color: 'var(--n-600)' }}
               >
                 <b className="font-semibold" style={{ color: 'var(--n-600)' }}>
                   {impact.source.press}
