@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react'
 import { arrow, directionLabel, impactOf } from '#/lib/format'
 import type { OriginStock } from '#/types'
 
@@ -8,21 +7,11 @@ function OriginCard({ stock }: { stock: OriginStock }) {
   const tint = down ? 'var(--d-50)' : 'var(--o-50)'
   const text = down ? 'var(--d-700)' : 'var(--o-700)'
   const border = down ? 'var(--d-100)' : 'var(--o-200)'
-  const glowShadow = down
-    ? 'rgba(14, 110, 150, 0.35)'
-    : 'rgba(242, 103, 34, 0.35)'
 
   return (
     <div
       className="origin-card-glow rounded-[15px] border-2 px-4 py-[15px]"
-      style={
-        {
-          borderColor: accent,
-          background: tint,
-          '--glow-color': accent,
-          '--glow-shadow': glowShadow,
-        } as CSSProperties
-      }
+      style={{ borderColor: accent, background: tint }}
     >
       <div className="flex items-center justify-between gap-2.5">
         <div className="text-lg font-extrabold tracking-[-0.035em]">
