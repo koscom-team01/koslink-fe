@@ -8,7 +8,7 @@ import type {
 } from '#/types'
 
 /**
- * docs/koslink.html의 정적 데모 데이터를 그대로 포팅한 것.
+ * docs/koslink.html의 정적 데모 데이터를 포팅 + 확장한 것.
  * 백엔드가 없는 지금은 lib/api.ts가 이 파일을 동기적으로 읽어 응답 모양을 만든다.
  * 실 API가 준비되면 lib/api.ts 내부만 fetch로 바꾸면 되고, 이 파일과 컴포넌트는
  * 그대로 유지할 수 있다.
@@ -144,1115 +144,756 @@ export const ONTOLOGY_EDGES: OntologyEdge[] = RAW_EDGES.map(
   }),
 )
 
+/**
+ * 뉴스 목록/impact 응답을 만들기 위한 내부 표현.
+ * `chain`은 파급 경로 그래프(노드/엣지) 산출에만 쓰고, 응답의 relation_path/propagation
+ * 텍스트는 lib/api.ts가 이 체인에서 템플릿으로 생성한다(§5.2 설계 노트와 동일한 방식).
+ */
 export interface NewsRecord {
-  id: string
-  sector: string
+  id: number
   title: string
   press: string
   publishedAt: string // ISO
-  relativeTime: string // '12분 전' 등 — 정적 데모 데이터 전용 표기
-  originUrl: string
+  url: string
   summary: string[] // 3줄
-  main: { nodeId: string; direction: Direction; reason: string }
-  related: {
+  originStocks: { nodeId: string; direction: Direction; reason: string }[]
+  relatedStocks: {
     nodeId: string
     direction: Direction
-    relation: string
+    relationLabel: string
     chain: string[]
   }[]
-  rationale: { event: string; propagation: string; precedent: string }
 }
 
 const TODAY = '2026-07-20'
 
-export const NEWS_RECORDS: NewsRecord[] = [
+/** 데모 안전장치(§11) — 상세 서사를 손으로 쓴 뉴스 25건. 항상 번들에 포함된다. */
+const CURATED_NEWS: NewsRecord[] = [
   {
-    id: 'n1',
-    sector: '반도체',
+    id: 10001,
     title: 'SK하이닉스, HBM4 양산 위해 청주 M15X 증설 확정… 2027년 가동',
     press: '연합뉴스',
     publishedAt: `${TODAY}T09:12:00+09:00`,
-    relativeTime: '12분 전',
-    originUrl: 'https://www.yna.co.kr/',
+    url: 'https://www.yna.co.kr/',
     summary: [
       'SK하이닉스가 청주 M15X 공장 증설 투자를 확정했다고 공시했다.',
       'HBM4 양산 대응이 목적이며 2027년 상반기 가동이 목표다.',
       '장비 발주는 올해 4분기부터 순차 집행될 예정이다.',
     ],
-    main: {
-      nodeId: 'sk',
-      direction: 'UP',
-      reason: 'HBM4 증설 발표로 생산능력이 직접 확대되는 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'hanmi',
+        nodeId: 'sk',
         direction: 'UP',
-        relation: '장비 공급',
-        chain: ['sk', 'hanmi'],
-      },
-      {
-        nodeId: 'hpsp',
-        direction: 'UP',
-        relation: '고압 어닐링 장비',
-        chain: ['sk', 'hpsp'],
-      },
-      {
-        nodeId: 'wonik',
-        direction: 'UP',
-        relation: '증착 장비',
-        chain: ['sk', 'wonik'],
-      },
-      {
-        nodeId: 'ss',
-        direction: 'DOWN',
-        relation: '경쟁 관계',
-        chain: ['sk', 'ss'],
+        reason: 'HBM4 증설 발표로 생산능력이 직접 확대되는 당사자',
       },
     ],
-    rationale: {
-      event: 'SK하이닉스가 HBM4 대응 목적의 청주 M15X 증설을 확정',
-      propagation:
-        '장비를 대는 <b>한미반도체 · HPSP · 원익IPS</b>에는 수주 확대 요인, 같은 시장에서 겨루는 <b>삼성전자</b>에는 점유율 압박 요인',
-      precedent:
-        '동일 유형 증설 공시 5건 중 4건에서 장비주가 익일 평균 <b>+3.1%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'hanmi', direction: 'UP', relationLabel: '장비 공급', chain: ['sk', 'hanmi'] },
+      { nodeId: 'hpsp', direction: 'UP', relationLabel: '고압 어닐링 장비', chain: ['sk', 'hpsp'] },
+      { nodeId: 'wonik', direction: 'UP', relationLabel: '증착 장비', chain: ['sk', 'wonik'] },
+      { nodeId: 'ss', direction: 'DOWN', relationLabel: '경쟁 관계', chain: ['sk', 'ss'] },
+    ],
   },
   {
-    id: 'n2',
-    sector: '반도체',
+    id: 10002,
     title: '엔비디아, 차세대 AI 가속기 물량 30% 상향… 메모리 조달 확대',
     press: '전자신문',
     publishedAt: `${TODAY}T08:36:00+09:00`,
-    relativeTime: '48분 전',
-    originUrl: 'https://www.etnews.com/',
+    url: 'https://www.etnews.com/',
     summary: [
       '엔비디아가 차세대 AI 가속기 생산 계획을 기존 대비 30퍼센트 상향했다.',
       '추가 물량 대응을 위해 HBM 조달을 늘릴 것으로 알려졌다.',
       '국내 메모리 업체의 공급 비중이 확대될 전망이다.',
     ],
-    main: {
-      nodeId: 'aidc',
-      direction: 'UP',
-      reason: 'AI 데이터센터 투자 확대가 메모리 수요를 직접 견인',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'sk',
+        nodeId: 'aidc',
         direction: 'UP',
-        relation: 'HBM 주력 생산',
-        chain: ['aidc', 'hbm', 'sk'],
-      },
-      {
-        nodeId: 'hanmi',
-        direction: 'UP',
-        relation: 'HBM 필수 장비',
-        chain: ['aidc', 'hbm', 'hanmi'],
-      },
-      {
-        nodeId: 'ss',
-        direction: 'UP',
-        relation: 'HBM 생산',
-        chain: ['aidc', 'hbm', 'ss'],
-      },
-      {
-        nodeId: 'eo',
-        direction: 'UP',
-        relation: '장비 납품',
-        chain: ['aidc', 'hbm', 'sk', 'eo'],
+        reason: 'AI 데이터센터 투자 확대가 메모리 수요를 직접 견인',
       },
     ],
-    rationale: {
-      event: '엔비디아가 AI 가속기 생산 물량을 30퍼센트 상향',
-      propagation:
-        'AI 데이터센터 수요가 HBM을 거쳐 <b>SK하이닉스 · 삼성전자</b>로, 다시 후공정 장비사인 <b>한미반도체</b>까지 이어짐',
-      precedent:
-        '유사 수요 상향 뉴스 6건 중 4건에서 메모리주가 익일 평균 <b>+2.2%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'sk', direction: 'UP', relationLabel: 'HBM 주력 생산', chain: ['aidc', 'hbm', 'sk'] },
+      { nodeId: 'hanmi', direction: 'UP', relationLabel: 'HBM 필수 장비', chain: ['aidc', 'hbm', 'hanmi'] },
+      { nodeId: 'ss', direction: 'UP', relationLabel: 'HBM 생산', chain: ['aidc', 'hbm', 'ss'] },
+      { nodeId: 'eo', direction: 'UP', relationLabel: '장비 납품', chain: ['aidc', 'hbm', 'sk', 'eo'] },
+    ],
   },
   {
-    id: 'n3',
-    sector: '2차전지',
+    id: 10003,
     title: '리튬 가격 3개월 만에 최저… 양극재 판가 연동 하락 불가피',
     press: '머니투데이',
     publishedAt: `${TODAY}T08:05:00+09:00`,
-    relativeTime: '1시간 전',
-    originUrl: 'https://news.mt.co.kr/',
+    url: 'https://news.mt.co.kr/',
     summary: [
       '탄산리튬 현물 가격이 3개월 만에 최저 수준으로 내려왔다.',
       '양극재는 리튬 가격에 판가가 연동되는 구조다.',
       '배터리 셀 업체는 원가 부담이 줄어드는 반대 효과가 예상된다.',
     ],
-    main: {
-      nodeId: 'li',
-      direction: 'DOWN',
-      reason: '리튬 현물 가격이 3개월 내 최저 수준으로 하락',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'ecop',
+        nodeId: 'li',
         direction: 'DOWN',
-        relation: '양극재 판가 연동',
-        chain: ['li', 'cath', 'ecop'],
-      },
-      {
-        nodeId: 'posf',
-        direction: 'DOWN',
-        relation: '양극재 판가 연동',
-        chain: ['li', 'cath', 'posf'],
-      },
-      {
-        nodeId: 'lnf',
-        direction: 'DOWN',
-        relation: '양극재 판가 연동',
-        chain: ['li', 'cath', 'lnf'],
-      },
-      {
-        nodeId: 'lgen',
-        direction: 'UP',
-        relation: '원가 하락 수혜',
-        chain: ['li', 'cath', 'lgen'],
+        reason: '리튬 현물 가격이 3개월 내 최저 수준으로 하락',
       },
     ],
-    rationale: {
-      event: '탄산리튬 현물 가격이 3개월 만에 최저치 기록',
-      propagation:
-        '양극재를 만들어 파는 <b>에코프로비엠 · 포스코퓨처엠 · 엘앤에프</b>는 판가가 함께 내려가고, 그 양극재를 사다 쓰는 <b>LG에너지솔루션</b>은 반대로 원가가 낮아짐',
-      precedent:
-        '리튬 급락 구간 7건 중 5건에서 양극재주가 익일 평균 <b>-2.6%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'ecop', direction: 'DOWN', relationLabel: '양극재 판가 연동', chain: ['li', 'cath', 'ecop'] },
+      { nodeId: 'posf', direction: 'DOWN', relationLabel: '양극재 판가 연동', chain: ['li', 'cath', 'posf'] },
+      { nodeId: 'lnf', direction: 'DOWN', relationLabel: '양극재 판가 연동', chain: ['li', 'cath', 'lnf'] },
+      { nodeId: 'lgen', direction: 'UP', relationLabel: '원가 하락 수혜', chain: ['li', 'cath', 'lgen'] },
+    ],
   },
   {
-    id: 'n4',
-    sector: '2차전지',
+    id: 10004,
     title: '美, 중국산 전기차 관세 추가 인상… 한국 배터리 반사이익 전망',
     press: '서울경제',
     publishedAt: `${TODAY}T07:20:00+09:00`,
-    relativeTime: '2시간 전',
-    originUrl: 'https://www.sedaily.com/',
+    url: 'https://www.sedaily.com/',
     summary: [
       '미국이 중국산 전기차에 대한 관세를 추가 인상하기로 했다.',
       '북미 생산 거점을 확보한 한국 배터리 업체가 수혜 대상으로 지목된다.',
       '양극재 등 소재 발주도 함께 늘어날 전망이다.',
     ],
-    main: {
-      nodeId: 'lgen',
-      direction: 'UP',
-      reason: '북미 생산 거점 기반으로 관세 인상의 직접 수혜',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'ecop',
+        nodeId: 'lgen',
         direction: 'UP',
-        relation: '양극재 조달처',
-        chain: ['lgen', 'ecop'],
-      },
-      {
-        nodeId: 'lnf',
-        direction: 'UP',
-        relation: '양극재 조달처',
-        chain: ['lgen', 'lnf'],
-      },
-      {
-        nodeId: 'cb',
-        direction: 'UP',
-        relation: '첨가제 공급',
-        chain: ['lgen', 'cb'],
-      },
-      {
-        nodeId: 'sdi',
-        direction: 'UP',
-        relation: '배터리 공급',
-        chain: ['lgen', 'ev', 'sdi'],
+        reason: '북미 생산 거점 기반으로 관세 인상의 직접 수혜',
       },
     ],
-    rationale: {
-      event: '미국이 중국산 전기차 관세를 추가 인상',
-      propagation:
-        '북미 거점을 가진 <b>LG에너지솔루션</b>의 수주가 늘면 양극재와 첨가제를 대는 <b>에코프로비엠 · 엘앤에프 · 천보</b>의 발주도 함께 증가',
-      precedent:
-        '관세 인상 관련 뉴스 4건 중 3건에서 배터리주가 익일 평균 <b>+1.8%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'ecop', direction: 'UP', relationLabel: '양극재 조달처', chain: ['lgen', 'ecop'] },
+      { nodeId: 'lnf', direction: 'UP', relationLabel: '양극재 조달처', chain: ['lgen', 'lnf'] },
+      { nodeId: 'cb', direction: 'UP', relationLabel: '첨가제 공급', chain: ['lgen', 'cb'] },
+      { nodeId: 'sdi', direction: 'UP', relationLabel: '배터리 공급', chain: ['lgen', 'ev', 'sdi'] },
+    ],
   },
   {
-    id: 'n5',
-    sector: '방산',
+    id: 10005,
     title: '폴란드, K9 자주포 2차 실행계약 서명… 3조원대 규모',
     press: '뉴시스',
     publishedAt: `${TODAY}T06:41:00+09:00`,
-    relativeTime: '3시간 전',
-    originUrl: 'https://www.newsis.com/',
+    url: 'https://www.newsis.com/',
     summary: [
       '폴란드 정부가 K9 자주포 2차 실행계약에 서명했다.',
       '계약 규모는 3조원대로 알려졌다.',
       '탄약 패키지가 별도 협상으로 이어질 가능성이 제기된다.',
     ],
-    main: {
-      nodeId: 'hwa',
-      direction: 'UP',
-      reason: 'K9 자주포 생산 주체로 계약 물량이 전량 반영',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'pung',
+        nodeId: 'hwa',
         direction: 'UP',
-        relation: '탄약 공급',
-        chain: ['hwa', 'pung'],
-      },
-      {
-        nodeId: 'rotem',
-        direction: 'UP',
-        relation: '방산 수출 확대',
-        chain: ['hwa', 'dex', 'rotem'],
-      },
-      {
-        nodeId: 'kai',
-        direction: 'UP',
-        relation: '방산 수출 확대',
-        chain: ['hwa', 'dex', 'kai'],
-      },
-      {
-        nodeId: 'lig',
-        direction: 'DOWN',
-        relation: '경쟁 관계',
-        chain: ['hwa', 'lig'],
+        reason: 'K9 자주포 생산 주체로 계약 물량이 전량 반영',
       },
     ],
-    rationale: {
-      event: '폴란드가 K9 자주포 2차 실행계약에 서명, 3조원대 규모',
-      propagation:
-        '생산 주체인 <b>한화에어로스페이스</b>가 물량을 받으면 탄약을 대는 <b>풍산</b>도 함께 늘고, 방산 수출 기대가 <b>현대로템 · 한국항공우주</b>로 번짐',
-      precedent:
-        '대형 수출 계약 공시 8건 중 6건에서 방산주가 익일 평균 <b>+4.2%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'pung', direction: 'UP', relationLabel: '탄약 공급', chain: ['hwa', 'pung'] },
+      { nodeId: 'rotem', direction: 'UP', relationLabel: '방산 수출 확대', chain: ['hwa', 'dex', 'rotem'] },
+      { nodeId: 'kai', direction: 'UP', relationLabel: '방산 수출 확대', chain: ['hwa', 'dex', 'kai'] },
+      { nodeId: 'lig', direction: 'DOWN', relationLabel: '경쟁 관계', chain: ['hwa', 'lig'] },
+    ],
   },
   {
-    id: 'n6',
-    sector: '방산',
+    id: 10006,
     title: '국방부, 차세대 장거리 유도무기 개발사업 착수',
     press: '국방일보',
     publishedAt: `${TODAY}T04:30:00+09:00`,
-    relativeTime: '5시간 전',
-    originUrl: 'https://kookbang.dema.mil.kr/',
+    url: 'https://kookbang.dema.mil.kr/',
     summary: [
       '국방부가 차세대 장거리 유도무기 개발사업에 착수했다고 밝혔다.',
       '총 사업비와 개발 기간은 추후 확정될 예정이다.',
       '유도무기 체계 개발 경험이 있는 업체가 주관사 후보로 거론된다.',
     ],
-    main: {
-      nodeId: 'lig',
-      direction: 'UP',
-      reason: '유도무기 체계 개발 이력으로 사업 참여 가능성 최상위',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'kai',
+        nodeId: 'lig',
         direction: 'UP',
-        relation: '방산 수출 확대',
-        chain: ['lig', 'dex', 'kai'],
-      },
-      {
-        nodeId: 'pung',
-        direction: 'UP',
-        relation: '방산 수출 확대',
-        chain: ['lig', 'dex', 'pung'],
-      },
-      {
-        nodeId: 'hwa',
-        direction: 'DOWN',
-        relation: '경쟁 관계',
-        chain: ['lig', 'hwa'],
+        reason: '유도무기 체계 개발 이력으로 사업 참여 가능성 최상위',
       },
     ],
-    rationale: {
-      event: '국방부가 차세대 장거리 유도무기 개발사업에 착수',
-      propagation:
-        '유도무기를 만들어 온 <b>LIG넥스원</b>이 주관사 후보로 앞서고, 같은 사업을 노리는 <b>한화에어로스페이스</b>에는 수주 분산 요인',
-      precedent:
-        '개발사업 착수 뉴스 5건 중 3건에서 주관 후보사가 익일 평균 <b>+2.4%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'kai', direction: 'UP', relationLabel: '방산 수출 확대', chain: ['lig', 'dex', 'kai'] },
+      { nodeId: 'pung', direction: 'UP', relationLabel: '방산 수출 확대', chain: ['lig', 'dex', 'pung'] },
+      { nodeId: 'hwa', direction: 'DOWN', relationLabel: '경쟁 관계', chain: ['lig', 'hwa'] },
+    ],
   },
-  // n7 ~ n25: 커서 기반 페이징(기본 limit=20) 테스트용으로 추가한 필러 뉴스.
-  // 기존 온톨로지 노드·엣지만 재사용해 그래프/분석 패널이 항상 유효하게 뜨도록 한다.
   {
-    id: 'n7',
-    sector: '반도체',
+    id: 10007,
     title: '삼성전자, 파운드리 신규 고객사 대형 수주 체결',
     press: '한국경제',
     publishedAt: '2026-07-20T03:40:00+09:00',
-    relativeTime: '6시간 전',
-    originUrl: 'https://www.hankyung.com/',
+    url: 'https://www.hankyung.com/',
     summary: [
       '삼성전자가 해외 팹리스 업체와 파운드리 대형 공급 계약을 체결했다.',
       '선단 공정 라인의 가동률이 큰 폭으로 오를 전망이다.',
       '관련 장비·소재 협력사 발주도 함께 늘어날 것으로 보인다.',
     ],
-    main: {
-      nodeId: 'ss',
-      direction: 'UP',
-      reason: '파운드리 대형 수주로 가동률이 직접 개선되는 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'jusung',
+        nodeId: 'ss',
         direction: 'UP',
-        relation: '장비 공급',
-        chain: ['ss', 'jusung'],
-      },
-      {
-        nodeId: 'lino',
-        direction: 'UP',
-        relation: '테스트 소켓',
-        chain: ['ss', 'lino'],
-      },
-      {
-        nodeId: 'dj',
-        direction: 'UP',
-        relation: '포토레지스트',
-        chain: ['ss', 'dj'],
-      },
-      {
-        nodeId: 'sk',
-        direction: 'DOWN',
-        relation: '경쟁',
-        chain: ['ss', 'sk'],
+        reason: '파운드리 대형 수주로 가동률이 직접 개선되는 당사자',
       },
     ],
-    rationale: {
-      event: '삼성전자가 파운드리 신규 고객사 대형 수주를 확정',
-      propagation:
-        '장비·소재를 대는 <b>주성엔지니어링·리노공업·동진쎄미켐</b>에는 발주 확대 요인, 경쟁하는 <b>SK하이닉스</b>에는 점유율 압박 요인',
-      precedent:
-        '대형 파운드리 수주 공시 4건 중 3건에서 협력사가 익일 평균 <b>+2.8%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'jusung', direction: 'UP', relationLabel: '장비 공급', chain: ['ss', 'jusung'] },
+      { nodeId: 'lino', direction: 'UP', relationLabel: '테스트 소켓', chain: ['ss', 'lino'] },
+      { nodeId: 'dj', direction: 'UP', relationLabel: '포토레지스트', chain: ['ss', 'dj'] },
+      { nodeId: 'sk', direction: 'DOWN', relationLabel: '경쟁', chain: ['ss', 'sk'] },
+    ],
   },
   {
-    id: 'n8',
-    sector: '반도체',
+    id: 10008,
     title: '글로벌 AI 서버 수요 폭증… HBM 공급 부족 심화',
     press: '이데일리',
     publishedAt: '2026-07-20T01:15:00+09:00',
-    relativeTime: '8시간 전',
-    originUrl: 'https://www.edaily.co.kr/',
+    url: 'https://www.edaily.co.kr/',
     summary: [
       'AI 서버향 수요가 예상을 웃돌며 HBM 공급 부족이 심화하고 있다.',
       '주요 메모리 업체의 HBM 가동률이 이미 최대치에 근접했다.',
       '후공정 장비 업체의 증설 압박도 함께 커지는 모습이다.',
     ],
-    main: {
-      nodeId: 'hbm',
-      direction: 'UP',
-      reason: 'AI 서버 수요 폭증으로 공급 부족이 직접 확인된 품목',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'sk',
+        nodeId: 'hbm',
         direction: 'UP',
-        relation: '주력 생산',
-        chain: ['hbm', 'sk'],
-      },
-      {
-        nodeId: 'ss',
-        direction: 'UP',
-        relation: '생산',
-        chain: ['hbm', 'ss'],
-      },
-      {
-        nodeId: 'hanmi',
-        direction: 'UP',
-        relation: 'TC본더 필수',
-        chain: ['hbm', 'hanmi'],
-      },
-      {
-        nodeId: 'aidc',
-        direction: 'UP',
-        relation: '수요 견인',
-        chain: ['hbm', 'aidc'],
+        reason: 'AI 서버 수요 폭증으로 공급 부족이 직접 확인된 품목',
       },
     ],
-    rationale: {
-      event: 'AI 서버향 수요 폭증으로 HBM 공급 부족이 심화',
-      propagation:
-        'HBM을 만드는 <b>SK하이닉스·삼성전자</b>의 가동률이 오르고, 후공정 필수 장비인 <b>한미반도체</b> 발주가 함께 늘어남',
-      precedent:
-        '유사 공급 부족 뉴스 6건 중 5건에서 HBM 관련주가 익일 평균 <b>+3.5%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'sk', direction: 'UP', relationLabel: '주력 생산', chain: ['hbm', 'sk'] },
+      { nodeId: 'ss', direction: 'UP', relationLabel: '생산', chain: ['hbm', 'ss'] },
+      { nodeId: 'hanmi', direction: 'UP', relationLabel: 'TC본더 필수', chain: ['hbm', 'hanmi'] },
+      { nodeId: 'aidc', direction: 'UP', relationLabel: '수요 견인', chain: ['hbm', 'aidc'] },
+    ],
   },
   {
-    id: 'n9',
-    sector: '반도체',
+    id: 10009,
     title: 'D램 가격 협상력 강화… 상반기 실적 개선 기대',
     press: '조선비즈',
     publishedAt: '2026-07-19T22:50:00+09:00',
-    relativeTime: '10시간 전',
-    originUrl: 'https://biz.chosun.com/',
+    url: 'https://biz.chosun.com/',
     summary: [
       'D램 고정거래가 협상에서 공급사 협상력이 강화됐다.',
       '재고 조정이 마무리 국면에 접어든 영향으로 풀이된다.',
       '상반기 메모리 업체 실적 개선 기대가 커지고 있다.',
     ],
-    main: {
-      nodeId: 'dram',
-      direction: 'UP',
-      reason: 'D램 협상력 강화가 가격에 직접 반영되는 품목',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'sk',
+        nodeId: 'dram',
         direction: 'UP',
-        relation: '주력 생산',
-        chain: ['dram', 'sk'],
-      },
-      {
-        nodeId: 'ss',
-        direction: 'UP',
-        relation: '생산',
-        chain: ['dram', 'ss'],
-      },
-      {
-        nodeId: 'aidc',
-        direction: 'UP',
-        relation: '수요 견인',
-        chain: ['dram', 'aidc'],
+        reason: 'D램 협상력 강화가 가격에 직접 반영되는 품목',
       },
     ],
-    rationale: {
-      event: 'D램 고정거래가 협상에서 공급사 협상력이 강화',
-      propagation:
-        'D램을 주력 생산하는 <b>SK하이닉스·삼성전자</b>의 수익성이 함께 개선',
-      precedent:
-        '유사 협상력 강화 뉴스 5건 중 4건에서 메모리주가 익일 평균 <b>+1.9%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'sk', direction: 'UP', relationLabel: '주력 생산', chain: ['dram', 'sk'] },
+      { nodeId: 'ss', direction: 'UP', relationLabel: '생산', chain: ['dram', 'ss'] },
+      { nodeId: 'aidc', direction: 'UP', relationLabel: '수요 견인', chain: ['dram', 'aidc'] },
+    ],
   },
   {
-    id: 'n10',
-    sector: '반도체',
+    id: 10010,
     title: '원익IPS, 국내 최대 반도체 라인 증착 장비 공급 계약',
     press: '파이낸셜뉴스',
     publishedAt: '2026-07-19T18:30:00+09:00',
-    relativeTime: '15시간 전',
-    originUrl: 'https://www.fnnews.com/',
+    url: 'https://www.fnnews.com/',
     summary: [
       '원익IPS가 대형 반도체 라인향 증착 장비 공급 계약을 체결했다.',
       '계약 규모는 회사 연 매출의 상당 부분에 해당한다.',
       '납품은 올해 하반기부터 순차 진행될 예정이다.',
     ],
-    main: {
-      nodeId: 'wonik',
-      direction: 'UP',
-      reason: '대형 증착 장비 공급 계약의 직접 수혜 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'sk',
+        nodeId: 'wonik',
         direction: 'UP',
-        relation: '증착 장비',
-        chain: ['wonik', 'sk'],
+        reason: '대형 증착 장비 공급 계약의 직접 수혜 당사자',
       },
     ],
-    rationale: {
-      event: '원익IPS가 대형 반도체 라인향 증착 장비 공급 계약을 체결',
-      propagation:
-        '장비를 공급받는 <b>SK하이닉스</b>의 증설 일정과 맞물려 함께 주목받음',
-      precedent:
-        '유사 대형 장비 수주 공시 3건 중 2건에서 익일 평균 <b>+5.1%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'sk', direction: 'UP', relationLabel: '증착 장비', chain: ['wonik', 'sk'] },
+    ],
   },
   {
-    id: 'n11',
-    sector: '반도체',
+    id: 10011,
     title: 'HPSP, 고압 어닐링 장비 해외 수주 확대',
     press: '뉴스1',
     publishedAt: '2026-07-19T14:05:00+09:00',
-    relativeTime: '19시간 전',
-    originUrl: 'https://www.news1.kr/',
+    url: 'https://www.news1.kr/',
     summary: [
       'HPSP가 해외 반도체 업체향 고압 어닐링 장비 수주를 확대했다.',
       '해외 매출 비중이 처음으로 절반을 넘어설 전망이다.',
       '증설된 생산라인은 내년부터 본격 가동된다.',
     ],
-    main: {
-      nodeId: 'hpsp',
-      direction: 'UP',
-      reason: '해외 수주 확대의 직접 수혜 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'sk',
+        nodeId: 'hpsp',
         direction: 'UP',
-        relation: '고압 어닐링',
-        chain: ['hpsp', 'sk'],
+        reason: '해외 수주 확대의 직접 수혜 당사자',
       },
     ],
-    rationale: {
-      event: 'HPSP가 해외 고압 어닐링 장비 수주를 확대',
-      propagation:
-        '국내 수요처인 <b>SK하이닉스</b>향 공급 실적과 함께 시장이 재평가',
-      precedent:
-        '유사 해외 수주 확대 뉴스 4건 중 3건에서 익일 평균 <b>+3.0%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'sk', direction: 'UP', relationLabel: '고압 어닐링', chain: ['hpsp', 'sk'] },
+    ],
   },
   {
-    id: 'n12',
-    sector: '반도체',
+    id: 10012,
     title: '티씨케이, 반도체 소모품 공급 물량 증가',
     press: '매일경제',
     publishedAt: '2026-07-19T09:20:00+09:00',
-    relativeTime: '1일 전',
-    originUrl: 'https://www.mk.co.kr/',
+    url: 'https://www.mk.co.kr/',
     summary: [
       '티씨케이의 반도체 공정용 소모품 공급 물량이 늘었다.',
       '고객사 라인 가동률 상승이 주된 배경으로 지목된다.',
       '분기 실적에 긍정적으로 반영될 전망이다.',
     ],
-    main: {
-      nodeId: 'tck',
-      direction: 'UP',
-      reason: '소모품 공급 물량 증가의 직접 수혜 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'sk',
+        nodeId: 'tck',
         direction: 'UP',
-        relation: '소모품 공급',
-        chain: ['tck', 'sk'],
+        reason: '소모품 공급 물량 증가의 직접 수혜 당사자',
       },
     ],
-    rationale: {
-      event: '티씨케이의 반도체 공정용 소모품 공급 물량이 증가',
-      propagation: '주요 고객사인 <b>SK하이닉스</b>의 가동률 상승과 연동',
-      precedent:
-        '유사 소모품 공급 확대 뉴스 3건 중 2건에서 익일 평균 <b>+2.0%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'sk', direction: 'UP', relationLabel: '소모품 공급', chain: ['tck', 'sk'] },
+    ],
   },
   {
-    id: 'n13',
-    sector: '반도체',
+    id: 10013,
     title: 'DB하이텍, 파운드리 가동률 상승',
     press: '아시아경제',
     publishedAt: '2026-07-19T06:45:00+09:00',
-    relativeTime: '1일 전',
-    originUrl: 'https://www.asiae.co.kr/',
+    url: 'https://www.asiae.co.kr/',
     summary: [
       'DB하이텍의 8인치 파운드리 가동률이 상승했다.',
       '차량용·전력 반도체 수요 회복이 배경으로 꼽힌다.',
       '가격 협상력도 함께 개선되고 있다.',
     ],
-    main: {
-      nodeId: 'dbh',
-      direction: 'UP',
-      reason: '파운드리 가동률 상승의 직접 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'fdry',
+        nodeId: 'dbh',
         direction: 'UP',
-        relation: '사업 영위',
-        chain: ['dbh', 'fdry'],
+        reason: '파운드리 가동률 상승의 직접 당사자',
       },
     ],
-    rationale: {
-      event: 'DB하이텍의 8인치 파운드리 가동률이 상승',
-      propagation: '파운드리 업황 개선 테마 전반에 긍정적으로 반영',
-      precedent: '유사 가동률 상승 뉴스 4건 중 3건에서 익일 평균 <b>+2.6%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'fdry', direction: 'UP', relationLabel: '사업 영위', chain: ['dbh', 'fdry'] },
+    ],
   },
   {
-    id: 'n14',
-    sector: '2차전지',
+    id: 10014,
     title: '삼성SDI, 유럽 완성차 배터리 공급 계약 체결',
     press: '한국경제',
     publishedAt: '2026-07-18T20:10:00+09:00',
-    relativeTime: '1일 전',
-    originUrl: 'https://www.hankyung.com/',
+    url: 'https://www.hankyung.com/',
     summary: [
       '삼성SDI가 유럽 완성차 업체와 배터리 공급 계약을 체결했다.',
       '유럽 공장 증설이 뒤따를 것으로 예상된다.',
       '경쟁사 대비 수주 잔고가 크게 늘었다.',
     ],
-    main: {
-      nodeId: 'sdi',
-      direction: 'UP',
-      reason: '유럽 배터리 공급 계약의 직접 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'posf',
+        nodeId: 'sdi',
         direction: 'UP',
-        relation: '양극재 조달',
-        chain: ['sdi', 'posf'],
-      },
-      {
-        nodeId: 'ev',
-        direction: 'UP',
-        relation: '배터리 공급',
-        chain: ['sdi', 'ev'],
-      },
-      {
-        nodeId: 'lgen',
-        direction: 'DOWN',
-        relation: '경쟁',
-        chain: ['sdi', 'lgen'],
+        reason: '유럽 배터리 공급 계약의 직접 당사자',
       },
     ],
-    rationale: {
-      event: '삼성SDI가 유럽 완성차 배터리 공급 계약을 체결',
-      propagation:
-        '양극재를 대는 <b>포스코퓨처엠</b>에는 발주 확대 요인, 경쟁하는 <b>LG에너지솔루션</b>에는 수주 분산 요인',
-      precedent:
-        '유사 유럽向 공급 계약 뉴스 4건 중 3건에서 익일 평균 <b>+2.3%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'posf', direction: 'UP', relationLabel: '양극재 조달', chain: ['sdi', 'posf'] },
+      { nodeId: 'ev', direction: 'UP', relationLabel: '배터리 공급', chain: ['sdi', 'ev'] },
+      { nodeId: 'lgen', direction: 'DOWN', relationLabel: '경쟁', chain: ['sdi', 'lgen'] },
+    ],
   },
   {
-    id: 'n15',
-    sector: '2차전지',
+    id: 10015,
     title: '에코프로비엠, 양극재 생산능력 증설 발표',
     press: '이데일리',
     publishedAt: '2026-07-18T15:35:00+09:00',
-    relativeTime: '2일 전',
-    originUrl: 'https://www.edaily.co.kr/',
+    url: 'https://www.edaily.co.kr/',
     summary: [
       '에코프로비엠이 양극재 생산능력 증설 계획을 발표했다.',
       '증설분은 2028년부터 순차 가동될 예정이다.',
       '고객사 다변화도 함께 추진 중이다.',
     ],
-    main: {
-      nodeId: 'ecop',
-      direction: 'UP',
-      reason: '생산능력 증설 발표의 직접 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'lgen',
+        nodeId: 'ecop',
         direction: 'UP',
-        relation: '양극재 조달',
-        chain: ['ecop', 'lgen'],
-      },
-      {
-        nodeId: 'cath',
-        direction: 'UP',
-        relation: '생산',
-        chain: ['ecop', 'cath'],
+        reason: '생산능력 증설 발표의 직접 당사자',
       },
     ],
-    rationale: {
-      event: '에코프로비엠이 양극재 생산능력 증설을 발표',
-      propagation:
-        '핵심 고객사인 <b>LG에너지솔루션</b>의 공급 안정성과 함께 재평가',
-      precedent:
-        '유사 양극재 증설 발표 뉴스 5건 중 4건에서 익일 평균 <b>+1.7%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'lgen', direction: 'UP', relationLabel: '양극재 조달', chain: ['ecop', 'lgen'] },
+      { nodeId: 'cath', direction: 'UP', relationLabel: '생산', chain: ['ecop', 'cath'] },
+    ],
   },
   {
-    id: 'n16',
-    sector: '2차전지',
+    id: 10016,
     title: '포스코퓨처엠, 신규 양극재 공장 착공',
     press: '조선비즈',
     publishedAt: '2026-07-18T11:00:00+09:00',
-    relativeTime: '2일 전',
-    originUrl: 'https://biz.chosun.com/',
+    url: 'https://biz.chosun.com/',
     summary: [
       '포스코퓨처엠이 신규 양극재 공장 착공식을 진행했다.',
       '완공 시 국내 최대 규모 생산라인이 될 전망이다.',
       '원료 수급 다변화 계획도 함께 공개됐다.',
     ],
-    main: {
-      nodeId: 'posf',
-      direction: 'UP',
-      reason: '신규 공장 착공의 직접 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'sdi',
+        nodeId: 'posf',
         direction: 'UP',
-        relation: '양극재 조달',
-        chain: ['posf', 'sdi'],
-      },
-      {
-        nodeId: 'cath',
-        direction: 'UP',
-        relation: '생산',
-        chain: ['posf', 'cath'],
+        reason: '신규 공장 착공의 직접 당사자',
       },
     ],
-    rationale: {
-      event: '포스코퓨처엠이 신규 양극재 공장을 착공',
-      propagation:
-        '주요 고객사인 <b>삼성SDI</b>의 물량 확보 계획과 맞물려 주목',
-      precedent:
-        '유사 신규 공장 착공 뉴스 3건 중 2건에서 익일 평균 <b>+2.1%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'sdi', direction: 'UP', relationLabel: '양극재 조달', chain: ['posf', 'sdi'] },
+      { nodeId: 'cath', direction: 'UP', relationLabel: '생산', chain: ['posf', 'cath'] },
+    ],
   },
   {
-    id: 'n17',
-    sector: '2차전지',
+    id: 10017,
     title: 'SK이노베이션, 배터리 부문 흑자 전환',
     press: '파이낸셜뉴스',
     publishedAt: '2026-07-18T08:25:00+09:00',
-    relativeTime: '2일 전',
-    originUrl: 'https://www.fnnews.com/',
+    url: 'https://www.fnnews.com/',
     summary: [
       'SK이노베이션 배터리 부문이 분기 기준 흑자 전환에 성공했다.',
       '수율 개선과 가동률 상승이 주된 요인으로 꼽힌다.',
       '내년까지 흑자 기조가 이어질 것으로 회사는 전망했다.',
     ],
-    main: {
-      nodeId: 'skinn',
-      direction: 'UP',
-      reason: '배터리 부문 흑자 전환의 직접 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'lgen',
-        direction: 'DOWN',
-        relation: '경쟁',
-        chain: ['skinn', 'lgen'],
-      },
-      {
-        nodeId: 'ev',
+        nodeId: 'skinn',
         direction: 'UP',
-        relation: '배터리 공급',
-        chain: ['skinn', 'ev'],
+        reason: '배터리 부문 흑자 전환의 직접 당사자',
       },
     ],
-    rationale: {
-      event: 'SK이노베이션 배터리 부문이 분기 흑자로 전환',
-      propagation:
-        '경쟁하는 <b>LG에너지솔루션</b>에는 점유율 경쟁 심화 요인으로 작용',
-      precedent: '유사 흑자 전환 뉴스 4건 중 3건에서 익일 평균 <b>+2.9%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'lgen', direction: 'DOWN', relationLabel: '경쟁', chain: ['skinn', 'lgen'] },
+      { nodeId: 'ev', direction: 'UP', relationLabel: '배터리 공급', chain: ['skinn', 'ev'] },
+    ],
   },
   {
-    id: 'n18',
-    sector: '2차전지',
+    id: 10018,
     title: '천보, 전해질 첨가제 수출 물량 확대',
     press: '뉴스1',
     publishedAt: '2026-07-17T21:50:00+09:00',
-    relativeTime: '2일 전',
-    originUrl: 'https://www.news1.kr/',
+    url: 'https://www.news1.kr/',
     summary: [
       '천보의 전해질 첨가제 수출 물량이 큰 폭으로 늘었다.',
       '북미 배터리 업체향 공급이 신규로 시작됐다.',
       '증설 라인 가동률도 함께 오르고 있다.',
     ],
-    main: {
-      nodeId: 'cb',
-      direction: 'UP',
-      reason: '첨가제 수출 물량 확대의 직접 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'lgen',
+        nodeId: 'cb',
         direction: 'UP',
-        relation: '첨가제 조달',
-        chain: ['cb', 'lgen'],
+        reason: '첨가제 수출 물량 확대의 직접 당사자',
       },
     ],
-    rationale: {
-      event: '천보의 전해질 첨가제 수출 물량이 확대',
-      propagation:
-        '주요 고객사인 <b>LG에너지솔루션</b>의 원가 구조와 연동해 주목',
-      precedent:
-        '유사 수출 물량 확대 뉴스 3건 중 2건에서 익일 평균 <b>+3.3%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'lgen', direction: 'UP', relationLabel: '첨가제 조달', chain: ['cb', 'lgen'] },
+    ],
   },
   {
-    id: 'n19',
-    sector: '2차전지',
+    id: 10019,
     title: '현대차, 전기차 신모델 사전계약 흥행',
     press: '매일경제',
     publishedAt: '2026-07-17T16:15:00+09:00',
-    relativeTime: '3일 전',
-    originUrl: 'https://www.mk.co.kr/',
+    url: 'https://www.mk.co.kr/',
     summary: [
       '현대차 신형 전기차 사전계약이 목표치를 웃돌았다.',
       '배터리 공급 물량 확대가 뒤따를 것으로 예상된다.',
       '계열사의 생산 대응도 속도를 낼 전망이다.',
     ],
-    main: {
-      nodeId: 'hmc',
-      direction: 'UP',
-      reason: '전기차 신모델 흥행의 직접 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'ev',
+        nodeId: 'hmc',
         direction: 'UP',
-        relation: '완성차',
-        chain: ['hmc', 'ev'],
-      },
-      {
-        nodeId: 'rotem',
-        direction: 'UP',
-        relation: '계열사',
-        chain: ['hmc', 'rotem'],
+        reason: '전기차 신모델 흥행의 직접 당사자',
       },
     ],
-    rationale: {
-      event: '현대차 신형 전기차 사전계약이 목표치를 상회',
-      propagation:
-        '배터리 공급망 전반과 계열사인 <b>현대로템</b>까지 훈풍이 확산',
-      precedent:
-        '유사 사전계약 흥행 뉴스 3건 중 2건에서 익일 평균 <b>+1.5%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'ev', direction: 'UP', relationLabel: '완성차', chain: ['hmc', 'ev'] },
+      { nodeId: 'rotem', direction: 'UP', relationLabel: '계열사', chain: ['hmc', 'rotem'] },
+    ],
   },
   {
-    id: 'n20',
-    sector: '방산',
+    id: 10020,
     title: '한국항공우주, 동유럽 훈련기 수출 협상 타결',
     press: '국방일보',
     publishedAt: '2026-07-17T10:40:00+09:00',
-    relativeTime: '3일 전',
-    originUrl: 'https://kookbang.dema.mil.kr/',
+    url: 'https://kookbang.dema.mil.kr/',
     summary: [
       '한국항공우주가 동유럽 국가와 훈련기 수출 협상을 타결했다.',
       '계약 규모는 1조원대로 알려졌다.',
       '후속 정비·부품 계약으로도 이어질 전망이다.',
     ],
-    main: {
-      nodeId: 'kai',
-      direction: 'UP',
-      reason: '훈련기 수출 협상 타결의 직접 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'dex',
+        nodeId: 'kai',
         direction: 'UP',
-        relation: '수출',
-        chain: ['kai', 'dex'],
-      },
-      {
-        nodeId: 'hwa',
-        direction: 'UP',
-        relation: '엔진 협력',
-        chain: ['kai', 'hwa'],
+        reason: '훈련기 수출 협상 타결의 직접 당사자',
       },
     ],
-    rationale: {
-      event: '한국항공우주가 동유럽 훈련기 수출 협상을 타결',
-      propagation:
-        '엔진을 협력하는 <b>한화에어로스페이스</b>에도 수주 훈풍 확산',
-      precedent: '유사 훈련기 수출 뉴스 3건 중 2건에서 익일 평균 <b>+3.8%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'dex', direction: 'UP', relationLabel: '수출', chain: ['kai', 'dex'] },
+      { nodeId: 'hwa', direction: 'UP', relationLabel: '엔진 협력', chain: ['kai', 'hwa'] },
+    ],
   },
   {
-    id: 'n21',
-    sector: '방산',
+    id: 10021,
     title: '현대로템, K2 전차 2차 수출계약 서명',
     press: '뉴시스',
     publishedAt: '2026-07-17T07:05:00+09:00',
-    relativeTime: '3일 전',
-    originUrl: 'https://www.newsis.com/',
+    url: 'https://www.newsis.com/',
     summary: [
       '현대로템이 K2 전차 2차 수출계약에 서명했다.',
       '1차 계약 대비 물량이 두 배 이상 늘었다.',
       '현지 생산 비중 확대 방안도 함께 논의됐다.',
     ],
-    main: {
-      nodeId: 'rotem',
-      direction: 'UP',
-      reason: 'K2 전차 2차 수출계약의 직접 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'dex',
+        nodeId: 'rotem',
         direction: 'UP',
-        relation: '수출',
-        chain: ['rotem', 'dex'],
-      },
-      {
-        nodeId: 'hmc',
-        direction: 'UP',
-        relation: '계열사',
-        chain: ['rotem', 'hmc'],
+        reason: 'K2 전차 2차 수출계약의 직접 당사자',
       },
     ],
-    rationale: {
-      event: '현대로템이 K2 전차 2차 수출계약에 서명',
-      propagation:
-        '방산 수출 테마 전반과 계열사인 <b>현대차</b>까지 관심이 확산',
-      precedent:
-        '유사 전차 수출계약 뉴스 4건 중 3건에서 익일 평균 <b>+4.5%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'dex', direction: 'UP', relationLabel: '수출', chain: ['rotem', 'dex'] },
+      { nodeId: 'hmc', direction: 'UP', relationLabel: '계열사', chain: ['rotem', 'hmc'] },
+    ],
   },
   {
-    id: 'n22',
-    sector: '방산',
+    id: 10022,
     title: '풍산, 대규모 포탄 수출 계약 체결',
     press: '국방일보',
     publishedAt: '2026-07-16T19:30:00+09:00',
-    relativeTime: '3일 전',
-    originUrl: 'https://kookbang.dema.mil.kr/',
+    url: 'https://kookbang.dema.mil.kr/',
     summary: [
       '풍산이 대규모 포탄 수출 계약을 체결했다.',
       '계약 물량은 역대 최대 규모로 파악된다.',
       '생산라인 증설도 함께 검토되고 있다.',
     ],
-    main: {
-      nodeId: 'pung',
-      direction: 'UP',
-      reason: '대규모 포탄 수출 계약의 직접 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'hwa',
+        nodeId: 'pung',
         direction: 'UP',
-        relation: '탄약 조달',
-        chain: ['pung', 'hwa'],
-      },
-      {
-        nodeId: 'dex',
-        direction: 'UP',
-        relation: '탄약 수출',
-        chain: ['pung', 'dex'],
-      },
-      {
-        nodeId: 'k9',
-        direction: 'UP',
-        relation: '탄약 공급',
-        chain: ['pung', 'k9'],
+        reason: '대규모 포탄 수출 계약의 직접 당사자',
       },
     ],
-    rationale: {
-      event: '풍산이 대규모 포탄 수출 계약을 체결',
-      propagation:
-        '탄약을 공급받는 <b>한화에어로스페이스</b>의 K9 수출 확대와 맞물려 주목',
-      precedent:
-        '유사 대규모 탄약 수출 뉴스 4건 중 3건에서 익일 평균 <b>+3.6%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'hwa', direction: 'UP', relationLabel: '탄약 조달', chain: ['pung', 'hwa'] },
+      { nodeId: 'dex', direction: 'UP', relationLabel: '탄약 수출', chain: ['pung', 'dex'] },
+      { nodeId: 'k9', direction: 'UP', relationLabel: '탄약 공급', chain: ['pung', 'k9'] },
+    ],
   },
   {
-    id: 'n23',
-    sector: '방산',
+    id: 10023,
     title: '국내 유도무기 체계 해외 인증 획득',
     press: '국방일보',
     publishedAt: '2026-07-16T13:55:00+09:00',
-    relativeTime: '4일 전',
-    originUrl: 'https://kookbang.dema.mil.kr/',
+    url: 'https://kookbang.dema.mil.kr/',
     summary: [
       '국내 개발 유도무기 체계가 해외 인증을 획득했다.',
       '이번 인증으로 수출 절차가 한층 간소화된다.',
       '중동·동남아 국가와의 수출 상담도 본격화될 전망이다.',
     ],
-    main: {
-      nodeId: 'gm',
-      direction: 'UP',
-      reason: '해외 인증 획득의 직접 당사자',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'lig',
+        nodeId: 'gm',
         direction: 'UP',
-        relation: '생산',
-        chain: ['gm', 'lig'],
-      },
-      {
-        nodeId: 'dex',
-        direction: 'UP',
-        relation: '대표 품목',
-        chain: ['gm', 'dex'],
+        reason: '해외 인증 획득의 직접 당사자',
       },
     ],
-    rationale: {
-      event: '국내 유도무기 체계가 해외 인증을 획득',
-      propagation:
-        '생산을 맡은 <b>LIG넥스원</b>의 수출 파이프라인 확대 기대로 이어짐',
-      precedent:
-        '유사 해외 인증 획득 뉴스 3건 중 2건에서 익일 평균 <b>+2.7%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'lig', direction: 'UP', relationLabel: '생산', chain: ['gm', 'lig'] },
+      { nodeId: 'dex', direction: 'UP', relationLabel: '대표 품목', chain: ['gm', 'dex'] },
+    ],
   },
   {
-    id: 'n24',
-    sector: '방산',
+    id: 10024,
     title: '정부간 방산 패키지 계약 논의 본격화',
     press: '뉴시스',
     publishedAt: '2026-07-16T09:20:00+09:00',
-    relativeTime: '4일 전',
-    originUrl: 'https://www.newsis.com/',
+    url: 'https://www.newsis.com/',
     summary: [
       '정부간 방산 패키지 계약 논의가 본격화됐다.',
       '무기 체계와 정비·훈련 지원을 묶은 형태로 추진된다.',
       '연내 최종 서명 가능성이 거론되고 있다.',
     ],
-    main: {
-      nodeId: 'agr',
-      direction: 'UP',
-      reason: '정부간 패키지 계약 논의의 직접 대상 테마',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'dex',
+        nodeId: 'agr',
         direction: 'UP',
-        relation: '계약 형태',
-        chain: ['agr', 'dex'],
-      },
-      {
-        nodeId: 'k9',
-        direction: 'UP',
-        relation: '계약 대상',
-        chain: ['agr', 'k9'],
+        reason: '정부간 패키지 계약 논의의 직접 대상 테마',
       },
     ],
-    rationale: {
-      event: '정부간 방산 패키지 계약 논의가 본격화',
-      propagation:
-        '대표 계약 대상으로 거론되는 <b>K9 자주포</b> 라인업에 관심이 집중',
-      precedent:
-        '유사 정부간 패키지 계약 뉴스 3건 중 2건에서 익일 평균 <b>+3.2%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'dex', direction: 'UP', relationLabel: '계약 형태', chain: ['agr', 'dex'] },
+      { nodeId: 'k9', direction: 'UP', relationLabel: '계약 대상', chain: ['agr', 'k9'] },
+    ],
   },
   {
-    id: 'n25',
-    sector: '방산',
+    id: 10025,
     title: 'K9 자주포 3개국 동시 수출 협상 진행',
     press: '국방일보',
     publishedAt: '2026-07-16T06:45:00+09:00',
-    relativeTime: '4일 전',
-    originUrl: 'https://kookbang.dema.mil.kr/',
+    url: 'https://kookbang.dema.mil.kr/',
     summary: [
       'K9 자주포 수출 협상이 3개국과 동시에 진행되고 있다.',
       '협상이 모두 성사되면 역대 최대 수출 실적이 예상된다.',
       '탄약·부품 후속 계약 규모도 함께 커질 전망이다.',
     ],
-    main: {
-      nodeId: 'k9',
-      direction: 'UP',
-      reason: '3개국 동시 수출 협상의 직접 대상 품목',
-    },
-    related: [
+    originStocks: [
       {
-        nodeId: 'hwa',
+        nodeId: 'k9',
         direction: 'UP',
-        relation: '생산',
-        chain: ['k9', 'hwa'],
-      },
-      {
-        nodeId: 'dex',
-        direction: 'UP',
-        relation: '대표 품목',
-        chain: ['k9', 'dex'],
-      },
-      {
-        nodeId: 'pung',
-        direction: 'UP',
-        relation: '탄약 공급',
-        chain: ['k9', 'pung'],
-      },
-      {
-        nodeId: 'agr',
-        direction: 'UP',
-        relation: '계약 대상',
-        chain: ['k9', 'agr'],
+        reason: '3개국 동시 수출 협상의 직접 대상 품목',
       },
     ],
-    rationale: {
-      event: 'K9 자주포 수출 협상이 3개국과 동시에 진행',
-      propagation:
-        '생산 주체인 <b>한화에어로스페이스</b>와 탄약을 대는 <b>풍산</b>까지 수혜 기대가 확산',
-      precedent:
-        '유사 다국 동시 수출 협상 뉴스 3건 중 2건에서 익일 평균 <b>+4.0%</b>',
-    },
+    relatedStocks: [
+      { nodeId: 'hwa', direction: 'UP', relationLabel: '생산', chain: ['k9', 'hwa'] },
+      { nodeId: 'dex', direction: 'UP', relationLabel: '대표 품목', chain: ['k9', 'dex'] },
+      { nodeId: 'pung', direction: 'UP', relationLabel: '탄약 공급', chain: ['k9', 'pung'] },
+      { nodeId: 'agr', direction: 'UP', relationLabel: '계약 대상', chain: ['k9', 'agr'] },
+    ],
   },
+]
+
+const STOCK_IDS = RAW_COMPANIES.map(([id]) => id)
+const nodeNameById = new Map<string, string>([
+  ...RAW_COMPANIES.map(([id, name]): [string, string] => [id, name]),
+  ...RAW_CONCEPTS.map(([id, name]): [string, string] => [id, name]),
+])
+
+const FILLER_TEMPLATES: {
+  headline: (name: string) => string
+  summary: (name: string) => string[]
+  reason: (name: string) => string
+}[] = [
+  {
+    headline: (name) => `${name}, 신규 대형 수주 확보 공시`,
+    summary: (name) => [
+      `${name}가 신규 대형 수주 계약을 공시했다.`,
+      '계약 이행은 순차적으로 진행될 예정이다.',
+      '관련 공급망 전반에 훈풍이 예상된다.',
+    ],
+    reason: (name) => `${name}의 신규 대형 수주 공시 직접 당사자`,
+  },
+  {
+    headline: (name) => `${name}, 생산라인 증설 검토 착수`,
+    summary: (name) => [
+      `${name}가 생산라인 증설을 검토 중이라고 밝혔다.`,
+      '투자 규모와 일정은 이사회 의결 후 확정된다.',
+      '가동 시점은 내후년으로 예상된다.',
+    ],
+    reason: (name) => `${name}의 생산라인 증설 검토 직접 당사자`,
+  },
+  {
+    headline: (name) => `${name}, 분기 실적 시장 예상치 상회`,
+    summary: (name) => [
+      `${name}가 시장 예상치를 웃도는 분기 실적을 발표했다.`,
+      '가동률 상승과 판가 개선이 주요 배경으로 꼽힌다.',
+      '다음 분기에도 개선 흐름이 이어질 것으로 전망된다.',
+    ],
+    reason: (name) => `${name}의 분기 실적 서프라이즈 직접 당사자`,
+  },
+  {
+    headline: (name) => `${name}, 해외 인증 획득으로 수출 기대`,
+    summary: (name) => [
+      `${name}가 주요 해외 인증을 획득했다.`,
+      '이번 인증으로 신규 시장 진입 절차가 단축된다.',
+      '후속 수출 계약 논의도 함께 진행될 전망이다.',
+    ],
+    reason: (name) => `${name}의 해외 인증 획득 직접 당사자`,
+  },
+  {
+    headline: (name) => `${name}, 주요 고객사向 공급계약 갱신`,
+    summary: (name) => [
+      `${name}가 주요 고객사와 공급계약을 갱신했다.`,
+      '계약 기간과 물량 모두 기존 대비 확대됐다.',
+      '안정적 매출 기반이 한층 강화될 전망이다.',
+    ],
+    reason: (name) => `${name}의 공급계약 갱신 직접 당사자`,
+  },
+  {
+    headline: (name) => `${name}, 재고 조정 마무리… 가동률 정상화`,
+    summary: (name) => [
+      `${name}의 재고 조정이 마무리 국면에 접어들었다.`,
+      '주요 생산라인 가동률이 정상 수준을 회복했다.',
+      '수급 개선으로 판가 협상력도 함께 높아지고 있다.',
+    ],
+    reason: (name) => `${name}의 가동률 정상화 직접 당사자`,
+  },
+]
+
+const PRESS_LIST = [
+  '연합뉴스',
+  '한국경제',
+  '매일경제',
+  '이데일리',
+  '전자신문',
+  '머니투데이',
+  '조선비즈',
+  '파이낸셜뉴스',
+  '뉴스1',
+  '서울경제',
+]
+
+/**
+ * 무한 스크롤(커서 페이징) 테스트용 필러 뉴스를 온톨로지 엣지에서 결정론적으로 생성한다.
+ * 매 실행마다 같은 결과가 나오도록 Math.random 대신 인덱스 기반 순환만 쓴다.
+ */
+function buildFillerNews(count: number, startId: number): NewsRecord[] {
+  const news: NewsRecord[] = []
+  let cursor = new Date(`${CURATED_NEWS.at(-1)!.publishedAt}`)
+
+  for (let i = 0; i < count; i++) {
+    const originId = STOCK_IDS[i % STOCK_IDS.length]
+    const template = FILLER_TEMPLATES[i % FILLER_TEMPLATES.length]
+    const direction: Direction = i % 3 === 2 ? 'DOWN' : 'UP'
+    const originName = nodeNameById.get(originId) ?? originId
+
+    const neighborEdges = ONTOLOGY_EDGES.filter(
+      (e) => e.source === originId && nodeNameById.has(e.target),
+    ).slice(0, 4)
+
+    const relatedStocks = neighborEdges.map((edge) => {
+      const isCompetitor = edge.relationType === 'COMPETITOR'
+      const relatedDirection: Direction = isCompetitor
+        ? direction === 'UP'
+          ? 'DOWN'
+          : 'UP'
+        : direction
+      return {
+        nodeId: edge.target,
+        direction: relatedDirection,
+        relationLabel: edge.relation,
+        chain: [originId, edge.target],
+      }
+    })
+
+    cursor = new Date(cursor.getTime() - (3 + (i % 4)) * 60 * 60 * 1000)
+
+    news.push({
+      id: startId + i,
+      title: template.headline(originName),
+      press: PRESS_LIST[i % PRESS_LIST.length],
+      publishedAt: cursor.toISOString(),
+      url: 'https://example.com/',
+      summary: template.summary(originName),
+      originStocks: [{ nodeId: originId, direction, reason: template.reason(originName) }],
+      relatedStocks,
+    })
+  }
+
+  return news
+}
+
+export const NEWS_RECORDS: NewsRecord[] = [
+  ...CURATED_NEWS,
+  ...buildFillerNews(35, 10026),
 ]
 
 export const VERIFY_ENTRIES: VerifyEntry[] = [

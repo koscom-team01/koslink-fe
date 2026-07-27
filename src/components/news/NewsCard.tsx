@@ -1,5 +1,8 @@
+import type { MouseEvent } from 'react'
+import { useAtom } from 'jotai'
 import { cn } from '#/lib/utils'
 import { formatRelativeTime } from '#/lib/format'
+import { scrappedNewsIdsAtom } from '#/lib/atoms'
 import type { NewsListItem } from '#/types'
 
 interface NewsCardProps {
@@ -9,12 +12,28 @@ interface NewsCardProps {
 }
 
 export default function NewsCard({ news, selected, onSelect }: NewsCardProps) {
+  const [scrapped, setScrapped] = useAtom(scrappedNewsIdsAtom)
+  const isScrapped = scrapped.includes(news.id)
+
+  function toggleScrap(e: MouseEvent) {
+    e.stopPropagation()
+    setScrapped(
+      isScrapped
+        ? scrapped.filter((id) => id !== news.id)
+        : [...scrapped, news.id],
+    )
+  }
+
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') onSelect()
+      }}
       className={cn(
-        'relative w-full rounded-[11px] border px-3.5 py-[13px] text-left transition-colors',
+        'relative w-full cursor-pointer rounded-[11px] border px-3.5 py-[13px] text-left transition-colors',
         selected
           ? 'border-[var(--o-300)] bg-[var(--o-50)]'
           : 'border-transparent hover:bg-[var(--n-50)]',
@@ -26,27 +45,25 @@ export default function NewsCard({ news, selected, onSelect }: NewsCardProps) {
           style={{ background: 'var(--o-500)' }}
         />
       )}
-      <div className="mb-1.5 flex items-center gap-1">
-        <span
-          className={cn(
-            'rounded-[5px] px-[7px] py-0.5 text-[11px] font-bold',
-            selected
-              ? 'bg-[var(--o-100)] text-[var(--o-700)]'
-              : 'bg-[var(--n-100)] text-[var(--n-600)]',
-          )}
-        >
-          {news.sector}
-        </span>
-      </div>
-      <div className="line-clamp-2 text-sm font-semibold leading-[1.45] tracking-[-0.022em]">
+      <button
+        type="button"
+        onClick={toggleScrap}
+        aria-label={isScrapped ? '스크랩 해제' : '스크랩'}
+        aria-pressed={isScrapped}
+        className="absolute top-2.5 right-2.5 text-xs font-bold"
+        style={{ color: isScrapped ? 'var(--n-900)' : 'var(--n-300)' }}
+      >
+        {isScrapped ? '★' : '☆'}
+      </button>
+      <div className="line-clamp-2 pr-5 text-sm font-semibold leading-[1.45] tracking-[-0.022em]">
         {news.title}
       </div>
       <div className="mt-[7px] text-xs" style={{ color: 'var(--n-500)' }}>
         <b className="font-medium" style={{ color: 'var(--n-600)' }}>
           {news.press}
         </b>{' '}
-        · {news.relativeTime ?? formatRelativeTime(news.publishedAt)}
+        · {formatRelativeTime(news.publishedAt)}
       </div>
-    </button>
+    </div>
   )
 }

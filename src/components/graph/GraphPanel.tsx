@@ -12,7 +12,7 @@ import '@xyflow/react/dist/style.css' // 필수 — 빠뜨리면 노드가 겹�
 import { useAtom, useAtomValue } from 'jotai'
 import { cn } from '#/lib/utils'
 import { highlightedNodeAtom, selectedNewsIdAtom } from '#/lib/atoms'
-import { useNewsImpactGraphQuery } from '#/lib/queries'
+import { useNewsImpactQuery } from '#/lib/queries'
 import { sizeOf } from '#/lib/format'
 import { fullLayout, graphIndex, radialLayout, tierOf } from '#/lib/layout'
 import type { LayoutPoint } from '#/lib/layout'
@@ -584,7 +584,8 @@ function Legend({ mode }: { mode: 'focus' | 'all' }) {
 
 export default function GraphPanel() {
   const selectedNewsId = useAtomValue(selectedNewsIdAtom)
-  const { data: impactGraph } = useNewsImpactGraphQuery(selectedNewsId)
+  const { data: impact } = useNewsImpactQuery(selectedNewsId)
+  const impactGraph = impact?.graph
 
   const scene2: Scene2 | null = useMemo(() => {
     if (selectedNewsId && impactGraph) return buildFocusScene(impactGraph)

@@ -1,14 +1,8 @@
 import { arrow, directionLabel, impactOf } from '#/lib/format'
-import type { NewsAnalysis } from '#/types'
+import type { OriginStock } from '#/types'
 
-/** 영향 기점 — 뉴스가 직접 가리키는 종목 (hop 0) */
-export default function MainStockCard({
-  analysis,
-}: {
-  analysis: NewsAnalysis
-}) {
-  const { main } = analysis
-  const down = main.direction === 'DOWN'
+function OriginCard({ stock }: { stock: OriginStock }) {
+  const down = stock.direction === 'DOWN'
   const accent = down ? 'var(--d-500)' : 'var(--o-500)'
   const tint = down ? 'var(--d-50)' : 'var(--o-50)'
   const text = down ? 'var(--d-700)' : 'var(--o-700)'
@@ -21,21 +15,19 @@ export default function MainStockCard({
     >
       <div className="flex items-center justify-between gap-2.5">
         <div className="text-lg font-extrabold tracking-[-0.035em]">
-          {main.name}
-          {main.ticker && (
-            <small
-              className="ml-1.5 text-xs font-semibold"
-              style={{ color: 'var(--n-500)' }}
-            >
-              {main.ticker}
-            </small>
-          )}
+          {stock.name}
+          <small
+            className="ml-1.5 text-xs font-semibold"
+            style={{ color: 'var(--n-500)' }}
+          >
+            {stock.ticker}
+          </small>
         </div>
         <span
           className="flex-none rounded-lg px-2.5 py-1 text-[12.5px] font-extrabold text-white"
           style={{ background: accent }}
         >
-          {arrow(main.direction)} {directionLabel(main.direction)}
+          {arrow(stock.direction)} {directionLabel(stock.direction)}
         </span>
       </div>
       <span
@@ -48,8 +40,23 @@ export default function MainStockCard({
         className="mt-[11px] text-[12.5px] leading-[1.55] tracking-[-0.022em]"
         style={{ color: text }}
       >
-        {main.reason}
+        {stock.reason}
       </p>
+    </div>
+  )
+}
+
+/** 영향 기점 — 뉴스에 직접 언급된 당사자 종목(들). 대부분 1개지만 여러 개일 수 있다. */
+export default function MainStockCard({
+  originStocks,
+}: {
+  originStocks: OriginStock[]
+}) {
+  return (
+    <div className="flex flex-col gap-2.5">
+      {originStocks.map((stock) => (
+        <OriginCard key={stock.ticker} stock={stock} />
+      ))}
     </div>
   )
 }

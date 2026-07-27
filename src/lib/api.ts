@@ -5,14 +5,10 @@ import {
   VERIFY_ENTRIES,
   buildVerifyDaily,
 } from './data'
+import type { NewsImpactWire, NewsListPageWire } from './mappers'
 import type {
-  BriefingMatch,
-  BriefingResult,
-  BriefingUnmatched,
+  Direction,
   ImpactGraphNode,
-  NewsAnalysis,
-  NewsImpactGraph,
-  NewsListPage,
   OntologyEdge,
   OntologyNode,
   VerifyResponse,
@@ -20,9 +16,11 @@ import type {
 
 /**
  * `docs/KOSLINK-FRONTEND.md` §5 API 명세와 같은 시그니처를 갖는 헬퍼 모음.
- * 지금은 백엔드가 없어 lib/data.ts를 동기적으로 가공해 반환한다. 실 API가
- * 준비되면 이 함수들의 본문만 fetch 호출로 바꾸면 되고, 호출부(컴포넌트)는
- * 그대로 둘 수 있다.
+ * 지금은 백엔드가 없어 lib/data.ts를 동기적으로 가공해 반환한다. 반환 모양은 실
+ * 백엔드가 내려줄 wire(snake_case) 그대로다 — MSW 핸들러가 이 함수들을 그대로
+ * HttpResponse.json()으로 흘려보내고, lib/queries.ts가 lib/mappers.ts를 거쳐
+ * camelCase 도메인 타입으로 바꾼다. 실 API가 준비되면 이 함수들의 본문만 fetch
+ * 호출로 바꾸면 되고, 매퍼·호출부는 그대로 둘 수 있다.
  */
 
 const nodeById = new Map(ONTOLOGY_NODES.map((n) => [n.id, n]))
@@ -31,15 +29,6 @@ function requireNode(id: string): OntologyNode {
   const node = nodeById.get(id)
   if (!node) throw new Error(`Unknown ontology node: ${id}`)
   return node
-}
-
-function bySector<T extends { sector: string }>(
-  items: T[],
-  sector?: string,
-): T[] {
-  return items.filter(
-    (n) => !sector || sector === '전체' || n.sector === sector,
-  )
 }
 
 /**
@@ -64,7 +53,6 @@ function paginate<T>(
 }
 
 export interface GetNewsParams {
-  sector?: string
   /** 이전 응답의 nextCursor. 첫 페이지는 생략한다. */
   cursor?: string
   limit?: number
@@ -73,67 +61,22 @@ export interface GetNewsParams {
 const DEFAULT_NEWS_LIMIT = 20
 
 export function getNews({
-  sector,
   cursor,
   limit = DEFAULT_NEWS_LIMIT,
-}: GetNewsParams = {}): NewsListPage {
-  const { page, nextCursor } = paginate(
-    bySector(NEWS_RECORDS, sector),
-    cursor,
-    limit,
-    (n) => n.id,
+}: GetNewsParams = {}): NewsListPageWire {
+  const { page, nextCursor } = paginate(NEWS_RECORDS, cursor, limit, (n) =>
+    String(n.id),
   )
 
   return {
     items: page.map((n) => ({
-      id: n.id,
+      news_id: n.id,
       title: n.title,
       press: n.press,
-      publishedAt: n.publishedAt,
-      sector: n.sector,
-      relativeTime: n.relativeTime,
+      published_at: n.publishedAt,
     })),
     nextCursor,
   }
-}
-
-export function getNewsAnalysis(newsId: string): NewsAnalysis | null {
-  const record = NEWS_RECORDS.find((n) => n.id === newsId)
-  if (!record) return null
-  const mainNode = requireNode(record.main.nodeId)
-  return {
-    newsId: record.id,
-    title: record.title,
-    sector: record.sector,
-    article: {
-      summary: record.summary,
-      originUrl: record.originUrl,
-      press: record.press,
-      publishedAt: record.publishedAt,
-    },
-    main: {
-      nodeId: mainNode.id,
-      name: mainNode.name,
-      ticker: mainNode.ticker,
-      direction: record.main.direction,
-      reason: record.main.reason,
-    },
-    related: record.related.map((r) => {
-      const node = requireNode(r.nodeId)
-      return {
-        nodeId: node.id,
-        name: node.name,
-        ticker: node.ticker,
-        direction: r.direction,
-        relation: r.relation,
-      }
-    }),
-    rationale: record.rationale,
-  }
-}
-
-export function getGraph(): { nodes: OntologyNode[]; edges: OntologyEdge[] } {
-  return { nodes: ONTOLOGY_NODES, edges: ONTOLOGY_EDGES }
 }
 
 function findOntologyEdge(a: string, b: string): OntologyEdge | undefined {
@@ -144,17 +87,70 @@ function findOntologyEdge(a: string, b: string): OntologyEdge | undefined {
   )
 }
 
+/** 관련주 카드의 근거 문장 — 서버가 그래프 경로(관계 레이블 + 방향)에서 템플릿 생성한다. */
+function buildPropagation(
+  originName: string,
+  relationLabel: string,
+  relatedName: string,
+  relatedDirection: Direction,
+): string {
+  const effect = relatedDirection === 'UP' ? '상승 요인' : '하락 요인'
+  return `${originName}과(와) ${relationLabel} 관계인 ${relatedName}에는 ${effect}으로 작용한다.`
+}
+
+/** 패널 하단 최종 요약 — 영향 기점과 파급된 관련주 수를 요약한다. */
+function buildFinalSummary(originNames: string[], relatedCount: number): string {
+  const origin = originNames.join(', ')
+  return `${origin} 관련 이슈로 관련 종목 ${relatedCount}개까지 영향이 파급됐다.`
+}
+
 /**
- * GET /api/news/{id}/graph. 뉴스별 파급 경로에 등장하는 노드·엣지만 추려서
- * 내려준다 — 좌표는 포함하지 않는다(프론트가 hop 레벨로 계산한다).
+ * GET /api/news/{id}/impact. 기존 analysis + graph 두 엔드포인트를 하나로 합친 것 —
+ * 분석 패널과 그래프 패널이 같은 화면 전환에서 동시에 필요한 데이터라서다.
  */
-export function getNewsImpactGraph(newsId: string): NewsImpactGraph | null {
+export function getNewsImpact(newsId: number): NewsImpactWire | null {
   const record = NEWS_RECORDS.find((n) => n.id === newsId)
   if (!record) return null
 
-  const nodeIds = new Set<string>([record.main.nodeId])
+  const originNames = record.originStocks.map(
+    (o) => nodeById.get(o.nodeId)?.name ?? o.nodeId,
+  )
+
+  const originStocks = record.originStocks.map((o) => {
+    const node = requireNode(o.nodeId)
+    return {
+      ticker: node.ticker ?? node.id,
+      name: node.name,
+      status: o.direction === 'UP' ? ('up' as const) : ('down' as const),
+      reason: o.reason,
+    }
+  })
+
+  const relatedStocks = record.relatedStocks.map((r) => {
+    const node = requireNode(r.nodeId)
+    const relationPath = r.chain
+      .map((id) => nodeById.get(id)?.name ?? id)
+      .join(' → ')
+    return {
+      ticker: node.ticker ?? node.id,
+      name: node.name,
+      status: r.direction === 'UP' ? ('up' as const) : ('down' as const),
+      relation_label: r.relationLabel,
+      relation_path: relationPath,
+      propagation: buildPropagation(
+        originNames[0] ?? '',
+        r.relationLabel,
+        node.name,
+        r.direction,
+      ),
+    }
+  })
+
+  // 파급 경로 그래프 — 노드/엣지만 내려주고 좌표는 프론트가 hop 레벨로 계산한다.
+  const originId = record.originStocks[0].nodeId
+  const nodeIds = new Set<string>(record.originStocks.map((o) => o.nodeId))
   const edgeById = new Map<string, OntologyEdge>()
-  record.related.forEach((r) => {
+  record.relatedStocks.forEach((r) => {
     nodeIds.add(r.nodeId)
     r.chain.forEach((id) => nodeIds.add(id))
     for (let i = 1; i < r.chain.length; i++) {
@@ -163,22 +159,52 @@ export function getNewsImpactGraph(newsId: string): NewsImpactGraph | null {
     }
   })
 
-  const directionById = new Map<string, typeof record.main.direction>()
-  directionById.set(record.main.nodeId, record.main.direction)
-  record.related.forEach((r) => directionById.set(r.nodeId, r.direction))
+  const directionById = new Map<string, Direction>()
+  record.originStocks.forEach((o) => directionById.set(o.nodeId, o.direction))
+  record.relatedStocks.forEach((r) => directionById.set(r.nodeId, r.direction))
 
-  const nodes: ImpactGraphNode[] = Array.from(nodeIds).map((id) => {
+  const graphNodes: ImpactGraphNode[] = Array.from(nodeIds).map((id) => {
     const node = requireNode(id)
     const direction = directionById.get(id)
     return direction ? { ...node, direction } : { ...node }
   })
 
   return {
-    newsId: record.id,
-    originId: record.main.nodeId,
-    nodes,
-    edges: Array.from(edgeById.values()),
+    news_summary: record.summary,
+    source: {
+      press: record.press,
+      published_at: record.publishedAt,
+      url: record.url,
+    },
+    origin_stocks: originStocks,
+    related_stocks: relatedStocks,
+    final_summary: buildFinalSummary(originNames, relatedStocks.length),
+    graph: {
+      newsId: record.id,
+      originId,
+      nodes: graphNodes,
+      edges: Array.from(edgeById.values()),
+    },
   }
+}
+
+export interface GetGraphParams {
+  mode: 'full'
+}
+
+export function getGraph(
+  _params?: GetGraphParams,
+): { nodes: OntologyNode[]; edges: OntologyEdge[] } {
+  return { nodes: ONTOLOGY_NODES, edges: ONTOLOGY_EDGES }
+}
+
+function bySector<T extends { sector: string }>(
+  items: T[],
+  sector?: string,
+): T[] {
+  return items.filter(
+    (n) => !sector || sector === '전체' || n.sector === sector,
+  )
 }
 
 export interface GetVerifyParams {
@@ -203,61 +229,4 @@ export function getVerify({
   )
   // daily 추이는 섹터/페이지와 무관한 전체 집계라 페이징하지 않는다.
   return { daily: buildVerifyDaily(), news: page, nextCursor }
-}
-
-/** 종목명·티커·노드ID 어느 것으로 들어와도 온톨로지 COMPANY 노드를 찾는다. */
-function findCompanyNode(query: string): OntologyNode | undefined {
-  return ONTOLOGY_NODES.find(
-    (n) =>
-      n.kind === 'STOCK' &&
-      (n.ticker === query ||
-        n.id === query ||
-        n.name === query ||
-        n.name.includes(query)),
-  )
-}
-
-export function runBriefing(tickers: string[]): BriefingResult {
-  const matched: BriefingMatch[] = []
-  const unmatched: BriefingUnmatched[] = []
-
-  tickers.forEach((query) => {
-    const node = findCompanyNode(query)
-    if (!node) {
-      unmatched.push({ ticker: query, name: query })
-      return
-    }
-
-    for (const record of NEWS_RECORDS) {
-      if (record.main.nodeId === node.id) {
-        matched.push({
-          ticker: node.ticker ?? node.id,
-          name: node.name,
-          direction: record.main.direction,
-          relation: '뉴스에서 직접 언급',
-          chain: [node.id],
-          newsId: record.id,
-          newsTitle: record.title,
-        })
-        return
-      }
-      const rel = record.related.find((r) => r.nodeId === node.id)
-      if (rel) {
-        matched.push({
-          ticker: node.ticker ?? node.id,
-          name: node.name,
-          direction: rel.direction,
-          relation: rel.relation,
-          chain: rel.chain,
-          newsId: record.id,
-          newsTitle: record.title,
-        })
-        return
-      }
-    }
-
-    unmatched.push({ ticker: node.ticker ?? node.id, name: node.name })
-  })
-
-  return { totalNews: NEWS_RECORDS.length, matched, unmatched }
 }

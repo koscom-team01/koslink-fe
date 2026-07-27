@@ -1,12 +1,5 @@
 import { HttpResponse, delay, http } from 'msw'
-import {
-  getGraph,
-  getNews,
-  getNewsAnalysis,
-  getNewsImpactGraph,
-  getVerify,
-  runBriefing,
-} from '#/lib/api'
+import { getGraph, getNews, getNewsImpact, getVerify } from '#/lib/api'
 
 /**
  * docs/KOSLINK-FRONTEND.md §5 API 명세와 동일한 JSON 모양으로 응답한다.
@@ -14,53 +7,41 @@ import {
  * TanStack Query의 placeholderData가 항상 같은 데이터 소스(lib/data.ts)를 본다.
  */
 
-/** /api/news, /api/verify가 함께 쓰는 sector/cursor/limit 쿼리스트링 파싱. */
-function readPageParams(url: string) {
-  const searchParams = new URL(url).searchParams
-  return {
-    sector: searchParams.get('sector') ?? undefined,
-    cursor: searchParams.get('cursor') ?? undefined,
-    limit: Number(searchParams.get('limit')) || undefined,
-  }
-}
-
 export const handlers = [
   http.get('/api/news', async ({ request }) => {
     await delay(300)
-    return HttpResponse.json(getNews(readPageParams(request.url)))
+    const searchParams = new URL(request.url).searchParams
+    return HttpResponse.json(
+      getNews({
+        cursor: searchParams.get('cursor') ?? undefined,
+        limit: Number(searchParams.get('limit')) || undefined,
+      }),
+    )
   }),
 
-  http.get('/api/news/:id/analysis', async ({ params }) => {
+  http.get('/api/news/:id/impact', async ({ params }) => {
     await delay(350)
-    const analysis = getNewsAnalysis(params.id as string)
-    if (!analysis) {
+    const impact = getNewsImpact(Number(params.id))
+    if (!impact) {
       return new HttpResponse(null, { status: 404 })
     }
-    return HttpResponse.json(analysis)
-  }),
-
-  http.get('/api/news/:id/graph', async ({ params }) => {
-    await delay(250)
-    const impactGraph = getNewsImpactGraph(params.id as string)
-    if (!impactGraph) {
-      return new HttpResponse(null, { status: 404 })
-    }
-    return HttpResponse.json(impactGraph)
+    return HttpResponse.json(impact)
   }),
 
   http.get('/api/graph', async () => {
     await delay(250)
-    return HttpResponse.json(getGraph())
-  }),
-
-  http.post('/api/briefing', async ({ request }) => {
-    await delay(400)
-    const { tickers } = (await request.json()) as { tickers: string[] }
-    return HttpResponse.json(runBriefing(tickers))
+    return HttpResponse.json(getGraph({ mode: 'full' }))
   }),
 
   http.get('/api/verify', async ({ request }) => {
     await delay(300)
-    return HttpResponse.json(getVerify(readPageParams(request.url)))
+    const searchParams = new URL(request.url).searchParams
+    return HttpResponse.json(
+      getVerify({
+        sector: searchParams.get('sector') ?? undefined,
+        cursor: searchParams.get('cursor') ?? undefined,
+        limit: Number(searchParams.get('limit')) || undefined,
+      }),
+    )
   }),
 ]

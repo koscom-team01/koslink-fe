@@ -12,7 +12,7 @@
 | 인증            | **없음.** 로그인, 회원가입, 마이페이지 구현 안 함                                        |
 | 데이터          | 뉴스, 그래프, 분석, 검증 **전부 서버 API에서 조회**                                      |
 | 클라이언트 저장 | 없음. localStorage 등 영속 저장 사용 안 함                                               |
-| 관심종목        | 사용자가 입력한 종목과 브리핑 결과만 **세션 메모리(Jotai)** 에 유지. 새로고침하면 사라짐 |
+| 스크랩          | 저장한 뉴스 id만 **세션 메모리(Jotai)** 에 유지. 서버 API 없음. 새로고침하면 사라짐      |
 | 플랫폼          | 데스크탑 웹 우선, 태블릿·모바일 반응형 대응                                              |
 | 페이지          | SPA 단일 페이지. 라우터 없이 탭 전환                                                     |
 | 언어            | 한국어 전용                                                                              |
@@ -25,7 +25,7 @@
 React 18 + TypeScript + Vite
 @xyflow/react (v12)        그래프
 Tailwind CSS + shadcn/ui   tabs, badge, sheet, tooltip, command, scroll-area, separator
-Jotai                      UI 상태 + 관심종목 메모리
+Jotai                      UI 상태 + 스크랩 메모리
 TanStack Query             서버 상태 캐싱
 ```
 
@@ -52,14 +52,14 @@ import '@xyflow/react/dist/style.css' // 필수. 빠뜨리면 노드가 겹쳐 �
 ├──────────┬──────────────────────┬───────────────────┤
 │ A 뉴스    │ B 관계 그래프          │ C 영향 분석        │
 │          │ [파급경로|전체관계망]   │                   │
-│ 섹터 필터 │                      │ 기사 요약 3줄      │
+│ 뉴스카드  │                      │ 기사 요약 3줄      │
 │ 뉴스카드  │   ○ ─── ○            │ 원문 링크          │
 │ 뉴스카드  │   │                   │ ─────────────    │
-│ 뉴스카드  │   ○     ○            │ 영향 기점 카드     │
+│          │   ○     ○            │ 영향 기점 카드     │
 │          │                      │ 관련주 리스트      │
-│          │ 범례                  │ 판단 근거 3줄      │
+│          │ 범례                  │ 최종 요약          │
 └──────────┴──────────────────────┴───────────────────┘
-                                    [관심종목 브리핑] ← FAB
+                                    [스크랩] ← FAB
 ```
 
 ### SC-02 예측 검증
@@ -77,10 +77,12 @@ import '@xyflow/react/dist/style.css' // 필수. 빠뜨리면 노드가 겹쳐 �
 
 페이지 번호 UI 없음. 목록은 커서 기반 무한 스크롤(뉴스 목록과 동일한 방식), 상세는 우측 고정.
 
-### SC-03 관심종목 브리핑
+### SC-03 스크랩
 
 우측 슬라이드 시트 424px. shadcn `Sheet`.
-종목 칩 입력 → 조회 → 결과 카드. 닫아도 상태 유지, FAB에 매칭 건수 배지.
+뉴스 카드의 ☆ 토글로 저장 → 시트에서 목록 확인 → 클릭 시 해당 뉴스로 이동. 서버 API 없이
+프론트엔드 세션 메모리(Jotai `scrappedNewsIdsAtom`)에만 저장한다. 닫아도 상태 유지,
+FAB에 저장 건수 배지. 새로고침하면 사라진다(§1 원칙과 동일).
 
 ### 반응형
 
@@ -142,161 +144,143 @@ interface OntologyEdge {
 
 ## 5. API 명세
 
-베이스 `/api`. 인증 헤더 없음. 전부 TanStack Query로 감싼다.
+베이스 `/api`. 인증 헤더 없음. 전부 TanStack Query로 감싼다. wire 응답은 아래처럼
+snake_case다 — `lib/mappers.ts`가 이를 camelCase 도메인 타입으로 변환한 뒤
+컴포넌트에 넘긴다(그래프 노드/엣지만 예외로, 명세 그대로 camelCase다).
 
 ### 5.1 뉴스 목록 (커서 기반 페이징 · 무한 스크롤)
 
 ```
-GET /api/news?limit=20&sector=반도체&cursor=n3
+GET /api/news?limit=20&cursor=10020
 ```
 
 ```jsonc
 {
   "items": [
     {
-      "id": "n1",
+      "news_id": 10001,
       "title": "SK하이닉스, HBM4 양산 위해 청주 M15X 증설 확정",
       "press": "연합뉴스",
-      "publishedAt": "2026-07-18T09:12:00Z",
-      "sector": "반도체",
+      "published_at": "2026-07-18T09:12:00+09:00",
     },
   ],
-  "nextCursor": "n1", // 다음 페이지 요청 시 그대로 실어 보낸다. 마지막 페이지면 null
+  "nextCursor": "10001", // 다음 페이지 요청 시 그대로 실어 보낸다. 마지막 페이지면 null
 }
 ```
 
-`cursor`는 클라이언트가 값을 해석하지 않는 opaque 문자열이다 — 이전 응답의
-`nextCursor`를 다음 요청의 `cursor`에 그대로 담아 보낸다. 첫 요청은 `cursor`를
-생략한다. 프론트는 `useInfiniteQuery`로 페이지를 쌓고, 목록 하단 sentinel이
-뷰포트에 들어오면 다음 페이지를 요청한다(`lib/queries.ts`의 `useNewsQuery`).
+**설계 노트**
+
+- `status='done'`(AI 분석 완료) 필터는 서버가 항상 고정 적용 — 클라이언트가 신경 쓸
+  파라미터가 아니므로 쿼리에 노출하지 않는다
+- `category`/`sector` 필드·파라미터 없음 — 지금은 반도체 스코프만 다루므로 제외한다.
+  섹터 구분은 온톨로지 그래프(§5.3)에는 여전히 존재한다
+- `cursor`는 클라이언트가 값을 해석하지 않는 opaque 문자열이다 — 이전 응답의
+  `nextCursor`를 다음 요청의 `cursor`에 그대로 담아 보낸다. 첫 요청은 `cursor`를 생략한다
+- 리스트 카드는 가볍게 유지 — 요약, 관련종목 등은 클릭 시 §5.2로 별도 조회한다
+- 프론트는 `useInfiniteQuery`로 페이지를 쌓고, 목록 하단 sentinel이 뷰포트에
+  들어오면 다음 페이지를 요청한다(`lib/queries.ts`의 `useNewsQuery`)
 
 ### 5.2 뉴스 영향 분석 — 화면의 핵심
 
+기존에는 분석과 파급 경로 그래프가 별도 엔드포인트였으나, 같은 화면 전환에서
+동시에 필요한 데이터라 하나로 합쳤다.
+
 ```
-GET /api/news/{id}/analysis
+GET /api/news/{news_id}/impact
 ```
 
 ```jsonc
 {
-  "newsId": "n1",
-  "title": "SK하이닉스, HBM4 양산 위해 청주 M15X 증설 확정",
-  "sector": "반도체",
-  "article": {
-    "summary": ["요약 1", "요약 2", "요약 3"],
-    "originUrl": "https://www.yna.co.kr/...",
+  "news_summary": ["요약 1", "요약 2", "요약 3"],
+  "source": {
     "press": "연합뉴스",
-    "publishedAt": "2026-07-18T09:12:00Z",
+    "published_at": "2026-07-18T09:12:00+09:00",
+    "url": "https://www.yna.co.kr/...",
   },
-  "main": {
-    "nodeId": "sk",
-    "name": "SK하이닉스",
-    "ticker": "000660",
-    "direction": "UP",
-    "reason": "HBM4 증설 발표로 생산능력이 직접 확대되는 당사자",
-  },
-  "related": [
+  "origin_stocks": [
     {
-      "nodeId": "hanmi",
-      "name": "한미반도체",
+      "ticker": "000660",
+      "name": "SK하이닉스",
+      "status": "up",
+      "reason": "HBM4 증설 발표로 생산능력이 직접 확대되는 당사자",
+    },
+  ],
+  "related_stocks": [
+    {
       "ticker": "042700",
-      "direction": "UP",
-      "relation": "장비 공급",
+      "name": "한미반도체",
+      "status": "up",
+      "relation_label": "장비 공급",
+      "relation_path": "SK하이닉스 → 한미반도체",
+      "propagation": "SK하이닉스과(와) 장비 공급 관계인 한미반도체에는 상승 요인으로 작용한다.",
     },
     {
-      "nodeId": "ss",
+      "ticker": "005930",
       "name": "삼성전자",
-      "direction": "DOWN",
-      "relation": "경쟁 관계",
+      "status": "down",
+      "relation_label": "경쟁",
+      "relation_path": "SK하이닉스 → 삼성전자",
+      "propagation": "SK하이닉스과(와) 경쟁 관계인 삼성전자에는 하락 요인으로 작용한다.",
     },
   ],
-  "rationale": {
-    "event": "SK하이닉스가 HBM4 대응 목적의 청주 M15X 증설을 확정",
-    "propagation": "장비를 대는 한미반도체·HPSP에는 수주 확대 요인, 경쟁하는 삼성전자에는 압박 요인",
-    "precedent": "동일 유형 공시 5건 중 4건에서 장비주가 익일 평균 +3.1%",
+  "final_summary": "SK하이닉스 관련 이슈로 관련 종목 4개까지 영향이 파급됐다.",
+  "graph": {
+    "newsId": 10001,
+    "originId": "sk",
+    "nodes": [
+      { "id": "sk", "name": "SK하이닉스", "kind": "STOCK", "ticker": "000660", "sector": "반도체", "marketCap": 1200000, "direction": "UP" },
+      { "id": "hanmi", "name": "한미반도체", "kind": "STOCK", "ticker": "042700", "sector": "반도체", "marketCap": 120000, "direction": "UP" },
+    ],
+    "edges": [
+      { "id": "e2", "source": "sk", "target": "hanmi", "relation": "장비 공급" },
+    ],
   },
 }
 ```
 
-**주의**
+**필드 설명**
 
+| 필드 | 설명 |
+| --- | --- |
+| `news_summary` | 기사 요약 3줄, 문자열 배열 |
+| `source` | 언론사·발행시각·원문 URL (뉴스 하나당 1개) |
+| `origin_stocks` | 뉴스에 직접 언급된 당사자 종목. 배열 — 뉴스 하나가 여러 종목을 동시에 언급하는 경우도 대응한다 |
+| `related_stocks` | 온톨로지로 파생된 관련 종목. 종목별로 관계 레이블·경로 문자열·판단 근거(`propagation`)를 갖는다 |
+| `final_summary` | 패널 하단에 한 번만 표시하는 최종 요약 한 줄 |
+| `graph` | 이 뉴스의 파급 경로 서브그래프. 좌표는 없다 — §6 참고 |
+
+**설계 결정 로그**
+
+- `origin_stocks`를 단일 객체가 아닌 배열로 설계했다
+- "판단 근거"는 뉴스 전체 통짜 텍스트가 아니라 종목별로 분산했다(`origin_stocks[].reason`,
+  `related_stocks[].propagation`) — UI는 "종목 카드 클릭 시 그 종목의 근거 표시"로 동작한다
+  (`RelatedList`의 펼치기 인터랙션)
+- `affected_count`(영향 종목 개수)는 없다 — `related_stocks.length + origin_stocks.length`로
+  프론트에서 바로 계산 가능한 파생값이라 서버가 별도로 내려줄 필요가 없다
+- `related_stocks[].propagation`은 서버가 그래프 경로(관계 레이블 + 방향)에서 템플릿
+  생성한다 — 목데이터에서는 `lib/api.ts`의 `buildPropagation()`이 이 역할을 한다
 - `confidence` 같은 확률값은 받지도, 표시하지도 않는다
-- 그래프 경로(`chain`)는 이 응답에 없다 — §5.3 파급 경로 그래프에서 받는다.
-  hop 수는 그 응답의 노드/엣지를 기점부터 BFS로 펼쳐서 프론트가 계산한다
-- `rationale.propagation`은 서버가 그래프 경로에서 템플릿 생성한다
-- `title`/`sector`는 뉴스 목록(§5.1)이 페이지네이션되어 선택된 뉴스가 이미
-  로드된 페이지에 없을 수 있으므로, 분석 패널이 목록을 다시 훑지 않고도
-  헤더에 표시할 수 있게 여기 포함한다
 
-### 5.3 뉴스 파급 경로 그래프
+### 5.3 전체 그래프
 
 ```
-GET /api/news/{id}/graph
-```
-
-```jsonc
-{
-  "newsId": "n1",
-  "originId": "sk",
-  "nodes": [
-    { "id": "sk", "name": "SK하이닉스", "kind": "STOCK", "ticker": "000660", "sector": "반도체", "marketCap": 1200000, "direction": "UP" },
-    { "id": "hanmi", "name": "한미반도체", "kind": "STOCK", "ticker": "042700", "sector": "반도체", "marketCap": 120000, "direction": "UP" },
-    { "id": "ss", "name": "삼성전자", "kind": "STOCK", "ticker": "005930", "sector": "반도체", "marketCap": 4600000, "direction": "DOWN" },
-  ],
-  "edges": [
-    { "id": "e2", "source": "sk", "target": "hanmi", "relation": "장비 공급" },
-    { "id": "e3", "source": "sk", "target": "ss", "relation": "경쟁", "relationType": "COMPETITOR" },
-  ],
-}
-```
-
-**주의**
-
-- 뉴스 클릭 시 그래프 패널이 그리는 서브그래프는 전부 이 응답에서 나온다 —
-  §5.2 analysis 응답과는 독립적으로 조회된다(`lib/queries.ts`의
-  `useNewsImpactGraphQuery`)
-- `direction`은 이 파급 경로에 포함된 노드에만 붙는다. CONCEPT 노드나 파급
-  경로 밖의 노드에는 없다
-- **좌표를 내려주지 않는다.** 배치는 `originId`에서 BFS로 계산한 hop
-  레벨을 기준으로 프론트가 동심원으로 계산한다(`lib/graphIndex.ts`의
-  `bfsBuild` + `lib/layout.ts`의 `radialLayout`)
-- 노드가 5개면 응답에도 5개만 온다 — 전체 온톨로지가 아니라 이 뉴스의
-  파급 경로에 해당하는 서브그래프만 내려준다
-
-### 5.4 전체 그래프
-
-```
-GET /api/graph
+GET /api/graph?mode=full
 → { "nodes": OntologyNode[], "edges": OntologyEdge[] }
 ```
 
-### 5.5 관심종목 브리핑
+뉴스에 종속되지 않는 온톨로지 전체 뷰라 `newsId`/`originId`가 없다. 그 외
+`nodes`/`edges` 스키마는 §5.2의 `graph` 필드와 동일하며, camelCase 그대로 온다
+(매핑 불필요).
 
-```
-POST /api/briefing
-{ "tickers": ["005930", "042700"] }
-```
+### 5.4 스크랩 (서버 API 없음)
 
-```jsonc
-{
-  "totalNews": 20,
-  "matched": [
-    {
-      "ticker": "042700",
-      "name": "한미반도체",
-      "direction": "UP",
-      "relation": "장비 공급",
-      "chain": ["sk", "hanmi"],
-      "newsId": "n1",
-      "newsTitle": "SK하이닉스, HBM4 양산 위해...",
-    },
-  ],
-  "unmatched": [{ "ticker": "005930", "name": "삼성전자" }],
-}
-```
+관심종목 브리핑(티커 역조회) 기능은 없앴다. 대신 뉴스 카드에서 바로 저장/해제하는
+단순 스크랩으로 바꿨다 — 서버 호출이 전혀 없고 프론트엔드 세션 메모리
+(`lib/atoms.ts`의 `scrappedNewsIdsAtom: number[]`)에만 저장된다. 새로고침하면
+사라진다(§1 원칙과 동일). 이미 로드된 뉴스 목록 캐시(`useNewsQuery`)에서 저장된
+id만 걸러 시트에 보여준다.
 
-요청에 담는 `tickers`는 서버에 저장되지 않는다. 매번 클라이언트 메모리에서 보낸다.
-
-### 5.6 예측 검증 (news는 커서 기반 페이징)
+### 5.5 예측 검증 (news는 커서 기반 페이징)
 
 ```
 GET /api/verify?days=30&sector=반도체&cursor=v10&limit=10
@@ -620,27 +604,22 @@ Jotai는 단일 스토어 객체가 아니라 atom 단위로 상태를 쪼갠다
 ```ts
 import { atom } from 'jotai'
 
-export const viewAtom = atom<'map' | 'verify'>('map')
-export const selectedNewsIdAtom = atom<string | null>(null)
-export const graphModeAtom = atom<'focus' | 'all' | 'node'>('focus')
+export const viewAtom = atom<'map' | 'network' | 'verify'>('map')
+export const selectedNewsIdAtom = atom<number | null>(null)
 export const highlightedNodeAtom = atom<string | null>(null) // 전체 관계망 제자리 강조
-export const backToAtom = atom<'focus' | 'all' | 'reset'>('focus')
-export const sectorFilterAtom = atom<string>('전체') // '전체' | '반도체' | ...
 export const verifyContextAtom = atom<{
   label: string
   names: string[]
 } | null>(null) // 뉴스에서 진입 시 종목명 배열
 export const newsSheetOpenAtom = atom(false) // 모바일 바텀시트
 
-// 브리핑 — 메모리 전용, 영속 저장 없음
-export const briefingTickersAtom = atom<string[]>([])
-export const briefingResultAtom = atom<BriefingResponse | null>(null)
-export const briefingRanAtAtom = atom<string | null>(null)
+// 스크랩 — 메모리 전용, 영속 저장 없음
+export const scrappedNewsIdsAtom = atom<number[]>([])
 ```
 
 서버 데이터(뉴스, 그래프, 분석, 검증)는 atom에 넣지 않는다. TanStack Query가
 관리한다(백엔드 연결 전까지는 `lib/api.ts`가 로컬 데이터를 동기적으로
-반환한다). Jotai atom은 **UI 상태와 관심종목 메모리**만 담당한다.
+반환한다). Jotai atom은 **UI 상태와 스크랩 메모리**만 담당한다.
 
 파생 상태가 필요하면(예: 선택된 뉴스 객체, 필터링된 뉴스 목록) 각 atom을
 `get`으로 조합하는 파생 atom(`atom((get) => ...)`)을 추가로 선언해 컴포넌트
@@ -737,11 +716,14 @@ src/
 │   │   ├── VerifyView.tsx
 │   │   ├── VerifyList.tsx
 │   │   └── VerifyDetail.tsx
-│   └── briefing/
-│       └── BriefingSheet.tsx
+│   └── scrap/
+│       ├── ScrapFab.tsx
+│       └── ScrapSheet.tsx
 ├── lib/
-│   ├── api.ts                   # fetch 래퍼 + Query 훅
-│   ├── atoms.ts                 # Jotai atom (UI 상태 + 관심종목 메모리)
+│   ├── api.ts                   # 목 데이터 wire 응답 함수 (§11 데모 안전장치)
+│   ├── mappers.ts                # wire(snake_case) → 도메인(camelCase) 매핑
+│   ├── queries.ts               # fetch 래퍼 + Query 훅
+│   ├── atoms.ts                 # Jotai atom (UI 상태 + 스크랩 메모리)
 │   ├── layout.ts                # focusBuild, nodeBuild, radialLayout, fullLayout
 │   └── format.ts                # 방향 라벨, 영향 태그(직접/간접/확산)
 └── types/index.ts
