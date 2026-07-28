@@ -278,7 +278,11 @@ export function GraphCanvas({
   const { nodeOverrides, edgeOverrides, stageText, tick, settled } =
     usePropagation(scene2.scene)
 
-  // 하이라이트가 없으면(전체 보기) 지금처럼 전체 노드에 즉시 맞춘다.
+  // mode==='focus'(뉴스 파급 경로, GraphPanel)는 지금까지처럼 항상 전체 노드에
+  // 즉시 fitView한다 — 아래 서브그래프 확대 줌은 mode==='all'(전체 관계망,
+  // NetworkView)에서만 적용한다.
+  //
+  // mode==='all'에서 하이라이트가 없으면(전체 보기) 전체 노드에 즉시 맞추고,
   // 하이라이트 중(scene2.scene 존재)이면 리빌 애니메이션이 끝나(settled)
   // 진정될 때까지는 줌을 건드리지 않고 기존 화면 그대로 하이라이트가 퍼지는
   // 걸 보여준 뒤, 다 끝나면 그제서야 기점+리빌 노드로만 fitView를 좁혀
@@ -287,6 +291,14 @@ export function GraphCanvas({
   // 둬 일부 노드가 화면 밖으로 밀려나더라도 카드가 잘 보이는 크기 밑으로는
   // 안 내려가게 한다.
   useEffect(() => {
+    if (mode !== 'all') {
+      const id = window.setTimeout(
+        () => fitView({ padding: 0.2, duration: 400 }),
+        60,
+      )
+      return () => window.clearTimeout(id)
+    }
+
     const scene = scene2.scene
     if (scene && !settled) return
 
@@ -303,7 +315,7 @@ export function GraphCanvas({
       60,
     )
     return () => window.clearTimeout(id)
-  }, [fitView, scene2.scene?.key, scene2.ids.length, settled])
+  }, [fitView, mode, scene2.scene?.key, scene2.ids.length, settled])
 
   // scene2/override가 실제로 바뀔 때만 재계산한다. React Flow는 노드/엣지를 id별로
   // 내부 스토어에 구독시키기 때문에, 값이 같아도 매 틱마다 전체 배열을 새 객체로
