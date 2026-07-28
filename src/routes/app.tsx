@@ -19,8 +19,13 @@ function KoslinkApp() {
   const view = useAtomValue(viewAtom)
   const [selectedNewsId, setSelectedNewsId] = useAtom(selectedNewsIdAtom)
   // NewsPanel도 같은 쿼리 키(['news'])를 쓰므로 캐시를 공유해 중복 요청되지 않는다.
-  const { data: newsPages } = useNewsQuery()
-  const firstNewsId = newsPages?.pages[0]?.items[0]?.id
+  const { data: newsPages, isPlaceholderData } = useNewsQuery()
+  // placeholderData는 mock의 첫 항목을 즉시 보여주는 용도라, 그 값으로 자동 선택을
+  // 확정해버리면 실 데이터가 도착한 뒤에도(selectedNewsId가 이미 채워져 있어서) 절대
+  // 갱신되지 않는다 — 반드시 실제 응답(isPlaceholderData === false)이 온 뒤에만 쓴다.
+  const firstNewsId = isPlaceholderData
+    ? undefined
+    : newsPages?.pages[0]?.items[0]?.id
 
   // 처음 진입하면 실제로 받아온 뉴스 목록의 첫 건을 바로 시각화한다(docs/koslink.html의
   // select(NEWS[0])와 동일) — mock 함수를 직접 부르면 실 배포에서도 목데이터의 첫 id로
