@@ -13,6 +13,9 @@ export const selectedNewsIdAtom = atom<number | null>(null)
 /** 전체 관계망에서 배치를 유지한 채 특정 노드 기점으로 제자리 강조할 때의 대상 */
 export const highlightedNodeAtom = atom<string | null>(null)
 
+/** 커버 화면 → /app 진입 시 전체 관계망 인트로(자동 하이라이트+줌)를 재생했는지 — 세션당 1회만 */
+export const introPlayedAtom = atom(false)
+
 export const verifyContextAtom = atom<{
   label: string
   names: string[]

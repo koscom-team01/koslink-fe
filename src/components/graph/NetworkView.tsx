@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
-import { useAtomValue } from 'jotai'
-import { highlightedNodeAtom } from '#/lib/atoms'
+import { useAtom } from 'jotai'
+import { highlightedNodeAtom, introPlayedAtom } from '#/lib/atoms'
 import { useGraphQuery } from '#/lib/queries'
-import { GraphCanvas, buildAllScene } from './GraphPanel'
+import { GraphCanvas, buildAllScene, FULL_LAYOUT } from './GraphPanel'
 import type { Scene2 } from './GraphPanel'
 import './graph.css'
 
@@ -11,8 +11,17 @@ import './graph.css'
  * 뉴스맵 3분할 레이아웃 밖 큰 화면에 보여준다. 노드 클릭 시 제자리 강조하는
  * highlightedNodeAtom은 GraphCanvas와 공유해 씬 계산과 상호작용을 동기화한다. */
 export default function NetworkView() {
-  const highlightedNode = useAtomValue(highlightedNodeAtom)
+  const [highlightedNode, setHighlightedNode] = useAtom(highlightedNodeAtom)
+  const [introPlayed, setIntroPlayed] = useAtom(introPlayedAtom)
   const { data: graph } = useGraphQuery()
+
+  // 커버 화면 → /app 최초 진입 시 허브 노드를 자동으로 한 번 하이라이트한다.
+  // introPlayedAtom이 전역이라 GNB 탭을 오가며 NetworkView가 재마운트돼도 재생되지 않는다.
+  useEffect(() => {
+    if (introPlayed || highlightedNode || !graph) return
+    setHighlightedNode(FULL_LAYOUT.centerId)
+    setIntroPlayed(true)
+  }, [introPlayed, highlightedNode, graph, setHighlightedNode, setIntroPlayed])
 
   const scene2: Scene2 | null = useMemo(() => {
     if (!graph) return null

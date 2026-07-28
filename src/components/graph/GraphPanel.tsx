@@ -42,7 +42,8 @@ const edgeTypes = { rel: RelEdge }
 
 // 정적 온톨로지 기준으로 결정적으로 계산되는 좌표라 모듈 스코프에서 한 번만
 // 계산해 캐시한다. 뷰를 오갈 때마다 재계산하면(성능 낭비는 물론) 노드가 튈 수 있다.
-const FULL_LAYOUT = fullLayout()
+// export해서 NetworkView가 centerId(인트로 하이라이트 기점)를 재계산 없이 가져다 쓴다.
+export const FULL_LAYOUT = fullLayout()
 
 interface EdgeSpec {
   id: string
@@ -278,9 +279,20 @@ export function GraphCanvas({
     scene2.scene,
   )
 
+  // 하이라이트 중(scene2.scene 존재)이면 기점+리빌 노드로만 fitView를 좁혀서
+  // 보기 좋은 크기로 줌인시키고, 아니면(전체 보기) 지금처럼 전체 노드에 맞춘다.
   useEffect(() => {
+    const scene = scene2.scene
+    const targetNodes = scene
+      ? [scene.originId, ...scene.nodes.map((n) => n.id)].map((id) => ({ id }))
+      : undefined
     const id = window.setTimeout(
-      () => fitView({ padding: 0.2, duration: 400 }),
+      () =>
+        fitView({
+          padding: 0.2,
+          duration: 400,
+          ...(targetNodes ? { nodes: targetNodes } : {}),
+        }),
       60,
     )
     return () => window.clearTimeout(id)

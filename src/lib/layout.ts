@@ -53,15 +53,19 @@ const SECTOR_CENTERS: Record<string, LayoutPoint> = {
 export interface FullLayout {
   pos: Record<string, LayoutPoint>
   sectorLabelPos: Record<string, LayoutPoint>
+  /** 연결 수 기준 최고 허브 노드 — 진입 인트로 하이라이트 기점으로 재사용된다 */
+  centerId: string
 }
 
 /**
  * 섹터별 고정 좌표(현재는 반도체 단일 클러스터, 중앙 배치). 클러스터 안은 연결 수
- * 내림차순 동심원. 호출부(GraphPanel)에서 useMemo로 캐시해 뷰 전환 시 재계산되지 않게 한다.
+ * 내림차순 3단 동심원(51개 규모에서 바깥 링 하나에 다 몰아넣으면 카드가 겹친다).
+ * 호출부(GraphPanel)에서 useMemo로 캐시해 뷰 전환 시 재계산되지 않게 한다.
  */
 export function fullLayout(): FullLayout {
   const pos: Record<string, LayoutPoint> = {}
   const sectorLabelPos: Record<string, LayoutPoint> = {}
+  let centerId = ''
 
   function ring(
     nodes: OntologyNode[],
@@ -87,18 +91,15 @@ export function fullLayout(): FullLayout {
     if (list.length === 0) return
 
     pos[list[0].id] = { x: center.x, y: center.y }
+    centerId = list[0].id
     const rest = list.slice(1)
-    ring(rest.slice(0, 6), center, 275, -Math.PI / 2)
-    ring(
-      rest.slice(6),
-      center,
-      480,
-      -Math.PI / 2 + Math.PI / Math.max(rest.length - 6, 1),
-    )
+    ring(rest.slice(0, 8), center, 260, -Math.PI / 2)
+    ring(rest.slice(8, 24), center, 460, -Math.PI / 2 + Math.PI / 8)
+    ring(rest.slice(24), center, 700, -Math.PI / 2 + Math.PI / 16)
     sectorLabelPos[sector] = { x: center.x, y: center.y - 330 }
   })
 
-  return { pos, sectorLabelPos }
+  return { pos, sectorLabelPos, centerId }
 }
 
 /** 전체 관계망 위계(연결 수 기준 3단계) — 진한 잉크(t1)일수록 핵심 노드 */
