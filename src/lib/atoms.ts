@@ -6,7 +6,7 @@ import { atom } from 'jotai'
  * 세션 메모리 전용이며 localStorage 등 영속 저장은 쓰지 않는다.
  */
 
-export const viewAtom = atom<'map' | 'network' | 'verify'>('map')
+export const viewAtom = atom<'network' | 'map' | 'verify'>('network')
 
 export const selectedNewsIdAtom = atom<number | null>(null)
 
