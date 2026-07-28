@@ -404,7 +404,7 @@ export function GraphCanvas({
 
       const prev = prevEdgesRef.current.get(spec.id)
       if (
-        prev &&
+        prev?.data &&
         prev.source === spec.source &&
         prev.target === spec.target &&
         prev.data.relation === spec.relation &&
