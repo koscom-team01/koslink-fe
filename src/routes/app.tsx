@@ -5,7 +5,7 @@ import { motion } from 'motion/react'
 import { selectedNewsIdAtom, viewAtom } from '#/lib/atoms'
 import { getNews } from '#/lib/api'
 import Header from '#/components/Header'
-import BriefingSheet from '#/components/briefing/BriefingSheet'
+import ScrapSheet from '#/components/scrap/ScrapSheet'
 import NewsPanel from '#/components/news/NewsPanel'
 import MobileNewsBar from '#/components/news/MobileNewsBar'
 import GraphPanel from '#/components/graph/GraphPanel'
@@ -22,7 +22,7 @@ function KoslinkApp() {
   // 처음 진입하면 최신 뉴스를 바로 시각화한다 (docs/koslink.html의 select(NEWS[0])와 동일)
   useEffect(() => {
     if (selectedNewsId) return
-    setSelectedNewsId(getNews().items[0].id)
+    setSelectedNewsId(getNews().items[0].news_id)
   }, [selectedNewsId, setSelectedNewsId])
 
   return (
@@ -48,7 +48,7 @@ function KoslinkApp() {
           <AnalysisPanel />
         </main>
       )}
-      <BriefingSheet />
+      <ScrapSheet />
     </motion.div>
   )
 }

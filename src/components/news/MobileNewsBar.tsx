@@ -1,19 +1,14 @@
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom } from 'jotai'
 import { cn } from '#/lib/utils'
-import {
-  newsSheetOpenAtom,
-  sectorFilterAtom,
-  selectedNewsIdAtom,
-} from '#/lib/atoms'
+import { newsSheetOpenAtom, selectedNewsIdAtom } from '#/lib/atoms'
 import { useNewsQuery } from '#/lib/queries'
 
 /** ≤1080px에서만 보이는 상단 현재뉴스 바 + 바텀시트 배경 스크림. CSS가 그 이상 폭에서는 숨긴다. */
 export default function MobileNewsBar() {
-  const sector = useAtomValue(sectorFilterAtom)
   const [selectedId, setSelectedId] = useAtom(selectedNewsIdAtom)
   const [sheetOpen, setSheetOpen] = useAtom(newsSheetOpenAtom)
 
-  const { data, fetchNextPage, hasNextPage } = useNewsQuery(sector)
+  const { data, fetchNextPage, hasNextPage } = useNewsQuery()
   const list = data?.pages.flatMap((p) => p.items) ?? []
   const index = list.findIndex((n) => n.id === selectedId)
   const current = index >= 0 ? list[index] : null
@@ -50,14 +45,8 @@ export default function MobileNewsBar() {
         >
           <span className="mb-[5px] flex items-center gap-[7px]">
             <span
-              className="rounded-[5px] px-[7px] py-0.5 text-[11px] font-bold"
-              style={{ background: 'var(--n-100)', color: 'var(--n-600)' }}
-            >
-              {current?.sector ?? '전체'}
-            </span>
-            <span
               className="text-[11.5px] font-bold after:ml-0.5 after:content-['▾']"
-              style={{ color: 'var(--n-500)' }}
+              style={{ color: 'var(--n-600)' }}
             >
               {index >= 0 ? index + 1 : 0} / {list.length}
             </span>

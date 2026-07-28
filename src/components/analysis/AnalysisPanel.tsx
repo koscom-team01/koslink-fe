@@ -1,6 +1,6 @@
 import { useAtom, useAtomValue } from 'jotai'
 import { selectedNewsIdAtom, verifyContextAtom, viewAtom } from '#/lib/atoms'
-import { useNewsAnalysisQuery } from '#/lib/queries'
+import { useNewsImpactQuery } from '#/lib/queries'
 import MainStockCard from './MainStockCard'
 import RelatedList from './RelatedList'
 import RationaleBox from './RationaleBox'
@@ -10,13 +10,16 @@ export default function AnalysisPanel() {
   const [, setVerifyContext] = useAtom(verifyContextAtom)
   const [, setView] = useAtom(viewAtom)
 
-  const { data: analysis } = useNewsAnalysisQuery(selectedNewsId)
+  const { data: impact } = useNewsImpactQuery(selectedNewsId)
 
   function openVerifyForThisNews() {
-    if (!analysis) return
+    if (!impact) return
     setVerifyContext({
-      label: analysis.title,
-      names: [analysis.main.name, ...analysis.related.map((r) => r.name)],
+      label: impact.originStocks.map((o) => o.name).join(', '),
+      names: [
+        ...impact.originStocks.map((o) => o.name),
+        ...impact.relatedStocks.map((r) => r.name),
+      ],
     })
     setView('verify')
   }
@@ -26,13 +29,13 @@ export default function AnalysisPanel() {
       <div className="phead">
         <h2>영향 분석</h2>
         <p>
-          {analysis
-            ? `${analysis.sector} · 영향 종목 ${analysis.related.length + 1}개`
+          {impact
+            ? `영향 종목 ${impact.originStocks.length + impact.relatedStocks.length}개`
             : '뉴스 선택 대기 중'}
         </p>
       </div>
       <div className="pbody">
-        {!analysis ? (
+        {!impact ? (
           <div
             className="px-6 py-16 text-center"
             style={{ color: 'var(--n-500)' }}
@@ -43,7 +46,7 @@ export default function AnalysisPanel() {
             >
               뉴스를 선택해 주세요
             </b>
-            <p className="text-[13px] leading-[1.6]">
+            <p className="text-[13px] leading-[1.6] font-medium">
               선택한 뉴스가 어떤 종목까지
               <br />
               이어지는지 단계별로 보여드립니다
@@ -57,7 +60,7 @@ export default function AnalysisPanel() {
             >
               <div
                 className="mb-[9px] text-[11.5px] font-bold"
-                style={{ color: 'var(--n-500)' }}
+                style={{ color: 'var(--n-600)' }}
               >
                 기사 요약
               </div>
@@ -65,15 +68,15 @@ export default function AnalysisPanel() {
                 className="flex flex-col gap-[7px] rounded-xl px-3.5 py-[13px]"
                 style={{ background: 'var(--n-50)' }}
               >
-                {analysis.article.summary.map((line, i) => (
+                {impact.newsSummary.map((line, i) => (
                   <p
                     key={i}
-                    className="flex gap-2 text-[13px] leading-[1.6] tracking-[-0.022em]"
-                    style={{ color: 'var(--n-600)' }}
+                    className="flex gap-2 text-[13px] leading-[1.6] tracking-[-0.022em] font-medium"
+                    style={{ color: 'var(--n-700)' }}
                   >
                     <b
                       className="flex-none font-bold"
-                      style={{ color: 'var(--n-400)' }}
+                      style={{ color: 'var(--n-700)' }}
                     >
                       {i + 1}
                     </b>
@@ -83,14 +86,14 @@ export default function AnalysisPanel() {
               </div>
               <div
                 className="mt-2.5 flex items-center gap-[7px] text-xs"
-                style={{ color: 'var(--n-500)' }}
+                style={{ color: 'var(--n-600)' }}
               >
                 <b className="font-semibold" style={{ color: 'var(--n-600)' }}>
-                  {analysis.article.press}
+                  {impact.source.press}
                 </b>
                 <span>·</span>
                 <span>
-                  {new Date(analysis.article.publishedAt).toLocaleTimeString(
+                  {new Date(impact.source.publishedAt).toLocaleTimeString(
                     'ko-KR',
                     {
                       hour: '2-digit',
@@ -99,7 +102,7 @@ export default function AnalysisPanel() {
                   )}
                 </span>
                 <a
-                  href={analysis.article.originUrl}
+                  href={impact.source.url}
                   target="_blank"
                   rel="noreferrer"
                   className="ml-auto text-xs font-bold hover:underline"
@@ -116,22 +119,25 @@ export default function AnalysisPanel() {
             >
               <div
                 className="mb-[9px] text-[11.5px] font-bold"
-                style={{ color: 'var(--n-500)' }}
+                style={{ color: 'var(--n-600)' }}
               >
                 영향 기점
               </div>
-              <MainStockCard analysis={analysis} />
+              <MainStockCard originStocks={impact.originStocks} />
             </section>
 
             <section
               className="border-b px-[18px] py-4"
               style={{ borderColor: 'var(--n-100)' }}
             >
-              <RelatedList analysis={analysis} />
+              <RelatedList
+                relatedStocks={impact.relatedStocks}
+                graph={impact.graph}
+              />
             </section>
 
             <section className="px-[18px] py-4">
-              <RationaleBox analysis={analysis} />
+              <RationaleBox finalSummary={impact.finalSummary} />
             </section>
 
             <section className="px-[18px] py-4">

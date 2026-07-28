@@ -47,7 +47,8 @@ function VerifyChart({ daily }: { daily: VerifyDaily[] }) {
             y={y(v) + 4}
             textAnchor="end"
             fontSize={11}
-            fill="#B4AFAA"
+            fontWeight={500}
+            fill="var(--n-500)"
           >
             {Math.round(v * 100)}%
           </text>
@@ -80,7 +81,8 @@ function VerifyChart({ daily }: { daily: VerifyDaily[] }) {
           x={x(i)}
           y={h - 9}
           fontSize={11}
-          fill="#B4AFAA"
+          fontWeight={500}
+          fill="var(--n-500)"
           textAnchor={anchor}
         >
           {label}
@@ -141,7 +143,7 @@ export default function VerifyView() {
             !
           </span>
           <p
-            className="text-[13px] leading-[1.5]"
+            className="text-[13px] leading-[1.5] font-medium"
             style={{ color: 'var(--o-700)' }}
           >
             이번 예측에 등장한{' '}
@@ -170,8 +172,8 @@ export default function VerifyView() {
         <div className="vmets flex flex-col gap-4 px-[22px] py-5">
           <div>
             <div
-              className="text-xs font-semibold"
-              style={{ color: 'var(--n-500)' }}
+              className="text-xs font-bold"
+              style={{ color: 'var(--n-600)' }}
             >
               뉴스 단위 적중률
             </div>
@@ -188,16 +190,16 @@ export default function VerifyView() {
               </em>
             </div>
             <div
-              className="mt-1 text-[11.5px]"
-              style={{ color: 'var(--n-400)' }}
+              className="mt-1 text-[11.5px] font-medium"
+              style={{ color: 'var(--n-500)' }}
             >
               예측 종목의 절반 이상을 맞힌 뉴스 비율
             </div>
           </div>
           <div>
             <div
-              className="text-xs font-semibold"
-              style={{ color: 'var(--n-500)' }}
+              className="text-xs font-bold"
+              style={{ color: 'var(--n-600)' }}
             >
               종목 단위 적중률
             </div>
@@ -211,16 +213,16 @@ export default function VerifyView() {
               </em>
             </div>
             <div
-              className="mt-1 text-[11.5px]"
-              style={{ color: 'var(--n-400)' }}
+              className="mt-1 text-[11.5px] font-medium"
+              style={{ color: 'var(--n-500)' }}
             >
               예측 방향과 익일 종가 방향 일치
             </div>
           </div>
           <div>
             <div
-              className="text-xs font-semibold"
-              style={{ color: 'var(--n-500)' }}
+              className="text-xs font-bold"
+              style={{ color: 'var(--n-600)' }}
             >
               검증 완료
             </div>
@@ -234,8 +236,8 @@ export default function VerifyView() {
               </em>
             </div>
             <div
-              className="mt-1 text-[11.5px]"
-              style={{ color: 'var(--n-400)' }}
+              className="mt-1 text-[11.5px] font-medium"
+              style={{ color: 'var(--n-500)' }}
             >
               {ctx ? '관련 검증 건수' : '최근 30일 기준'}
             </div>
@@ -245,7 +247,10 @@ export default function VerifyView() {
           <h3 className="text-[13.5px] font-bold tracking-[-0.025em]">
             일자별 적중률 추이
           </h3>
-          <p className="mt-[3px] text-xs" style={{ color: 'var(--n-500)' }}>
+          <p
+            className="mt-[3px] text-xs font-medium"
+            style={{ color: 'var(--n-500)' }}
+          >
             최근 30거래일
           </p>
           <VerifyChart daily={daily} />

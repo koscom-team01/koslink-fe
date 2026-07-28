@@ -1,11 +1,10 @@
 import { arrow, directionLabel, impactOf } from '#/lib/format'
-import { bfsBuild, buildGraphIndex, pathTo } from '#/lib/graphIndex'
-import { useNewsImpactGraphQuery } from '#/lib/queries'
-import type { NewsAnalysis, NewsRelatedStock } from '#/types'
+import { bfsBuild, buildGraphIndex } from '#/lib/graphIndex'
+import type { NewsImpactGraph, RelatedStock } from '#/types'
 
-function sortRelated(hopOf: (nodeId: string) => number) {
-  return (a: NewsRelatedStock, b: NewsRelatedStock) => {
-    const hopDiff = hopOf(a.nodeId) - hopOf(b.nodeId)
+function sortRelated(hopOf: (ticker: string) => number) {
+  return (a: RelatedStock, b: RelatedStock) => {
+    const hopDiff = hopOf(a.ticker) - hopOf(b.ticker)
     if (hopDiff !== 0) return hopDiff
     if (a.direction === b.direction) return 0
     return a.direction === 'UP' ? -1 : 1
@@ -13,33 +12,39 @@ function sortRelated(hopOf: (nodeId: string) => number) {
 }
 
 /** 관계로 이어진 종목 — 기점에서 파급 경로 그래프(BFS)를 따라 이어지는 관련주 목록 */
-export default function RelatedList({ analysis }: { analysis: NewsAnalysis }) {
-  const { data: impactGraph } = useNewsImpactGraphQuery(analysis.newsId)
-  if (!impactGraph) return null
+export default function RelatedList({
+  relatedStocks,
+  graph,
+}: {
+  relatedStocks: RelatedStock[]
+  graph: NewsImpactGraph
+}) {
+  const index = buildGraphIndex(graph.nodes, graph.edges)
+  const built = bfsBuild(index, graph.originId)
+  const hopByTicker = new Map<string, number>()
+  graph.nodes.forEach((n) => {
+    if (n.ticker) hopByTicker.set(n.ticker, built.level[n.id] ?? 0)
+  })
+  const hopOf = (ticker: string) => hopByTicker.get(ticker) ?? 0
 
-  const index = buildGraphIndex(impactGraph.nodes, impactGraph.edges)
-  const built = bfsBuild(index, impactGraph.originId)
-  const hopOf = (nodeId: string) => built.level[nodeId] ?? 0
-
-  const sorted = [...analysis.related].sort(sortRelated(hopOf))
+  const sorted = [...relatedStocks].sort(sortRelated(hopOf))
 
   return (
     <div>
       <div
         className="mb-[9px] text-[11.5px] font-bold"
-        style={{ color: 'var(--n-500)' }}
+        style={{ color: 'var(--n-600)' }}
       >
-        관계로 이어진 종목 {analysis.related.length}
+        관계로 이어진 종목 {relatedStocks.length}
       </div>
       <div className="flex flex-col gap-[7px]">
         {sorted.map((r) => {
-          const hop = hopOf(r.nodeId)
+          const hop = hopOf(r.ticker)
           const impact = impactOf(hop)
           const down = r.direction === 'DOWN'
           return (
             <div
-              key={r.nodeId}
-              data-id={r.nodeId}
+              key={r.ticker}
               className="rounded-xl border px-[13px] py-3"
               style={{ borderColor: 'var(--n-150)' }}
             >
@@ -68,17 +73,24 @@ export default function RelatedList({ analysis }: { analysis: NewsAnalysis }) {
                   {impact.label}
                 </span>
                 <b className="font-bold" style={{ color: 'var(--n-900)' }}>
-                  {r.relation}
+                  {r.relationLabel}
                 </b>{' '}
                 관계
               </div>
               <div
-                className="mt-[7px] text-[11.5px]"
-                style={{ color: 'var(--n-400)' }}
+                className="mt-[7px] text-[11.5px] font-medium"
+                style={{ color: 'var(--n-500)' }}
               >
-                {pathTo(built, r.nodeId)
-                  .map((id) => index.byId.get(id)?.name ?? id)
-                  .join(' → ')}
+                {r.relationPath}
+              </div>
+              <div
+                className="mt-2.5 rounded-lg px-3 py-2.5 text-[12px] leading-[1.55] font-medium"
+                style={{
+                  background: down ? 'var(--d-50)' : 'var(--o-50)',
+                  color: down ? 'var(--d-700)' : 'var(--o-700)',
+                }}
+              >
+                {r.propagation}
               </div>
             </div>
           )

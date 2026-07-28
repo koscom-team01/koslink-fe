@@ -27,7 +27,7 @@ export default function Header() {
           KOS<span style={{ color: 'var(--o-500)' }}>LINK</span>
         </b>
         <em
-          className="text-xs font-normal not-italic"
+          className="text-xs font-medium not-italic"
           style={{ color: 'var(--n-500)' }}
         >
           뉴스로 읽는 종목 관계
@@ -55,7 +55,7 @@ export default function Header() {
       </nav>
 
       <div
-        className="ml-auto hidden items-center gap-1.5 text-xs sm:flex"
+        className="ml-auto hidden items-center gap-1.5 text-xs font-medium sm:flex"
         style={{ color: 'var(--n-500)' }}
       >
         <i

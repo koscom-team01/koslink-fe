@@ -26,8 +26,8 @@ export default function NetworkView() {
           <GraphCanvas scene2={scene2} mode="all" title="전체 관계망" />
         ) : (
           <div
-            className="pbody flex items-center justify-center text-sm"
-            style={{ color: 'var(--n-500)' }}
+            className="pbody flex items-center justify-center text-sm font-medium"
+            style={{ color: 'var(--n-600)' }}
           >
             불러오는 중…
           </div>

@@ -51,7 +51,10 @@ export default function VerifyList({
         <h2 className="text-[14.5px] font-bold tracking-[-0.025em]">
           검증 목록
         </h2>
-        <p className="mt-[3px] text-xs" style={{ color: 'var(--n-500)' }}>
+        <p
+          className="mt-[3px] text-xs font-medium"
+          style={{ color: 'var(--n-500)' }}
+        >
           {subtitle}
         </p>
       </div>
@@ -89,7 +92,7 @@ export default function VerifyList({
             >
               검증 결과가 없습니다
             </b>
-            <p className="text-[13px] leading-[1.6]">
+            <p className="text-[13px] leading-[1.6] font-medium">
               필터를 바꾸거나 전체 검증을 확인해 주세요
             </p>
           </div>
@@ -127,11 +130,11 @@ export default function VerifyList({
                 </i>
               </span>
               <span className="min-w-0 flex-1">
-                <span className="line-clamp-2 block text-sm font-semibold tracking-[-0.025em] leading-[1.4]">
+                <span className="line-clamp-2 block text-sm font-bold tracking-[-0.025em] leading-[1.4]">
                   {v.title}
                 </span>
                 <span
-                  className="mt-[5px] flex items-center gap-1.5 text-[11.5px]"
+                  className="mt-[5px] flex items-center gap-1.5 text-[11.5px] font-medium"
                   style={{ color: 'var(--n-500)' }}
                 >
                   <span
@@ -152,8 +155,8 @@ export default function VerifyList({
         {hasNextPage && (
           <div
             ref={sentinelRef}
-            className="py-3 text-center text-xs"
-            style={{ color: 'var(--n-400)' }}
+            className="py-3 text-center text-xs font-medium"
+            style={{ color: 'var(--n-500)' }}
           >
             {isFetchingNextPage ? '더 불러오는 중…' : ''}
           </div>

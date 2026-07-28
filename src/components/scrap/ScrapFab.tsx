@@ -1,15 +1,11 @@
 import type { ComponentProps } from 'react'
 
-interface BriefingFabProps extends ComponentProps<'button'> {
-  matchedCount: number
+interface ScrapFabProps extends ComponentProps<'button'> {
+  count: number
 }
 
-/** 우하단 고정 FAB — 관심종목 브리핑 결과 매칭 건수를 배지로 보여준다 */
-export default function BriefingFab({
-  matchedCount,
-  className,
-  ...rest
-}: BriefingFabProps) {
+/** 우하단 고정 FAB — 스크랩한 뉴스 건수를 배지로 보여준다 */
+export default function ScrapFab({ count, className, ...rest }: ScrapFabProps) {
   return (
     <button
       type="button"
@@ -17,13 +13,13 @@ export default function BriefingFab({
       style={{ background: 'var(--n-900)', boxShadow: 'var(--shadow-lg)' }}
       {...rest}
     >
-      관심종목 브리핑
-      {matchedCount > 0 && (
+      스크랩
+      {count > 0 && (
         <span
           className="rounded-full px-2 py-0.5 text-xs font-extrabold"
           style={{ background: 'var(--o-500)' }}
         >
-          {matchedCount}
+          {count}
         </span>
       )}
     </button>

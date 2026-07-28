@@ -12,7 +12,7 @@ import '@xyflow/react/dist/style.css' // 필수 — 빠뜨리면 노드가 겹�
 import { useAtom, useAtomValue } from 'jotai'
 import { cn } from '#/lib/utils'
 import { highlightedNodeAtom, selectedNewsIdAtom } from '#/lib/atoms'
-import { useNewsImpactGraphQuery } from '#/lib/queries'
+import { useNewsImpactQuery } from '#/lib/queries'
 import { sizeOf } from '#/lib/format'
 import { fullLayout, graphIndex, radialLayout, tierOf } from '#/lib/layout'
 import type { LayoutPoint } from '#/lib/layout'
@@ -584,7 +584,8 @@ function Legend({ mode }: { mode: 'focus' | 'all' }) {
 
 export default function GraphPanel() {
   const selectedNewsId = useAtomValue(selectedNewsIdAtom)
-  const { data: impactGraph } = useNewsImpactGraphQuery(selectedNewsId)
+  const { data: impact } = useNewsImpactQuery(selectedNewsId)
+  const impactGraph = impact?.graph
 
   const scene2: Scene2 | null = useMemo(() => {
     if (selectedNewsId && impactGraph) return buildFocusScene(impactGraph)
@@ -598,8 +599,8 @@ export default function GraphPanel() {
           <GraphCanvas scene2={scene2} mode="focus" />
         ) : (
           <div
-            className="pbody flex items-center justify-center text-sm"
-            style={{ color: 'var(--n-500)' }}
+            className="pbody flex items-center justify-center text-sm font-medium"
+            style={{ color: 'var(--n-600)' }}
           >
             뉴스를 선택하면 파급 경로가 나타납니다
           </div>
