@@ -281,6 +281,9 @@ export function GraphCanvas({
 
   // 하이라이트 중(scene2.scene 존재)이면 기점+리빌 노드로만 fitView를 좁혀서
   // 보기 좋은 크기로 줌인시키고, 아니면(전체 보기) 지금처럼 전체 노드에 맞춘다.
+  // SK하이닉스처럼 연결이 아주 많은 허브는 리빌 노드 전부를 담으려 하면 다시
+  // 확 줌아웃돼 버리므로, 하이라이트 중에는 minZoom으로 하한선을 둬 일부 노드가
+  // 화면 밖으로 밀려나더라도 카드가 잘 보이는 크기 밑으로는 안 내려가게 한다.
   useEffect(() => {
     const scene = scene2.scene
     const targetNodes = scene
@@ -291,7 +294,7 @@ export function GraphCanvas({
         fitView({
           padding: 0.2,
           duration: 400,
-          ...(targetNodes ? { nodes: targetNodes } : {}),
+          ...(targetNodes ? { nodes: targetNodes, minZoom: 0.7 } : {}),
         }),
       60,
     )
