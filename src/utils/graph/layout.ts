@@ -1,5 +1,6 @@
 import { ONTOLOGY_EDGES, ONTOLOGY_NODES } from '#/mocks/graph/data'
 import { buildGraphIndex } from '#/shared/utils/graphIndex'
+import type { GraphIndex } from '#/shared/utils/graphIndex'
 import { RADIUS, SECTOR_CENTERS } from '#/constants/graph/layout'
 import type { OntologyNode } from '#/types/graph'
 
@@ -57,19 +58,19 @@ export interface FullLayout {
  * 내림차순 3단 동심원(51개 규모에서 바깥 링 하나에 다 몰아넣으면 카드가 겹친다).
  * 호출부(GraphPanel)에서 useMemo로 캐시해 뷰 전환 시 재계산되지 않게 한다.
  */
-export function fullLayout(): FullLayout {
+export function fullLayout(nodes: OntologyNode[], index: GraphIndex): FullLayout {
   const pos: Record<string, LayoutPoint> = {}
   const sectorLabelPos: Record<string, LayoutPoint> = {}
   let centerId = ''
 
   function ring(
-    nodes: OntologyNode[],
+    ringNodes: OntologyNode[],
     center: LayoutPoint,
     radius: number,
     offset: number,
   ) {
-    nodes.forEach((n, i) => {
-      const angle = offset + (i * 2 * Math.PI) / Math.max(nodes.length, 1)
+    ringNodes.forEach((n, i) => {
+      const angle = offset + (i * 2 * Math.PI) / Math.max(ringNodes.length, 1)
       pos[n.id] = {
         x: center.x + Math.cos(angle) * radius,
         y: center.y + Math.sin(angle) * radius * 0.8,
@@ -78,10 +79,10 @@ export function fullLayout(): FullLayout {
   }
 
   Object.entries(SECTOR_CENTERS).forEach(([sector, center]) => {
-    const list = ONTOLOGY_NODES.filter((n) => n.sector === sector).sort(
+    const list = nodes.filter((n) => n.sector === sector).sort(
       (a, b) =>
-        (graphIndex.adjacency.get(b.id)?.length ?? 0) -
-        (graphIndex.adjacency.get(a.id)?.length ?? 0),
+        (index.adjacency.get(b.id)?.length ?? 0) -
+        (index.adjacency.get(a.id)?.length ?? 0),
     )
     if (list.length === 0) return
 
@@ -98,8 +99,8 @@ export function fullLayout(): FullLayout {
 }
 
 /** 전체 관계망 위계(연결 수 기준 3단계) — 진한 잉크(t1)일수록 핵심 노드 */
-export function tierOf(id: string): 't1' | 't2' | 't3' {
-  const degree = graphIndex.adjacency.get(id)?.length ?? 0
+export function tierOf(index: GraphIndex, id: string): 't1' | 't2' | 't3' {
+  const degree = index.adjacency.get(id)?.length ?? 0
   if (degree >= 7) return 't1'
   if (degree >= 4) return 't2'
   return 't3'

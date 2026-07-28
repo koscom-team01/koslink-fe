@@ -18,6 +18,8 @@ import { sizeOf } from '#/shared/utils/format'
 import { fullLayout, graphIndex, radialLayout, tierOf } from '#/utils/graph/layout'
 import type { LayoutPoint } from '#/utils/graph/layout'
 import { bfsBuild, buildGraphIndex } from '#/shared/utils/graphIndex'
+import type { GraphIndex } from '#/shared/utils/graphIndex'
+import { FULL_GRAPH_EDGES, FULL_GRAPH_NODES } from '#/mocks/graph/fullGraph'
 import type { Direction } from '#/shared/types'
 import type {
   EdgeVisualState,
@@ -39,10 +41,14 @@ import './graph.css'
 const nodeTypes = { stock: StockNode }
 const edgeTypes = { rel: RelEdge }
 
+// 전체 관계망(graph.json) 전용 인덱스 — 뉴스별 파급 경로 뷰가 쓰는 graphIndex(옛
+// 데모 데이터)와는 완전히 분리된 데이터셋이다.
+export const fullGraphIndex = buildGraphIndex(FULL_GRAPH_NODES, FULL_GRAPH_EDGES)
+
 // 정적 온톨로지 기준으로 결정적으로 계산되는 좌표라 모듈 스코프에서 한 번만
 // 계산해 캐시한다. 뷰를 오갈 때마다 재계산하면(성능 낭비는 물론) 노드가 튈 수 있다.
 // export해서 NetworkView가 centerId(인트로 하이라이트 기점)를 재계산 없이 가져다 쓴다.
-export const FULL_LAYOUT = fullLayout()
+export const FULL_LAYOUT = fullLayout(FULL_GRAPH_NODES, fullGraphIndex)
 
 interface EdgeSpec {
   id: string
@@ -163,7 +169,7 @@ export function buildAllScene(
       isMain: false,
       restingState: 'idle',
       badge: null,
-      tier: tierOf(id),
+      tier: tierOf(fullGraphIndex, id),
     }))
     const edges: EdgeSpec[] = graph.edges.map((e) => ({
       id: e.id,
@@ -186,8 +192,8 @@ export function buildAllScene(
     }
   }
 
-  const built = bfsBuild(graphIndex, highlightId, 2)
-  const origin = graphIndex.byId.get(highlightId)!
+  const built = bfsBuild(fullGraphIndex, highlightId, 2)
+  const origin = fullGraphIndex.byId.get(highlightId)!
 
   function ontologyEdgeId(source: string, target: string): string {
     const match = graph.edges.find(
@@ -203,7 +209,7 @@ export function buildAllScene(
     isMain: false,
     restingState: 'dim',
     badge: null,
-    tier: tierOf(id),
+    tier: tierOf(fullGraphIndex, id),
   }))
   const edges: EdgeSpec[] = graph.edges.map((e) => ({
     id: e.id,
@@ -254,12 +260,14 @@ export function buildAllScene(
 interface GraphCanvasProps {
   scene2: Scene2
   mode: 'focus' | 'all'
+  index: GraphIndex
   title?: string
 }
 
 export function GraphCanvas({
   scene2,
   mode,
+  index,
   title = '관계 그래프',
 }: GraphCanvasProps) {
   const { zoomIn, zoomOut, fitView } = useReactFlow()
@@ -342,7 +350,7 @@ export function GraphCanvas({
         return prev
       }
 
-      const ontologyNode = graphIndex.byId.get(spec.id)!
+      const ontologyNode = index.byId.get(spec.id)!
       const size = sizeOf(ontologyNode)
       const node: StockFlowNode = {
         id: spec.id,
@@ -373,7 +381,7 @@ export function GraphCanvas({
     })
     prevNodesRef.current = nextPrev
     return list
-  }, [scene2, nodeOverrides, tick])
+  }, [scene2, nodeOverrides, tick, index])
 
   // 각 엣지 객체는 실제로 상태가 바뀐 것만 새로 만들고, 나머지는 이전 렌더의
   // 객체를 그대로 재사용한다. React Flow는 엣지를 id별로 구독하기 때문에, 값은
@@ -409,7 +417,7 @@ export function GraphCanvas({
       }
 
       const polarity =
-        graphIndex.relationByKey.get(
+        index.relationByKey.get(
           [spec.source, spec.target].sort().join('|'),
         )?.polarity ?? 1
       const edge: RelFlowEdge = {
@@ -442,7 +450,7 @@ export function GraphCanvas({
     })
     prevEdgesRef.current = nextPrev
     return list
-  }, [scene2, edgeOverrides, tick, mode, highlightedNode, hoverId])
+  }, [scene2, edgeOverrides, tick, mode, highlightedNode, hoverId, index])
 
   // 노드 클릭은 전체 관계망(all 모드)에서 그 자리 강조를 켜고 끄는 용도로만 쓰인다
   // — 파급 경로 뷰는 클릭에 반응하지 않는다.
@@ -460,7 +468,7 @@ export function GraphCanvas({
 
   const handleNodeEnter: NodeMouseHandler<Node> = useCallback(
     (event, node) => {
-      const ontologyNode = graphIndex.byId.get(node.id)
+      const ontologyNode = index.byId.get(node.id)
       if (!ontologyNode || !canvasRef.current) return
       if (mode === 'all' && !highlightedNode) setHoverId(node.id)
       const rect = canvasRef.current.getBoundingClientRect()
@@ -470,7 +478,7 @@ export function GraphCanvas({
         node: ontologyNode,
       })
     },
-    [mode, highlightedNode],
+    [mode, highlightedNode, index],
   )
   const handleNodeMove: NodeMouseHandler<Node> = useCallback((event) => {
     if (!canvasRef.current) return
@@ -558,7 +566,7 @@ export function GraphCanvas({
             <b>{tip.node.name}</b>{' '}
             {tip.node.ticker ? `· ${tip.node.ticker}` : `· ${tip.node.kind}`}
             <br />
-            연결 관계 {graphIndex.adjacency.get(tip.node.id)?.length ?? 0}건
+            연결 관계 {index.adjacency.get(tip.node.id)?.length ?? 0}건
           </div>
         )}
         <Legend mode={scene2.legendMode} />
@@ -626,7 +634,7 @@ export default function GraphPanel() {
     <section className="panel col-graph">
       <ReactFlowProvider>
         {scene2 ? (
-          <GraphCanvas scene2={scene2} mode="focus" />
+          <GraphCanvas scene2={scene2} mode="focus" index={graphIndex} />
         ) : (
           <div
             className="pbody flex items-center justify-center text-sm font-medium"
