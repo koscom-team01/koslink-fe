@@ -15,7 +15,7 @@ import { selectedNewsIdAtom } from '#/shared/store/atoms'
 import { highlightedNodeAtom } from '#/store/graph/atoms'
 import { useNewsImpactQuery } from '#/apis/analysis/queries'
 import { sizeOf } from '#/shared/utils/format'
-import { fullLayout, graphIndex, radialLayout, tierOf } from '#/utils/graph/layout'
+import { fullLayout, radialLayout, tierOf } from '#/utils/graph/layout'
 import type { LayoutPoint } from '#/utils/graph/layout'
 import { bfsBuild, buildGraphIndex } from '#/shared/utils/graphIndex'
 import type { GraphIndex } from '#/shared/utils/graphIndex'
@@ -77,6 +77,11 @@ export interface Scene2 {
   ghint: string
   legendMode: 'focus' | 'all'
   backchip: string | null
+  /** 이 씬의 노드 메타데이터(marketCap/kind/ticker 등)를 조회할 인덱스.
+   * focus 모드는 해당 뉴스의 impactGraph에서 매번 새로 만든 인덱스, all 모드는
+   * graph.json 기반 fullGraphIndex — 두 데이터셋이 서로 다른 id 체계라 씬마다
+   * 자기 데이터에 맞는 인덱스를 반드시 함께 실어 보내야 한다. */
+  index: GraphIndex
 }
 
 function polarityEdgeState(polarity: 1 | -1, tier: 1 | 2): EdgeVisualState {
@@ -156,6 +161,7 @@ function buildFocusScene(impactGraph: NewsImpactGraph): Scene2 {
         : `기점에서 최대 ${maxHop}단계까지 파급`,
     legendMode: 'focus',
     backchip: null,
+    index,
   }
 }
 
@@ -193,6 +199,7 @@ export function buildAllScene(
         '진한 카드일수록 연결이 많은 핵심 노드입니다 · 노드를 클릭해 보세요',
       legendMode: 'all',
       backchip: null,
+      index: fullGraphIndex,
     }
   }
 
@@ -258,22 +265,25 @@ export function buildAllScene(
     ghint: `${origin.name} · 1단계 ${hop1}개, 2단계 ${hop2}개로 파급`,
     legendMode: 'all',
     backchip: '← 전체 보기',
+    index: fullGraphIndex,
   }
 }
 
 interface GraphCanvasProps {
   scene2: Scene2
   mode: 'focus' | 'all'
-  index: GraphIndex
   title?: string
 }
 
 export function GraphCanvas({
   scene2,
   mode,
-  index,
   title = '관계 그래프',
 }: GraphCanvasProps) {
+  // 씬마다 자기 데이터에 맞는 인덱스를 실어 보낸다(focus=뉴스별 impactGraph,
+  // all=graph.json) — 두 데이터셋의 id 체계가 다르므로 고정된 전역 인덱스를
+  // 쓰면 다른 쪽 모드에서 노드를 못 찾아 undefined.marketCap 등으로 터진다.
+  const index = scene2.index
   const { zoomIn, zoomOut, fitView } = useReactFlow()
   const [highlightedNode, setHighlightedNode] = useAtom(highlightedNodeAtom)
   const [hoverId, setHoverId] = useState<string | null>(null)
@@ -641,7 +651,7 @@ export default function GraphPanel() {
     <section className="panel col-graph">
       <ReactFlowProvider>
         {scene2 ? (
-          <GraphCanvas scene2={scene2} mode="focus" index={graphIndex} />
+          <GraphCanvas scene2={scene2} mode="focus" />
         ) : (
           <div
             className="pbody flex items-center justify-center text-sm font-medium"

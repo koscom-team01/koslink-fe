@@ -1,5 +1,3 @@
-import { ONTOLOGY_EDGES, ONTOLOGY_NODES } from '#/mocks/graph/data'
-import { buildGraphIndex } from '#/shared/utils/graphIndex'
 import type { GraphIndex } from '#/shared/utils/graphIndex'
 import { RADIUS, SECTOR_CENTERS } from '#/constants/graph/layout'
 import type { OntologyNode } from '#/types/graph'
@@ -13,9 +11,6 @@ export interface LayoutPoint {
   x: number
   y: number
 }
-
-/** 전체 온톨로지 인덱스. 정적 데이터 기준으로 한 번만 계산해 캐시한다. */
-export const graphIndex = buildGraphIndex(ONTOLOGY_NODES, ONTOLOGY_EDGES)
 
 /** 파급 경로: 기점 중앙, hop 레벨별 동심원(타원) 배치 */
 export function radialLayout(
