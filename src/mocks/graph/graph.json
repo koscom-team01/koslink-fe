@@ -1,0 +1,1010 @@
+{
+  "nodes": [
+    {
+      "id": "S_SEC",
+      "node_type": "Stock",
+      "name": "삼성전자",
+      "ticker": "005930",
+      "marketType": "KOSPI",
+      "capSize": "Large"
+    },
+    {
+      "id": "S_SKH",
+      "node_type": "Stock",
+      "name": "SK하이닉스",
+      "ticker": "000660",
+      "marketType": "KOSPI",
+      "capSize": "Large"
+    },
+    {
+      "id": "S_DBH",
+      "node_type": "Stock",
+      "name": "DB하이텍",
+      "ticker": "000990",
+      "marketType": "KOSPI",
+      "capSize": "Mid"
+    },
+    {
+      "id": "S_OPE",
+      "node_type": "Stock",
+      "name": "오픈엣지테크놀로지",
+      "ticker": "394280",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_CNM",
+      "node_type": "Stock",
+      "name": "칩스앤미디어",
+      "ticker": "094360",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_QTB",
+      "node_type": "Stock",
+      "name": "퀄리타스반도체",
+      "ticker": "432720",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_GAO",
+      "node_type": "Stock",
+      "name": "가온칩스",
+      "ticker": "399720",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_ADT",
+      "node_type": "Stock",
+      "name": "에이디테크놀로지",
+      "ticker": "049080",
+      "marketType": "KOSPI",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_COA",
+      "node_type": "Stock",
+      "name": "코아시아",
+      "ticker": "045970",
+      "marketType": "KOSPI",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_LXS",
+      "node_type": "Stock",
+      "name": "LX세미콘",
+      "ticker": "108320",
+      "marketType": "KOSDAQ",
+      "capSize": "Mid"
+    },
+    {
+      "id": "S_TLC",
+      "node_type": "Stock",
+      "name": "텔레칩스",
+      "ticker": "054450",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_NXC",
+      "node_type": "Stock",
+      "name": "넥스트칩",
+      "ticker": "396270",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_JJS",
+      "node_type": "Stock",
+      "name": "제주반도체",
+      "ticker": "080220",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_ABV",
+      "node_type": "Stock",
+      "name": "어보브반도체",
+      "ticker": "102950",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_HMI",
+      "node_type": "Stock",
+      "name": "한미반도체",
+      "ticker": "042700",
+      "marketType": "KOSPI",
+      "capSize": "Mid"
+    },
+    {
+      "id": "S_PSK_H",
+      "node_type": "Stock",
+      "name": "피에스케이홀딩스",
+      "ticker": "031980",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_STI",
+      "node_type": "Stock",
+      "name": "에스티아이",
+      "ticker": "039440",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_DIT",
+      "node_type": "Stock",
+      "name": "디아이티",
+      "ticker": "110990",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_ZEU",
+      "node_type": "Stock",
+      "name": "제우스",
+      "ticker": "079370",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_PRT",
+      "node_type": "Stock",
+      "name": "프로텍",
+      "ticker": "053610",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_LZC",
+      "node_type": "Stock",
+      "name": "레이저쎌",
+      "ticker": "412350",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_NEO",
+      "node_type": "Stock",
+      "name": "네오셈",
+      "ticker": "253590",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_YCI",
+      "node_type": "Stock",
+      "name": "와이씨",
+      "ticker": "232140",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_EXC",
+      "node_type": "Stock",
+      "name": "엑시콘",
+      "ticker": "092870",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_TCW",
+      "node_type": "Stock",
+      "name": "테크윙",
+      "ticker": "089030",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_DIA",
+      "node_type": "Stock",
+      "name": "디아이",
+      "ticker": "003160",
+      "marketType": "KOSPI",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_ORO",
+      "node_type": "Stock",
+      "name": "오로스테크놀로지",
+      "ticker": "322310",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_NXT",
+      "node_type": "Stock",
+      "name": "넥스틴",
+      "ticker": "348210",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_ITP",
+      "node_type": "Stock",
+      "name": "인텍플러스",
+      "ticker": "064290",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_KOY",
+      "node_type": "Stock",
+      "name": "고영",
+      "ticker": "098460",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_LNO",
+      "node_type": "Stock",
+      "name": "리노공업",
+      "ticker": "058470",
+      "marketType": "KOSDAQ",
+      "capSize": "Mid"
+    },
+    {
+      "id": "S_ISC",
+      "node_type": "Stock",
+      "name": "ISC",
+      "ticker": "095340",
+      "marketType": "KOSDAQ",
+      "capSize": "Mid"
+    },
+    {
+      "id": "S_TSE",
+      "node_type": "Stock",
+      "name": "티에스이",
+      "ticker": "131290",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_MCT",
+      "node_type": "Stock",
+      "name": "마이크로컨텍솔",
+      "ticker": "098120",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_OKS",
+      "node_type": "Stock",
+      "name": "오킨스전자",
+      "ticker": "080580",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_TGE",
+      "node_type": "Stock",
+      "name": "타이거일렉",
+      "ticker": "219130",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_FST",
+      "node_type": "Stock",
+      "name": "에프에스티",
+      "ticker": "036810",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_SST",
+      "node_type": "Stock",
+      "name": "에스앤에스텍",
+      "ticker": "101490",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_HPS",
+      "node_type": "Stock",
+      "name": "HPSP",
+      "ticker": "403870",
+      "marketType": "KOSDAQ",
+      "capSize": "Mid"
+    },
+    {
+      "id": "S_PSI",
+      "node_type": "Stock",
+      "name": "파크시스템스",
+      "ticker": "140860",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_DDE",
+      "node_type": "Stock",
+      "name": "대덕전자",
+      "ticker": "353200",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_STH",
+      "node_type": "Stock",
+      "name": "심텍",
+      "ticker": "222800",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_HSD",
+      "node_type": "Stock",
+      "name": "해성디에스",
+      "ticker": "195870",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_KAC",
+      "node_type": "Stock",
+      "name": "코리아써키트",
+      "ticker": "007810",
+      "marketType": "KOSPI",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_DJS",
+      "node_type": "Stock",
+      "name": "동진쎄미켐",
+      "ticker": "005290",
+      "marketType": "KOSPI",
+      "capSize": "Mid"
+    },
+    {
+      "id": "S_SOB",
+      "node_type": "Stock",
+      "name": "솔브레인",
+      "ticker": "357780",
+      "marketType": "KOSDAQ",
+      "capSize": "Mid"
+    },
+    {
+      "id": "S_WNM",
+      "node_type": "Stock",
+      "name": "원익머트리얼즈",
+      "ticker": "104830",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_HNM",
+      "node_type": "Stock",
+      "name": "하나머티리얼즈",
+      "ticker": "166090",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_WDX",
+      "node_type": "Stock",
+      "name": "월덱스",
+      "ticker": "101160",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_TCK",
+      "node_type": "Stock",
+      "name": "티씨케이",
+      "ticker": "064760",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "S_PSK",
+      "node_type": "Stock",
+      "name": "피에스케이",
+      "ticker": "319660",
+      "marketType": "KOSDAQ",
+      "capSize": "Small"
+    },
+    {
+      "id": "T_AI",
+      "node_type": "Theme",
+      "name": "온디바이스 AI",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    },
+    {
+      "id": "T_HBM",
+      "node_type": "Theme",
+      "name": "HBM",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    },
+    {
+      "id": "T_CXL",
+      "node_type": "Theme",
+      "name": "CXL",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    },
+    {
+      "id": "R_CHIP",
+      "node_type": "Role",
+      "name": "칩 제조사",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    },
+    {
+      "id": "R_IP",
+      "node_type": "Role",
+      "name": "반도체 IP 설계",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    },
+    {
+      "id": "R_DESIGN_HOUSE",
+      "node_type": "Role",
+      "name": "디자인하우스",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    },
+    {
+      "id": "R_FABLESS",
+      "node_type": "Role",
+      "name": "팹리스",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    },
+    {
+      "id": "R_PKG_EQUIP",
+      "node_type": "Role",
+      "name": "패키징 장비",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    },
+    {
+      "id": "R_TEST_EQUIP",
+      "node_type": "Role",
+      "name": "테스트 장비",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    },
+    {
+      "id": "R_TEST_PART",
+      "node_type": "Role",
+      "name": "테스트 부품",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    },
+    {
+      "id": "R_EUV",
+      "node_type": "Role",
+      "name": "미세공정 EUV",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    },
+    {
+      "id": "R_SUBSTRATE",
+      "node_type": "Role",
+      "name": "기판",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    },
+    {
+      "id": "R_MATERIAL",
+      "node_type": "Role",
+      "name": "공정 소재",
+      "ticker": null,
+      "marketType": null,
+      "capSize": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "S_HPS",
+      "target": "S_SEC",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e2",
+      "source": "S_SOB",
+      "target": "S_SEC",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e3",
+      "source": "S_WNM",
+      "target": "S_SEC",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e4",
+      "source": "S_ABV",
+      "target": "S_SEC",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e5",
+      "source": "S_SST",
+      "target": "S_SEC",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e6",
+      "source": "S_EXC",
+      "target": "S_SEC",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e7",
+      "source": "S_OKS",
+      "target": "S_SEC",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e8",
+      "source": "S_ADT",
+      "target": "S_SEC",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e9",
+      "source": "S_STI",
+      "target": "S_SEC",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e10",
+      "source": "S_SKH",
+      "target": "S_SEC",
+      "relation": "MARKET_COMPETITION"
+    },
+    {
+      "id": "e11",
+      "source": "S_WDX",
+      "target": "S_SEC",
+      "relation": "경쟁사"
+    },
+    {
+      "id": "e12",
+      "source": "S_DIA",
+      "target": "S_SEC",
+      "relation": "기타관계"
+    },
+    {
+      "id": "e13",
+      "source": "S_YCI",
+      "target": "S_SEC",
+      "relation": "계열/관계사"
+    },
+    {
+      "id": "e14",
+      "source": "S_SOB",
+      "target": "S_SEC",
+      "relation": "경쟁사"
+    },
+    {
+      "id": "e15",
+      "source": "S_DJS",
+      "target": "S_SEC",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e16",
+      "source": "S_DDE",
+      "target": "S_SEC",
+      "relation": "경쟁사"
+    },
+    {
+      "id": "e17",
+      "source": "S_SST",
+      "target": "S_SEC",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e18",
+      "source": "S_FST",
+      "target": "S_SEC",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e19",
+      "source": "S_DIA",
+      "target": "S_SEC",
+      "relation": "경쟁사"
+    },
+    {
+      "id": "e20",
+      "source": "S_COA",
+      "target": "S_SEC",
+      "relation": "계열/관계사"
+    },
+    {
+      "id": "e21",
+      "source": "S_QTB",
+      "target": "S_SKH",
+      "relation": "기술라이선싱"
+    },
+    {
+      "id": "e22",
+      "source": "S_HPS",
+      "target": "S_SKH",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e23",
+      "source": "S_NXT",
+      "target": "S_SKH",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e24",
+      "source": "S_ORO",
+      "target": "S_SKH",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e25",
+      "source": "S_YCI",
+      "target": "S_SKH",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e26",
+      "source": "S_STH",
+      "target": "S_SKH",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e27",
+      "source": "S_PSI",
+      "target": "S_SKH",
+      "relation": "TECH_COOPERATION"
+    },
+    {
+      "id": "e28",
+      "source": "S_DIT",
+      "target": "S_SKH",
+      "relation": "TECH_COOPERATION"
+    },
+    {
+      "id": "e29",
+      "source": "S_ISC",
+      "target": "S_SKH",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e30",
+      "source": "S_TCW",
+      "target": "S_SKH",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e31",
+      "source": "S_ITP",
+      "target": "S_SKH",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e32",
+      "source": "S_HMI",
+      "target": "S_SKH",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e33",
+      "source": "S_STI",
+      "target": "S_SKH",
+      "relation": "TECH_COOPERATION"
+    },
+    {
+      "id": "e34",
+      "source": "S_PSK_H",
+      "target": "S_SKH",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e35",
+      "source": "S_DJS",
+      "target": "S_SKH",
+      "relation": "TECH_COOPERATION"
+    },
+    {
+      "id": "e36",
+      "source": "S_DIA",
+      "target": "S_SKH",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e37",
+      "source": "S_WDX",
+      "target": "S_SKH",
+      "relation": "경쟁사"
+    },
+    {
+      "id": "e38",
+      "source": "S_DIA",
+      "target": "S_SKH",
+      "relation": "기타관계"
+    },
+    {
+      "id": "e39",
+      "source": "S_YCI",
+      "target": "S_SKH",
+      "relation": "계열/관계사"
+    },
+    {
+      "id": "e40",
+      "source": "S_SOB",
+      "target": "S_SKH",
+      "relation": "경쟁사"
+    },
+    {
+      "id": "e41",
+      "source": "S_ISC",
+      "target": "S_SKH",
+      "relation": "경쟁사"
+    },
+    {
+      "id": "e42",
+      "source": "S_DIA",
+      "target": "S_SKH",
+      "relation": "경쟁사"
+    },
+    {
+      "id": "e43",
+      "source": "S_TLC",
+      "target": "S_CNM",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e44",
+      "source": "S_SKH",
+      "target": "S_QTB",
+      "relation": "기술라이선싱"
+    },
+    {
+      "id": "e45",
+      "source": "S_SEC",
+      "target": "S_ADT",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e46",
+      "source": "S_TLC",
+      "target": "S_LXS",
+      "relation": "기타관계"
+    },
+    {
+      "id": "e47",
+      "source": "S_LXS",
+      "target": "S_TLC",
+      "relation": "기타관계"
+    },
+    {
+      "id": "e48",
+      "source": "S_LXS",
+      "target": "S_TLC",
+      "relation": "계열/관계사"
+    },
+    {
+      "id": "e49",
+      "source": "S_LXS",
+      "target": "S_TLC",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e50",
+      "source": "S_SEC",
+      "target": "S_ABV",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e51",
+      "source": "S_SKH",
+      "target": "S_HMI",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e52",
+      "source": "S_SKH",
+      "target": "S_PSK_H",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e53",
+      "source": "S_PSK",
+      "target": "S_PSK_H",
+      "relation": "계열/관계사"
+    },
+    {
+      "id": "e54",
+      "source": "S_SEC",
+      "target": "S_STI",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e55",
+      "source": "S_SKH",
+      "target": "S_STI",
+      "relation": "TECH_COOPERATION"
+    },
+    {
+      "id": "e56",
+      "source": "S_SKH",
+      "target": "S_DIT",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e57",
+      "source": "S_SKH",
+      "target": "S_YCI",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e58",
+      "source": "S_EXC",
+      "target": "S_YCI",
+      "relation": "계열/관계사"
+    },
+    {
+      "id": "e59",
+      "source": "S_EXC",
+      "target": "S_YCI",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e60",
+      "source": "S_SEC",
+      "target": "S_YCI",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e61",
+      "source": "S_SEC",
+      "target": "S_EXC",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e62",
+      "source": "S_YCI",
+      "target": "S_EXC",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e63",
+      "source": "S_SKH",
+      "target": "S_TCW",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e64",
+      "source": "S_SKH",
+      "target": "S_DIA",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e65",
+      "source": "S_SKH",
+      "target": "S_ORO",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e66",
+      "source": "S_FST",
+      "target": "S_ORO",
+      "relation": "계열/관계사"
+    },
+    {
+      "id": "e67",
+      "source": "S_SKH",
+      "target": "S_NXT",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e68",
+      "source": "S_SKH",
+      "target": "S_ITP",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e69",
+      "source": "S_SKH",
+      "target": "S_ISC",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e70",
+      "source": "S_TGE",
+      "target": "S_TSE",
+      "relation": "계열/관계사"
+    },
+    {
+      "id": "e71",
+      "source": "S_SEC",
+      "target": "S_OKS",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e72",
+      "source": "S_TSE",
+      "target": "S_TGE",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e73",
+      "source": "S_ORO",
+      "target": "S_FST",
+      "relation": "계열/관계사"
+    },
+    {
+      "id": "e74",
+      "source": "S_SEC",
+      "target": "S_FST",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e75",
+      "source": "S_SEC",
+      "target": "S_SST",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e76",
+      "source": "S_SKH",
+      "target": "S_PSI",
+      "relation": "TECH_COOPERATION"
+    },
+    {
+      "id": "e77",
+      "source": "S_SKH",
+      "target": "S_STH",
+      "relation": "SUPPLY_CHAIN"
+    },
+    {
+      "id": "e78",
+      "source": "S_SKH",
+      "target": "S_DJS",
+      "relation": "TECH_COOPERATION"
+    },
+    {
+      "id": "e79",
+      "source": "S_SEC",
+      "target": "S_DJS",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e80",
+      "source": "S_SEC",
+      "target": "S_SOB",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e81",
+      "source": "S_PSK_H",
+      "target": "S_PSK",
+      "relation": "지분투자"
+    },
+    {
+      "id": "e82",
+      "source": "S_PSK_H",
+      "target": "S_PSK",
+      "relation": "계열/관계사"
+    }
+  ]
+}

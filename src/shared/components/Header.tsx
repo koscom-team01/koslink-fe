@@ -1,11 +1,10 @@
 import { useAtom } from 'jotai'
 import { viewAtom } from '#/shared/store/atoms'
-import { useGraphQuery } from '#/apis/graph/queries'
+import { FULL_GRAPH_EDGES, FULL_GRAPH_NODES } from '#/mocks/graph/fullGraph'
 import { TABS } from '#/shared/constants/tabs'
 
 export default function Header() {
   const [view, setView] = useAtom(viewAtom)
-  const { data: graph } = useGraphQuery()
 
   return (
     <header
@@ -57,7 +56,7 @@ export default function Header() {
           className="inline-block h-1.5 w-1.5 rounded-full"
           style={{ background: '#0f8a5f' }}
         />
-        온톨로지 {graph?.nodes.length ?? 0}개 노드 · {graph?.edges.length ?? 0}
+        온톨로지 {FULL_GRAPH_NODES.length}개 노드 · {FULL_GRAPH_EDGES.length}
         개 관계
       </div>
     </header>

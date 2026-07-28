@@ -3,38 +3,43 @@ import type { NewsListPageWire } from './mappers'
 import { paginate } from '#/shared/apis/paginate'
 
 /**
- * `docs/KOSLINK-FRONTEND.md` §5 API 명세와 같은 시그니처를 갖는 헬퍼 모음.
+ * `docs/KOSLINK_API.md` §1 GET /news 명세와 같은 시그니처를 갖는 헬퍼 모음.
  * 지금은 백엔드가 없어 mocks/news/data.ts를 동기적으로 가공해 반환한다. 반환 모양은
- * 실 백엔드가 내려줄 wire(snake_case) 그대로다 — mocks/news/handlers.ts가 이 함수들을
- * 그대로 HttpResponse.json()으로 흘려보내고, apis/news/queries.ts가 apis/news/mappers.ts를
- * 거쳐 camelCase 도메인 타입으로 바꾼다. 실 API가 준비되면 이 함수들의 본문만 fetch
- * 호출로 바꾸면 되고, 매퍼·호출부는 그대로 둘 수 있다.
+ * 실 백엔드가 내려줄 wire 그대로다(이 엔드포인트는 wire도 camelCase) — mocks/news/handlers.ts가
+ * 이 함수들을 그대로 HttpResponse.json()으로 흘려보내고, apis/news/queries.ts가
+ * apis/news/mappers.ts를 거쳐 도메인 타입으로 바꾼다. 실 API가 준비되면 이 함수들의
+ * 본문만 fetch 호출로 바꾸면 되고, 매퍼·호출부는 그대로 둘 수 있다.
  */
 
 export interface GetNewsParams {
-  /** 이전 응답의 nextCursor. 첫 페이지는 생략한다. */
-  cursor?: string
-  limit?: number
+  /** 이전 응답의 lastCursorId. 첫 페이지는 생략한다. */
+  cursorId?: number
+  size?: number
 }
 
-const DEFAULT_NEWS_LIMIT = 20
+const DEFAULT_NEWS_SIZE = 20
 
 export function getNews({
-  cursor,
-  limit = DEFAULT_NEWS_LIMIT,
+  cursorId,
+  size = DEFAULT_NEWS_SIZE,
 }: GetNewsParams = {}): NewsListPageWire {
-  const { page, nextCursor } = paginate(NEWS_RECORDS, cursor, limit, (n) =>
-    String(n.id),
+  const { page, nextCursor } = paginate(
+    NEWS_RECORDS,
+    cursorId != null ? String(cursorId) : undefined,
+    size,
+    (n) => String(n.id),
   )
 
   return {
-    items: page.map((n) => ({
-      news_id: n.id,
+    news: page.map((n) => ({
+      newsId: n.id,
       title: n.title,
       press: n.press,
-      published_at: n.publishedAt,
+      publishedAt: n.publishedAt,
+      url: n.url,
     })),
-    nextCursor,
+    hasNext: nextCursor !== null,
+    lastCursorId: page.at(-1)?.id ?? null,
   }
 }
 

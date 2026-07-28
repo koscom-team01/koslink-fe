@@ -22,7 +22,7 @@ export default function NewsPanel() {
   const queryClient = useQueryClient()
   const isRefreshing = useIsFetching({ queryKey: newsKeys.all() }) > 0
   const [toastCount, setToastCount] = useState<number | null>(null)
-  const toastTimerRef = useRef<number>()
+  const toastTimerRef = useRef<number | undefined>(undefined)
 
   useEffect(() => () => window.clearTimeout(toastTimerRef.current), [])
 

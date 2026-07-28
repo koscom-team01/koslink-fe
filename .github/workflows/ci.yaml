@@ -21,9 +21,8 @@ jobs:
         IMAGE_TAG="${{ github.run_number }}"
         IMAGE_FULL_NAME="${REGISTRY}/${PROJECT}/${IMAGE_NAME}:${IMAGE_TAG}"
 
-        # 쿠버네티스 Nginx 프록시(/api/)로 빌드
         echo "Building image: $IMAGE_FULL_NAME"
-        docker build --build-arg VITE_API_BASE_URL="/api" -t "$IMAGE_FULL_NAME" .
+        docker build -t "$IMAGE_FULL_NAME" .
 
         echo "Logging into Harbor..."
         docker login "$REGISTRY" -u admin -p Harbor12345

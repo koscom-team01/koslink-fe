@@ -22,7 +22,7 @@ function KoslinkApp() {
   // 처음 진입하면 최신 뉴스를 바로 시각화한다 (docs/koslink.html의 select(NEWS[0])와 동일)
   useEffect(() => {
     if (selectedNewsId) return
-    setSelectedNewsId(getNews().items[0].news_id)
+    setSelectedNewsId(getNews().news[0].newsId)
   }, [selectedNewsId, setSelectedNewsId])
 
   return (
