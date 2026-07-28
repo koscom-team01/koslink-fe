@@ -150,7 +150,10 @@ function buildFocusScene(impactGraph: NewsImpactGraph): Scene2 {
       nodes: revealNodes,
       edges: revealEdges,
     },
-    ghint: `기점에서 최대 ${maxHop}단계까지 파급`,
+    ghint:
+      maxHop === 0
+        ? '이어진 관련 종목이 확인되지 않았습니다'
+        : `기점에서 최대 ${maxHop}단계까지 파급`,
     legendMode: 'focus',
     backchip: null,
   }

@@ -44,32 +44,9 @@ const CURATED_NEWS: NewsRecord[] = [
         reason: 'HBM4 증설 발표로 생산능력이 직접 확대되는 당사자',
       },
     ],
-    relatedStocks: [
-      {
-        nodeId: 'hanmi',
-        direction: 'UP',
-        relationLabel: '장비 공급',
-        chain: ['sk', 'hanmi'],
-      },
-      {
-        nodeId: 'hpsp',
-        direction: 'UP',
-        relationLabel: '고압 어닐링 장비',
-        chain: ['sk', 'hpsp'],
-      },
-      {
-        nodeId: 'wonik',
-        direction: 'UP',
-        relationLabel: '증착 장비',
-        chain: ['sk', 'wonik'],
-      },
-      {
-        nodeId: 'ss',
-        direction: 'DOWN',
-        relationLabel: '경쟁 관계',
-        chain: ['sk', 'ss'],
-      },
-    ],
+    // related_stocks 빈 배열 케이스 데모 — 리스트 첫 항목에서 온톨로지 상 파생
+    // 관련 종목이 없는 경우를 항상 확인할 수 있게 의도적으로 비워둔다.
+    relatedStocks: [],
   },
   {
     id: 10002,
