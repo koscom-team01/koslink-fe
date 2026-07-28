@@ -1,26 +1,14 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { http } from '#/shared/apis/http'
 import { getVerify } from './mock'
-import type { VerifyResponse } from '#/types/verify'
 
 export const verifyKeys = {
   bySector: (sector: string) => ['verify', sector] as const,
 }
 
-/** GET /api/verify가 쓰는 sector/cursor 쿼리스트링. */
-function pageSearchParams(sector: string, cursor?: string) {
-  const searchParams: Record<string, string> = {}
-  if (sector && sector !== '전체') searchParams.sector = sector
-  if (cursor) searchParams.cursor = cursor
-  return searchParams
-}
-
-async function fetchVerify(
-  sector: string,
-  cursor?: string,
-): Promise<VerifyResponse> {
-  const searchParams = pageSearchParams(sector, cursor)
-  return http.get('verify', { searchParams }).json<VerifyResponse>()
+/** 예측 검증 탭 — 실 백엔드에 해당 API가 없어 verify.json 더미 데이터를
+ * API를 거치지 않고 클라이언트에서 직접 페이징한다. */
+function fetchVerify(sector: string, cursor?: string) {
+  return getVerify({ sector, cursor })
 }
 
 /** 검증 목록 — 무한 스크롤용 커서 기반 페이징. `data.pages.flatMap(p => p.news)`로 펼쳐 쓴다. */
