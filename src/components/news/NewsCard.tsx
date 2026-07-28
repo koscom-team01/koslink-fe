@@ -1,10 +1,10 @@
 import type { MouseEvent } from 'react'
 import { useAtom } from 'jotai'
 import { Star } from 'lucide-react'
-import { cn } from '#/lib/utils'
-import { formatRelativeTime } from '#/lib/format'
-import { scrappedNewsIdsAtom } from '#/lib/atoms'
-import type { NewsListItem } from '#/types'
+import { cn } from '#/shared/utils/cn'
+import { formatRelativeTime } from '#/shared/utils/format'
+import { scrappedNewsIdsAtom } from '#/store/scrap/atoms'
+import type { NewsListItem } from '#/types/news'
 
 interface NewsCardProps {
   news: NewsListItem

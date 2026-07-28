@@ -10,29 +10,28 @@ import {
 import type { Node, NodeMouseHandler } from '@xyflow/react'
 import '@xyflow/react/dist/style.css' // 필수 — 빠뜨리면 노드가 겹쳐 보인다
 import { useAtom, useAtomValue } from 'jotai'
-import { cn } from '#/lib/utils'
-import { highlightedNodeAtom, selectedNewsIdAtom } from '#/lib/atoms'
-import { useNewsImpactQuery } from '#/lib/queries'
-import { sizeOf } from '#/lib/format'
-import { fullLayout, graphIndex, radialLayout, tierOf } from '#/lib/layout'
-import type { LayoutPoint } from '#/lib/layout'
-import { bfsBuild, buildGraphIndex } from '#/lib/graphIndex'
-import type {
-  Direction,
-  NewsImpactGraph,
-  OntologyEdge,
-  OntologyNode,
-} from '#/types'
-import StockNode from './StockNode'
-import RelEdge from './RelEdge'
-import { usePropagation } from './usePropagation'
-import type { RevealEdge, RevealNode, Scene } from './usePropagation'
+import { cn } from '#/shared/utils/cn'
+import { selectedNewsIdAtom } from '#/shared/store/atoms'
+import { highlightedNodeAtom } from '#/store/graph/atoms'
+import { useNewsImpactQuery } from '#/apis/analysis/queries'
+import { sizeOf } from '#/shared/utils/format'
+import { fullLayout, graphIndex, radialLayout, tierOf } from '#/utils/graph/layout'
+import type { LayoutPoint } from '#/utils/graph/layout'
+import { bfsBuild, buildGraphIndex } from '#/shared/utils/graphIndex'
+import type { Direction } from '#/shared/types'
 import type {
   EdgeVisualState,
+  NewsImpactGraph,
   NodeVisualState,
+  OntologyEdge,
+  OntologyNode,
   RelFlowEdge,
   StockFlowNode,
-} from './types'
+} from '#/types/graph'
+import StockNode from './StockNode'
+import RelEdge from './RelEdge'
+import { usePropagation } from '#/hooks/graph/usePropagation'
+import type { RevealEdge, RevealNode, Scene } from '#/hooks/graph/usePropagation'
 import './graph.css'
 
 // nodeTypes/edgeTypes는 반드시 컴포넌트 바깥(모듈 스코프)에 선언한다.

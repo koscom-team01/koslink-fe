@@ -39,8 +39,8 @@ pnpm dlx shadcn@latest add <component>
 Both `#/*` and `@/*` resolve to `./src/*`:
 
 ```typescript
-import { cn } from '#/lib/utils'
-import { cn } from '@/lib/utils'
+import { cn } from '#/shared/utils/cn'
+import { cn } from '@/shared/utils/cn'
 ```
 
 ## Architecture
@@ -53,25 +53,37 @@ Routes are defined in `src/routes/`. The route tree is auto-generated to `src/ro
 - `index.tsx` - Home page
 - `demo/` - Demo pages (can be safely deleted)
 
-### Key Directories (Planned Structure)
+### Key Directories
+
+Category-first, then domain: each top-level concern (`components`, `hooks`, `utils`, `constants`, `types`, `apis`, `store`, `mocks`) has its own folder, and within each, code is split by domain (`news`, `graph`, `analysis`, `verify`, `scrap`, `cover`). Code used by 2+ domains doesn't live inside a category — it goes in the single top-level `src/shared/` folder, mirroring the same category subfolders internally. Domain subfolders are only created where a file actually exists for that domain (e.g. `hooks/news/` doesn't exist since there's no news-specific hook).
 
 ```
 src/
-├── routes/          # File-based routes
-├── components/
-│   ├── ui/          # shadcn components
-│   ├── news/        # News list, cards
-│   ├── graph/       # React Flow graph components
-│   ├── analysis/    # Impact analysis panel
-│   ├── verify/      # Prediction verification
-│   └── briefing/    # Watchlist briefing sheet
-├── lib/
-│   ├── utils.ts     # cn() utility
-│   ├── api.ts       # API fetch + Query hooks
-│   └── layout.ts    # Graph layout calculations
+├── routes/                      # File-based routes (unchanged by domain split)
+├── shared/                      # cross-domain code, one subfolder per category
+│   ├── components/               #   Header
+│   ├── hooks/                    #   useInfiniteScrollTrigger
+│   ├── utils/                    #   cn, format, graphIndex
+│   ├── constants/                #   tabs
+│   ├── types/                    #   Direction
+│   ├── apis/                     #   http, paginate
+│   ├── store/                    #   viewAtom, selectedNewsIdAtom, ...
+│   └── mocks/                    #   aggregated handlers, browser worker
+├── components/{news,graph,analysis,verify,scrap,cover,ui}/
+│   └── ui/                      # shadcn components — kept flat here, not under shared/,
+│                                 #   since `pnpm dlx shadcn add` targets this path by default
+├── hooks/graph/                  # usePropagation
+├── utils/graph/                  # layout.ts
+├── constants/{graph,verify}/
+├── types/{news,graph,analysis,verify}/
+├── apis/{news,graph,analysis,verify}/  # mock.ts + queries.ts (+ mappers.ts) per domain
+├── store/{news,graph,verify,scrap}/    # Jotai atoms, one file per domain
+├── mocks/{news,graph,analysis,verify}/ # MSW handlers + mock data per domain
 ├── integrations/tanstack-query/  # Query provider setup
-└── types/
+├── main.tsx, router.tsx, styles.css
 ```
+
+There is no `briefing` domain yet — none of the above folders have a `briefing/` subfolder until that feature is built.
 
 ### State Management Pattern
 
@@ -84,7 +96,7 @@ src/
 When implementing the graph visualization:
 
 1. **Declare nodeTypes/edgeTypes outside components** - Defining inside causes full graph remount on every render
-2. **No layout library needed** - Use simple trigonometry for radial/cluster layouts in `lib/layout.ts`
+2. **No layout library needed** - Use simple trigonometry for radial/cluster layouts in `utils/graph/layout.ts`
 3. **Custom floating edges required** - Default edges snap to handles; calculate rectangle intersection points for proper connections
 4. **One-shot animations only** - Never use React Flow's `animated: true`; use CSS with `animation-fill-mode: forwards`
 5. **Cache fullLayout results** - Recalculating on view switches causes nodes to jump
@@ -103,7 +115,7 @@ Base path is `/api`. No authentication. All endpoints wrapped with TanStack Quer
 
 - `GET /api/news` - News list, cursor-paginated (`sector?`, `cursor?`, `limit?` → `{ items, nextCursor }`), infinite scroll
 - `GET /api/news/{id}/analysis` - Impact analysis text panel (article summary, main stock, related stocks, rationale). Includes `title`/`sector` so the panel doesn't need the paginated list. No graph/coordinate data — see the next endpoint
-- `GET /api/news/{id}/graph` - Propagation subgraph for this news (`{ newsId, originId, nodes, edges }`), Neo4j-derived. Nodes carry `direction` only where relevant; no coordinates — the frontend computes hop-based layout itself (`lib/graphIndex.ts`'s `bfsBuild` + `lib/layout.ts`'s `radialLayout`)
+- `GET /api/news/{id}/graph` - Propagation subgraph for this news (`{ newsId, originId, nodes, edges }`), Neo4j-derived. Nodes carry `direction` only where relevant; no coordinates — the frontend computes hop-based layout itself (`shared/utils/graphIndex.ts`'s `bfsBuild` + `utils/graph/layout.ts`'s `radialLayout`)
 - `GET /api/graph` - Full ontology graph, same trimmed node/edge shape as above (`kind: 'STOCK' | 'CONCEPT'`, edges carry `relationType` only for competitor/affiliate-type relations)
 - `POST /api/briefing` - Watchlist reverse lookup
 - `GET /api/verify` - Prediction verification data; `news` is cursor-paginated the same way as `/api/news`, `daily` is not
@@ -116,5 +128,5 @@ Base path is `/api`. No authentication. All endpoints wrapped with TanStack Quer
 - React Flow `animated: true`
 - `nodeTypes`/`edgeTypes` declared inside components
 - Horizontal scroll news list on mobile
-- Numbered pagination UI (1, 2, 3…) in news list or verification screen — both use cursor-based infinite scroll instead (`useInfiniteScrollTrigger`)
+- Numbered pagination UI (1, 2, 3…) in news list or verification screen — both use cursor-based infinite scroll instead (`shared/hooks/useInfiniteScrollTrigger`)
 - shadcn Card inside graph nodes (interferes with size calculation)

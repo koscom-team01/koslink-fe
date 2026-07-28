@@ -1,7 +1,7 @@
 import { Handle, Position } from '@xyflow/react'
 import type { NodeProps } from '@xyflow/react'
-import { cn } from '#/lib/utils'
-import type { StockFlowNode } from './types'
+import { cn } from '#/shared/utils/cn'
+import type { StockFlowNode } from '#/types/graph'
 
 export default function StockNode({ data }: NodeProps<StockFlowNode>) {
   return (

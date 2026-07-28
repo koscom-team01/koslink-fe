@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useAtom } from 'jotai'
-import { verifyContextAtom } from '#/lib/atoms'
-import { useVerifyQuery } from '#/lib/queries'
-import type { VerifyDaily } from '#/types'
+import { verifyContextAtom } from '#/store/verify/atoms'
+import { useVerifyQuery } from '#/apis/verify/queries'
+import type { VerifyDaily } from '#/types/verify'
 import VerifyList, { hitCount } from './VerifyList'
 import VerifyDetail from './VerifyDetail'
 

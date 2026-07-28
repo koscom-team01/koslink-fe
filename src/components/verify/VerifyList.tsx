@@ -1,8 +1,7 @@
 import { useRef } from 'react'
-import { useInfiniteScrollTrigger } from '#/lib/useInfiniteScrollTrigger'
-import type { VerifyEntry } from '#/types'
-
-const SECTORS = ['전체', '반도체', '2차전지', '방산']
+import { useInfiniteScrollTrigger } from '#/shared/hooks/useInfiniteScrollTrigger'
+import type { VerifyEntry } from '#/types/verify'
+import { SECTORS } from '#/constants/verify/sectors'
 
 export function hitCount(entry: VerifyEntry): number {
   return entry.items.filter((i) => i.hit).length

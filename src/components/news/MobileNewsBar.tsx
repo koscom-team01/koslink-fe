@@ -1,7 +1,7 @@
 import { useAtom } from 'jotai'
-import { cn } from '#/lib/utils'
-import { newsSheetOpenAtom, selectedNewsIdAtom } from '#/lib/atoms'
-import { useNewsQuery } from '#/lib/queries'
+import { cn } from '#/shared/utils/cn'
+import { newsSheetOpenAtom, selectedNewsIdAtom } from '#/shared/store/atoms'
+import { useNewsQuery } from '#/apis/news/queries'
 
 /** ≤1080px에서만 보이는 상단 현재뉴스 바 + 바텀시트 배경 스크림. CSS가 그 이상 폭에서는 숨긴다. */
 export default function MobileNewsBar() {

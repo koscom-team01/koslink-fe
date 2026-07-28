@@ -6,13 +6,9 @@ import {
   useInternalNode,
 } from '@xyflow/react'
 import type { EdgeProps, InternalNode } from '@xyflow/react'
-import { cn } from '#/lib/utils'
-import type { RelFlowEdge, StockFlowNode } from './types'
-
-// graph.css의 .ep.draw 애니메이션(0.48s)과 맞춘 값. 실제 path 길이보다 넉넉하게 잡아
-// 어떤 엣지든 dashoffset을 0으로 보내면 완전히 그려진다.
-const DASH_LEN = 1400
-const DRAW_DURATION_MS = 480
+import { cn } from '#/shared/utils/cn'
+import type { RelFlowEdge, StockFlowNode } from '#/types/graph'
+import { DASH_LEN, DRAW_DURATION_MS } from '#/constants/graph/edge'
 
 /**
  * 기본 엣지는 Handle 위치에 고정돼 방사형 배치에서 카드 옆구리에 어긋나 붙는다.

@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useAtom, useSetAtom } from 'jotai'
-import { scrappedNewsIdsAtom, selectedNewsIdAtom, viewAtom } from '#/lib/atoms'
-import { useNewsQuery } from '#/lib/queries'
-import { formatRelativeTime } from '#/lib/format'
+import { selectedNewsIdAtom, viewAtom } from '#/shared/store/atoms'
+import { scrappedNewsIdsAtom } from '#/store/scrap/atoms'
+import { useNewsQuery } from '#/apis/news/queries'
+import { formatRelativeTime } from '#/shared/utils/format'
 import {
   Sheet,
   SheetContent,
