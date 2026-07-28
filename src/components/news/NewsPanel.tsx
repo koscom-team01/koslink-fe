@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useIsFetching, useQueryClient } from '@tanstack/react-query'
+import type { InfiniteData } from '@tanstack/react-query'
 import { useAtom, useSetAtom } from 'jotai'
 import { RefreshCw } from 'lucide-react'
 import { cn } from '#/shared/utils/cn'
@@ -7,6 +8,7 @@ import { newsSheetOpenAtom } from '#/shared/store/atoms'
 import { newlyAddedNewsIdsAtom } from '#/store/news/atoms'
 import { refreshNews } from '#/apis/news/mock'
 import { newsKeys } from '#/apis/news/queries'
+import type { NewsListPage } from '#/types/news'
 import NewsList from './NewsList'
 
 const REFRESH_TOAST_MS = 4500
@@ -26,12 +28,31 @@ export default function NewsPanel() {
 
   useEffect(() => () => window.clearTimeout(toastTimerRef.current), [])
 
-  async function handleRefresh() {
-    // mock 데이터 계층에서 데모용 새 뉴스 몇 건을 먼저 끼워 넣은 뒤, 목록 전체를
-    // 첫 페이지부터 다시 불러온다 — 스크롤로 더 불러온 뒷페이지는 새로고침 시
-    // 버리고 최신순 1페이지로 되돌아간다(실제 뉴스 피드 새로고침과 동일한 동작).
-    const { addedIds } = refreshNews()
-    await queryClient.resetQueries({ queryKey: newsKeys.all() })
+  function handleRefresh() {
+    // mock 데이터 계층에서 데모용 새 뉴스 몇 건을 먼저 끼워 넣는다.
+    const { addedIds, addedItems } = refreshNews()
+
+    // 임시 처리(TODO): 새로고침 시 쿼리를 다시 받아오는 대신, 방금 받아온 항목을
+    // 캐시 첫 페이지 맨 앞에 직접 끼워 넣는다 — 선택된 뉴스(selectedNewsIdAtom)는
+    // 이 쿼리 캐시와 무관해 그대로 유지된다. 실 API 연동 시 아래처럼 재조회로
+    // 되돌리면 된다.
+    // await queryClient.resetQueries({ queryKey: newsKeys.all() })
+    if (addedItems.length > 0) {
+      queryClient.setQueryData<InfiniteData<NewsListPage, string | undefined>>(
+        newsKeys.all(),
+        (old) => {
+          if (!old) return old
+          const [firstPage, ...restPages] = old.pages
+          return {
+            ...old,
+            pages: [
+              { ...firstPage, items: [...addedItems, ...firstPage.items] },
+              ...restPages,
+            ],
+          }
+        },
+      )
+    }
 
     setNewlyAdded(addedIds)
     setToastCount(addedIds.length)

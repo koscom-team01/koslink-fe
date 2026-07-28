@@ -1,6 +1,7 @@
 import { NEWS_RECORDS, pullRefreshBatch } from '#/mocks/news/data'
 import type { NewsListPageWire } from './mappers'
 import { paginate } from '#/shared/apis/paginate'
+import type { NewsListItem } from '#/types/news'
 
 /**
  * `docs/KOSLINK_API.md` §1 GET /news 명세와 같은 시그니처를 갖는 헬퍼 모음.
@@ -45,11 +46,23 @@ export function getNews({
 
 /**
  * "최신 뉴스 새로고침" 데모용 — 실 백엔드가 없어 pullRefreshBatch()로 몇 건을
- * 새 뉴스로 뽑아 NEWS_RECORDS 맨 앞에 끼워 넣고, 그 id 목록을 돌려준다.
- * 호출부(NewsPanel)는 이 id로 새로 추가된 카드에 NEW 배지를 붙이고 몇 건이
- * 들어왔는지 안내한다.
+ * 새 뉴스로 뽑아 NEWS_RECORDS 맨 앞에 끼워 넣고, id 목록과 리스트 표시용 항목을
+ * 함께 돌려준다. 호출부(NewsPanel)는 이 id로 새로 추가된 카드에 NEW 배지를 붙이고
+ * addedItems를 쿼리 캐시 맨 앞에 직접 끼워 넣어(쿼리 재조회 없이) 화면에 반영한다.
  */
-export function refreshNews(): { addedIds: number[] } {
+export function refreshNews(): {
+  addedIds: number[]
+  addedItems: NewsListItem[]
+} {
   const added = pullRefreshBatch()
-  return { addedIds: added.map((n) => n.id) }
+  return {
+    addedIds: added.map((n) => n.id),
+    addedItems: added.map((n) => ({
+      id: n.id,
+      title: n.title,
+      press: n.press,
+      publishedAt: n.publishedAt,
+      url: n.url,
+    })),
+  }
 }
