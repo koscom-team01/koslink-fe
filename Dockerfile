@@ -13,11 +13,8 @@ RUN pnpm install --frozen-lockfile
 # 소스 코드 복사
 COPY . .
 
-# 쿠버네티스 Nginx 프록시(/api/)를 거치도록 기본값 설정
-ARG VITE_API_BASE_URL=/api
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
-
-# 정적 번들 빌드 (/app/dist 가 생성됨)
+# 정적 번들 빌드 (/app/dist 가 생성됨) — API 호출은 항상 같은 오리진의 /api로
+# 붙고, 쿠버네티스에서는 nginx.conf의 /api/ 프록시가 실 백엔드로 전달한다
 RUN pnpm build
 
 # 2. 실행 스테이지 (Nginx)

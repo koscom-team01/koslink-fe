@@ -5,14 +5,13 @@ import { getRouter } from './router'
 import './styles.css'
 
 /**
- * 아직 실 백엔드가 없으므로 dev든 프로덕션 빌드든 항상 MSW를 띄운다.
- * docs/KOSLINK-FRONTEND.md §11(데모 안전장치)은 "빌드된 정적 파일로 발표한다"고
- * 못박아 두고 있어서, DEV로만 게이팅하면 pnpm build && pnpm preview에서
- * /api/* 요청이 전부 404가 나고 placeholderData가 error 상태로 사라진다.
- * 실 백엔드가 준비되면 VITE_API_BASE_URL을 설정해 이 워커를 끄면 된다.
+ * 프로덕션 빌드(nginx.conf의 /api/ 프록시가 koslink-backend-app 실 백엔드로
+ * 연결해준다)에서는 MSW를 절대 띄우지 않는다. import.meta.env.PROD는 Vite가
+ * `vite build` 결과물에 빌드 타임에 심어주는 값이라 별도 환경변수 설정이
+ * 필요 없다 — 개발 서버(`vite dev`)에서만 MSW가 /api/* 를 가로챈다.
  */
 async function enableMocking() {
-  if (import.meta.env.VITE_API_BASE_URL) return
+  if (import.meta.env.PROD) return
   const { worker } = await import('#/shared/mocks/browser')
   await worker.start({ onUnhandledRequest: 'bypass' })
 }
