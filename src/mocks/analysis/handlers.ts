@@ -2,7 +2,7 @@ import { HttpResponse, delay, http } from 'msw'
 import { getNewsImpact } from '#/apis/analysis/mock'
 
 export const analysisHandlers = [
-  http.get('/api/news/:id/impact', async ({ params }) => {
+  http.get('/api/v1/news/:id/impact', async ({ params }) => {
     await delay(350)
     const impact = getNewsImpact(Number(params.id))
     if (!impact) {
