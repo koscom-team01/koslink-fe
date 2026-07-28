@@ -32,6 +32,7 @@ import type {
 } from '#/types/graph'
 import StockNode from './StockNode'
 import RelEdge from './RelEdge'
+import GraphSearch from './GraphSearch'
 import { usePropagation } from '#/hooks/graph/usePropagation'
 import type { RevealEdge, RevealNode, Scene } from '#/hooks/graph/usePropagation'
 import './graph.css'
@@ -510,6 +511,9 @@ export function GraphCanvas({
           </button>
         )}
         <span className="ghint">{scene2.ghint}</span>
+        {mode === 'all' && (
+          <GraphSearch index={index} onSelect={setHighlightedNode} />
+        )}
         <div className="gtools">
           <button
             type="button"
