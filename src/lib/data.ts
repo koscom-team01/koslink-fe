@@ -68,7 +68,7 @@ const RAW_CONCEPTS: [string, string, string][] = [
   ['dram', 'D램', '반도체'],
   ['fdry', '파운드리', '반도체'],
   ['aidc', 'AI 데이터센터', '반도체'],
-  ['adpkg', '첨단패키징', '반도체'],
+  ['adpkg', '삼성전자', '반도체'],
   ['glass', '유리기판', '반도체'],
   ['euv', 'EUV', '반도체'],
   ['ondevice', '온디바이스AI', '반도체'],
@@ -237,10 +237,30 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'hanmi', direction: 'UP', relationLabel: '장비 공급', chain: ['sk', 'hanmi'] },
-      { nodeId: 'hpsp', direction: 'UP', relationLabel: '고압 어닐링 장비', chain: ['sk', 'hpsp'] },
-      { nodeId: 'wonik', direction: 'UP', relationLabel: '증착 장비', chain: ['sk', 'wonik'] },
-      { nodeId: 'ss', direction: 'DOWN', relationLabel: '경쟁 관계', chain: ['sk', 'ss'] },
+      {
+        nodeId: 'hanmi',
+        direction: 'UP',
+        relationLabel: '장비 공급',
+        chain: ['sk', 'hanmi'],
+      },
+      {
+        nodeId: 'hpsp',
+        direction: 'UP',
+        relationLabel: '고압 어닐링 장비',
+        chain: ['sk', 'hpsp'],
+      },
+      {
+        nodeId: 'wonik',
+        direction: 'UP',
+        relationLabel: '증착 장비',
+        chain: ['sk', 'wonik'],
+      },
+      {
+        nodeId: 'ss',
+        direction: 'DOWN',
+        relationLabel: '경쟁 관계',
+        chain: ['sk', 'ss'],
+      },
     ],
   },
   {
@@ -262,10 +282,30 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: 'HBM 주력 생산', chain: ['aidc', 'hbm', 'sk'] },
-      { nodeId: 'hanmi', direction: 'UP', relationLabel: 'HBM 필수 장비', chain: ['aidc', 'hbm', 'hanmi'] },
-      { nodeId: 'ss', direction: 'UP', relationLabel: 'HBM 생산', chain: ['aidc', 'hbm', 'ss'] },
-      { nodeId: 'eo', direction: 'UP', relationLabel: '장비 납품', chain: ['aidc', 'hbm', 'sk', 'eo'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: 'HBM 주력 생산',
+        chain: ['aidc', 'hbm', 'sk'],
+      },
+      {
+        nodeId: 'hanmi',
+        direction: 'UP',
+        relationLabel: 'HBM 필수 장비',
+        chain: ['aidc', 'hbm', 'hanmi'],
+      },
+      {
+        nodeId: 'ss',
+        direction: 'UP',
+        relationLabel: 'HBM 생산',
+        chain: ['aidc', 'hbm', 'ss'],
+      },
+      {
+        nodeId: 'eo',
+        direction: 'UP',
+        relationLabel: '장비 납품',
+        chain: ['aidc', 'hbm', 'sk', 'eo'],
+      },
     ],
   },
   {
@@ -287,10 +327,30 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'jusung', direction: 'UP', relationLabel: '장비 공급', chain: ['ss', 'jusung'] },
-      { nodeId: 'lino', direction: 'UP', relationLabel: '테스트 소켓', chain: ['ss', 'lino'] },
-      { nodeId: 'dj', direction: 'UP', relationLabel: '포토레지스트', chain: ['ss', 'dj'] },
-      { nodeId: 'sk', direction: 'DOWN', relationLabel: '경쟁', chain: ['ss', 'sk'] },
+      {
+        nodeId: 'jusung',
+        direction: 'UP',
+        relationLabel: '장비 공급',
+        chain: ['ss', 'jusung'],
+      },
+      {
+        nodeId: 'lino',
+        direction: 'UP',
+        relationLabel: '테스트 소켓',
+        chain: ['ss', 'lino'],
+      },
+      {
+        nodeId: 'dj',
+        direction: 'UP',
+        relationLabel: '포토레지스트',
+        chain: ['ss', 'dj'],
+      },
+      {
+        nodeId: 'sk',
+        direction: 'DOWN',
+        relationLabel: '경쟁',
+        chain: ['ss', 'sk'],
+      },
     ],
   },
   {
@@ -312,10 +372,30 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: '주력 생산', chain: ['hbm', 'sk'] },
-      { nodeId: 'ss', direction: 'UP', relationLabel: '생산', chain: ['hbm', 'ss'] },
-      { nodeId: 'hanmi', direction: 'UP', relationLabel: 'TC본더 필수', chain: ['hbm', 'hanmi'] },
-      { nodeId: 'aidc', direction: 'UP', relationLabel: '수요 견인', chain: ['hbm', 'aidc'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '주력 생산',
+        chain: ['hbm', 'sk'],
+      },
+      {
+        nodeId: 'ss',
+        direction: 'UP',
+        relationLabel: '생산',
+        chain: ['hbm', 'ss'],
+      },
+      {
+        nodeId: 'hanmi',
+        direction: 'UP',
+        relationLabel: 'TC본더 필수',
+        chain: ['hbm', 'hanmi'],
+      },
+      {
+        nodeId: 'aidc',
+        direction: 'UP',
+        relationLabel: '수요 견인',
+        chain: ['hbm', 'aidc'],
+      },
     ],
   },
   {
@@ -337,9 +417,24 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: '주력 생산', chain: ['dram', 'sk'] },
-      { nodeId: 'ss', direction: 'UP', relationLabel: '생산', chain: ['dram', 'ss'] },
-      { nodeId: 'aidc', direction: 'UP', relationLabel: '수요 견인', chain: ['dram', 'aidc'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '주력 생산',
+        chain: ['dram', 'sk'],
+      },
+      {
+        nodeId: 'ss',
+        direction: 'UP',
+        relationLabel: '생산',
+        chain: ['dram', 'ss'],
+      },
+      {
+        nodeId: 'aidc',
+        direction: 'UP',
+        relationLabel: '수요 견인',
+        chain: ['dram', 'aidc'],
+      },
     ],
   },
   {
@@ -361,7 +456,12 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: '증착 장비', chain: ['wonik', 'sk'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '증착 장비',
+        chain: ['wonik', 'sk'],
+      },
     ],
   },
   {
@@ -383,7 +483,12 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: '고압 어닐링', chain: ['hpsp', 'sk'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '고압 어닐링',
+        chain: ['hpsp', 'sk'],
+      },
     ],
   },
   {
@@ -405,7 +510,12 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: '소모품 공급', chain: ['tck', 'sk'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '소모품 공급',
+        chain: ['tck', 'sk'],
+      },
     ],
   },
   {
@@ -427,7 +537,12 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'fdry', direction: 'UP', relationLabel: '사업 영위', chain: ['dbh', 'fdry'] },
+      {
+        nodeId: 'fdry',
+        direction: 'UP',
+        relationLabel: '사업 영위',
+        chain: ['dbh', 'fdry'],
+      },
     ],
   },
 ]
@@ -458,9 +573,24 @@ const REFRESH_POOL: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'testinsp', direction: 'UP', relationLabel: '테스트 장비 공급', chain: ['unitest', 'testinsp'] },
-      { nodeId: 'testna', direction: 'UP', relationLabel: '테스트 서비스', chain: ['unitest', 'testinsp', 'testna'] },
-      { nodeId: 'isc', direction: 'UP', relationLabel: '테스트 소켓 공급', chain: ['unitest', 'testinsp', 'isc'] },
+      {
+        nodeId: 'testinsp',
+        direction: 'UP',
+        relationLabel: '테스트 장비 공급',
+        chain: ['unitest', 'testinsp'],
+      },
+      {
+        nodeId: 'testna',
+        direction: 'UP',
+        relationLabel: '테스트 서비스',
+        chain: ['unitest', 'testinsp', 'testna'],
+      },
+      {
+        nodeId: 'isc',
+        direction: 'UP',
+        relationLabel: '테스트 소켓 공급',
+        chain: ['unitest', 'testinsp', 'isc'],
+      },
     ],
   },
   {
@@ -482,9 +612,24 @@ const REFRESH_POOL: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'euv', direction: 'UP', relationLabel: '선단공정 노광 도입', chain: ['ss', 'euv'] },
-      { nodeId: 'park', direction: 'UP', relationLabel: '계측 장비 공급', chain: ['ss', 'euv', 'park'] },
-      { nodeId: 'fdry', direction: 'UP', relationLabel: '미세공정 필수', chain: ['ss', 'euv', 'fdry'] },
+      {
+        nodeId: 'euv',
+        direction: 'UP',
+        relationLabel: '선단공정 노광 도입',
+        chain: ['ss', 'euv'],
+      },
+      {
+        nodeId: 'park',
+        direction: 'UP',
+        relationLabel: '계측 장비 공급',
+        chain: ['ss', 'euv', 'park'],
+      },
+      {
+        nodeId: 'fdry',
+        direction: 'UP',
+        relationLabel: '미세공정 필수',
+        chain: ['ss', 'euv', 'fdry'],
+      },
     ],
   },
   {
@@ -506,10 +651,30 @@ const REFRESH_POOL: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'adpkg', direction: 'UP', relationLabel: 'HBM 패키징 공급', chain: ['sk', 'adpkg'] },
-      { nodeId: 'hanamc', direction: 'UP', relationLabel: '첨단패키징 후공정', chain: ['sk', 'adpkg', 'hanamc'] },
-      { nodeId: 'nepes', direction: 'UP', relationLabel: '첨단패키징 후공정', chain: ['sk', 'adpkg', 'nepes'] },
-      { nodeId: 'sfa', direction: 'UP', relationLabel: '첨단패키징 후공정', chain: ['sk', 'adpkg', 'sfa'] },
+      {
+        nodeId: 'adpkg',
+        direction: 'UP',
+        relationLabel: 'HBM 패키징 공급',
+        chain: ['sk', 'adpkg'],
+      },
+      {
+        nodeId: 'hanamc',
+        direction: 'UP',
+        relationLabel: '첨단패키징 후공정',
+        chain: ['sk', 'adpkg', 'hanamc'],
+      },
+      {
+        nodeId: 'nepes',
+        direction: 'UP',
+        relationLabel: '첨단패키징 후공정',
+        chain: ['sk', 'adpkg', 'nepes'],
+      },
+      {
+        nodeId: 'sfa',
+        direction: 'UP',
+        relationLabel: '첨단패키징 후공정',
+        chain: ['sk', 'adpkg', 'sfa'],
+      },
     ],
   },
   {
@@ -531,9 +696,24 @@ const REFRESH_POOL: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'wafermat', direction: 'UP', relationLabel: '웨이퍼 공정 소재 공급', chain: ['hansolchem', 'wafermat'] },
-      { nodeId: 'ss', direction: 'UP', relationLabel: '공정 소재 조달', chain: ['hansolchem', 'wafermat', 'ss'] },
-      { nodeId: 'enf', direction: 'UP', relationLabel: '포토레지스트 공급', chain: ['hansolchem', 'wafermat', 'enf'] },
+      {
+        nodeId: 'wafermat',
+        direction: 'UP',
+        relationLabel: '웨이퍼 공정 소재 공급',
+        chain: ['hansolchem', 'wafermat'],
+      },
+      {
+        nodeId: 'ss',
+        direction: 'UP',
+        relationLabel: '공정 소재 조달',
+        chain: ['hansolchem', 'wafermat', 'ss'],
+      },
+      {
+        nodeId: 'enf',
+        direction: 'UP',
+        relationLabel: '포토레지스트 공급',
+        chain: ['hansolchem', 'wafermat', 'enf'],
+      },
     ],
   },
   {
@@ -555,9 +735,24 @@ const REFRESH_POOL: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'ondevice', direction: 'UP', relationLabel: '차량용 온디바이스 AI 칩 개발', chain: ['telechips', 'ondevice'] },
-      { nodeId: 'anapass', direction: 'UP', relationLabel: '온디바이스 AI 구동칩 개발', chain: ['telechips', 'ondevice', 'anapass'] },
-      { nodeId: 'abov', direction: 'UP', relationLabel: 'MCU 공급', chain: ['telechips', 'ondevice', 'abov'] },
+      {
+        nodeId: 'ondevice',
+        direction: 'UP',
+        relationLabel: '차량용 온디바이스 AI 칩 개발',
+        chain: ['telechips', 'ondevice'],
+      },
+      {
+        nodeId: 'anapass',
+        direction: 'UP',
+        relationLabel: '온디바이스 AI 구동칩 개발',
+        chain: ['telechips', 'ondevice', 'anapass'],
+      },
+      {
+        nodeId: 'abov',
+        direction: 'UP',
+        relationLabel: 'MCU 공급',
+        chain: ['telechips', 'ondevice', 'abov'],
+      },
     ],
   },
   {
@@ -579,9 +774,24 @@ const REFRESH_POOL: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'glass', direction: 'UP', relationLabel: '유리기판 개발', chain: ['simmtech', 'glass'] },
-      { nodeId: 'daeduck', direction: 'UP', relationLabel: '유리기판 개발', chain: ['simmtech', 'glass', 'daeduck'] },
-      { nodeId: 'aidc', direction: 'UP', relationLabel: '차세대 패키징 수요', chain: ['simmtech', 'glass', 'aidc'] },
+      {
+        nodeId: 'glass',
+        direction: 'UP',
+        relationLabel: '유리기판 개발',
+        chain: ['simmtech', 'glass'],
+      },
+      {
+        nodeId: 'daeduck',
+        direction: 'UP',
+        relationLabel: '유리기판 개발',
+        chain: ['simmtech', 'glass', 'daeduck'],
+      },
+      {
+        nodeId: 'aidc',
+        direction: 'UP',
+        relationLabel: '차세대 패키징 수요',
+        chain: ['simmtech', 'glass', 'aidc'],
+      },
     ],
   },
   {
@@ -603,9 +813,24 @@ const REFRESH_POOL: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'cxl', direction: 'UP', relationLabel: '차세대 메모리 인터페이스 개발', chain: ['sk', 'cxl'] },
-      { nodeId: 'ss', direction: 'UP', relationLabel: '차세대 메모리 인터페이스 개발', chain: ['sk', 'cxl', 'ss'] },
-      { nodeId: 'dram', direction: 'UP', relationLabel: '메모리 확장 표준', chain: ['sk', 'cxl', 'dram'] },
+      {
+        nodeId: 'cxl',
+        direction: 'UP',
+        relationLabel: '차세대 메모리 인터페이스 개발',
+        chain: ['sk', 'cxl'],
+      },
+      {
+        nodeId: 'ss',
+        direction: 'UP',
+        relationLabel: '차세대 메모리 인터페이스 개발',
+        chain: ['sk', 'cxl', 'ss'],
+      },
+      {
+        nodeId: 'dram',
+        direction: 'UP',
+        relationLabel: '메모리 확장 표준',
+        chain: ['sk', 'cxl', 'dram'],
+      },
     ],
   },
   {
@@ -627,9 +852,24 @@ const REFRESH_POOL: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'specgas', direction: 'UP', relationLabel: '특수가스 공급', chain: ['foosung', 'specgas'] },
-      { nodeId: 'sk', direction: 'UP', relationLabel: '증착 공정 필수 가스', chain: ['foosung', 'specgas', 'sk'] },
-      { nodeId: 'fdry', direction: 'UP', relationLabel: '파운드리 공정 필수', chain: ['foosung', 'specgas', 'fdry'] },
+      {
+        nodeId: 'specgas',
+        direction: 'UP',
+        relationLabel: '특수가스 공급',
+        chain: ['foosung', 'specgas'],
+      },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '증착 공정 필수 가스',
+        chain: ['foosung', 'specgas', 'sk'],
+      },
+      {
+        nodeId: 'fdry',
+        direction: 'UP',
+        relationLabel: '파운드리 공정 필수',
+        chain: ['foosung', 'specgas', 'fdry'],
+      },
     ],
   },
   {
@@ -651,8 +891,18 @@ const REFRESH_POOL: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: '식각 장비 공급', chain: ['psk', 'sk'] },
-      { nodeId: 'jusung', direction: 'DOWN', relationLabel: '경쟁', chain: ['psk', 'jusung'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '식각 장비 공급',
+        chain: ['psk', 'sk'],
+      },
+      {
+        nodeId: 'jusung',
+        direction: 'DOWN',
+        relationLabel: '경쟁',
+        chain: ['psk', 'jusung'],
+      },
     ],
   },
   {
@@ -674,8 +924,18 @@ const REFRESH_POOL: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: '부품 세정 코팅 공급', chain: ['comico', 'sk'] },
-      { nodeId: 'tck', direction: 'DOWN', relationLabel: '경쟁', chain: ['comico', 'tck'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '부품 세정 코팅 공급',
+        chain: ['comico', 'sk'],
+      },
+      {
+        nodeId: 'tck',
+        direction: 'DOWN',
+        relationLabel: '경쟁',
+        chain: ['comico', 'tck'],
+      },
     ],
   },
 ]
@@ -833,7 +1093,9 @@ function buildFillerNews(count: number, startId: number): NewsRecord[] {
       publishedAt: cursor.toISOString(),
       url: 'https://example.com/',
       summary: template.summary(originName),
-      originStocks: [{ nodeId: originId, direction, reason: template.reason(originName) }],
+      originStocks: [
+        { nodeId: originId, direction, reason: template.reason(originName) },
+      ],
       relatedStocks,
     })
   }
