@@ -511,9 +511,6 @@ export function GraphCanvas({
           </button>
         )}
         <span className="ghint">{scene2.ghint}</span>
-        {mode === 'all' && (
-          <GraphSearch index={index} onSelect={setHighlightedNode} />
-        )}
         <div className="gtools">
           <button
             type="button"
@@ -564,6 +561,9 @@ export function GraphCanvas({
             color="#E3E0DC"
           />
         </ReactFlow>
+        {mode === 'all' && (
+          <GraphSearch index={index} onSelect={setHighlightedNode} />
+        )}
         <div className={cn('stage', stageText && 'on')}>{stageText}</div>
         {tip && (
           <div className="tip on" style={{ left: tip.x, top: tip.y }}>

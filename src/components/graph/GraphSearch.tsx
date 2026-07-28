@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { KeyboardEvent } from 'react'
+import { Search, X } from 'lucide-react'
 import type { GraphIndex } from '#/shared/utils/graphIndex'
 
 const MAX_RESULTS = 8
@@ -9,8 +10,8 @@ interface GraphSearchProps {
   onSelect: (id: string) => void
 }
 
-/** 전체 관계망 전용 종목 검색 — 결과 선택은 해당 노드를 클릭한 것과 동일하게
- * onSelect(id)로 highlightedNodeAtom을 세팅해 그 자리 파급 강조를 켠다. */
+/** 전체 관계망 캔버스 위에 떠 있는 종목 검색 — 결과 선택은 해당 노드를 클릭한 것과
+ * 동일하게 onSelect(id)로 highlightedNodeAtom을 세팅해 그 자리 파급 강조를 켠다. */
 export default function GraphSearch({ index, onSelect }: GraphSearchProps) {
   const [query, setQuery] = useState('')
   const nodes = useMemo(() => Array.from(index.byId.values()), [index])
@@ -42,22 +43,38 @@ export default function GraphSearch({ index, onSelect }: GraphSearchProps) {
 
   return (
     <div className="gsearch">
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="종목 검색"
-        className="gsearch-input"
-        aria-label="종목 검색"
-      />
+      <div className="gsearch-box">
+        <Search size={14} className="gsearch-icon" />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="종목명·티커 검색"
+          className="gsearch-input"
+          aria-label="종목 검색"
+        />
+        {query && (
+          <button
+            type="button"
+            className="gsearch-clear"
+            aria-label="검색어 지우기"
+            // mousedown이 input의 blur보다 먼저 발생하게 해 목록이 닫히기 전에 처리한다
+            onMouseDown={(e) => {
+              e.preventDefault()
+              setQuery('')
+            }}
+          >
+            <X size={13} />
+          </button>
+        )}
+      </div>
       {results.length > 0 && (
         <ul className="gsearch-results">
           {results.map((n) => (
             <li key={n.id}>
               <button
                 type="button"
-                // mousedown이 input의 blur보다 먼저 발생하게 해 목록이 닫히기 전에 선택을 확정한다
                 onMouseDown={(e) => {
                   e.preventDefault()
                   handleSelect(n.id)
