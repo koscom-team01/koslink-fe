@@ -333,424 +333,93 @@ const CURATED_NEWS: NewsRecord[] = [
 ]
 
 /**
- * "최신 뉴스 새로고침" 시연용 풀. 실 백엔드가 없으니 새로고침 버튼을 누를 때마다
- * pullRefreshBatch()가 여기서 몇 건을 순환해 뽑아 NEWS_RECORDS 맨 앞에 끼워 넣는다.
- * 실 API가 준비되면 이 풀과 pullRefreshBatch는 통째로 지우고 새로고침을 그냥
+ * "최신 뉴스 새로고침" 시연용 고정 3건 — 한미반도체(SK하이닉스·삼성전자 제외) 관련
+ * 실제 최근 반도체 기사를 바탕으로 함. 이 3건의 실제 impact 응답은
+ * apis/analysis/mock.ts가 id 20001~20003을 특별 취급해
+ * mocks/analysis/refreshNewsExamples.json + hmiSubgraph.json으로 반환하므로,
+ * 아래 originStocks/relatedStocks/summary는 리스트 표시에는 안 쓰인다.
+ * 실 API가 준비되면 이 배열과 pullRefreshBatch는 통째로 지우고 새로고침을 그냥
  * 쿼리 재조회로 대체하면 된다.
  */
-const REFRESH_POOL: NewsRecord[] = [
+const REFRESH_ADDITIONS: NewsRecord[] = [
   {
-    id: 30001,
-    title: '유니테스트, HBM 검증 수요 급증에 테스트 장비 수주 확대',
-    press: '전자신문',
+    id: 20001,
+    title: '한미반도체, 5천여평 규모 제8공장 확보…AI 반도체 장비 쇼티지 선제 대응',
+    press: '뉴스핌',
     publishedAt: TODAY,
-    url: 'https://www.etnews.com/',
+    url: 'https://www.newspim.com/news/view/20260720000985',
     summary: [
-      '유니테스트가 HBM 검증용 테스트 장비 수주를 확대했다고 밝혔다.',
-      'HBM 검증 물량 증가가 수주 확대의 배경으로 꼽힌다.',
-      '하반기까지 관련 수주가 이어질 것으로 전망된다.',
+      '한미반도체가 인천 본사 인근 부지를 매입해 창사 이래 최대 규모인 제8공장 건설을 추진한다고 밝혔다.',
+      '신규 공장은 HBM 생산에 필수적인 TC본더 등 첨단 패키징 장비 생산시설로 활용될 계획이다.',
+      'AI 반도체 시장 확대에 따른 장비 공급 부족(쇼티지)에 선제 대응하려는 조치로 풀이된다.',
     ],
     originStocks: [
       {
-        nodeId: 'unitest',
+        nodeId: 'hanmi',
         direction: 'UP',
-        reason: 'HBM 검증용 테스트 장비 수주 확대의 직접 당사자',
+        reason: '제8공장 확보로 TC본더 생산능력이 직접 확대되는 당사자',
       },
     ],
-    relatedStocks: [
-      {
-        nodeId: 'testinsp',
-        direction: 'UP',
-        relationLabel: '테스트 장비 공급',
-        chain: ['unitest', 'testinsp'],
-      },
-      {
-        nodeId: 'testna',
-        direction: 'UP',
-        relationLabel: '테스트 서비스',
-        chain: ['unitest', 'testinsp', 'testna'],
-      },
-      {
-        nodeId: 'isc',
-        direction: 'UP',
-        relationLabel: '테스트 소켓 공급',
-        chain: ['unitest', 'testinsp', 'isc'],
-      },
-    ],
+    relatedStocks: [],
   },
   {
-    id: 30002,
-    title: '삼성전자, EUV 노광 장비 신규 발주 확정',
-    press: '한국경제',
-    publishedAt: TODAY,
-    url: 'https://www.hankyung.com/',
-    summary: [
-      '삼성전자가 선단공정 EUV 노광 장비 신규 발주를 확정했다.',
-      '미세공정 전환 대응이 목적으로 파악된다.',
-      '계측 장비 협력사 수주도 함께 늘어날 전망이다.',
-    ],
-    originStocks: [
-      {
-        nodeId: 'ss',
-        direction: 'UP',
-        reason: 'EUV 장비 신규 발주를 직접 확정한 당사자',
-      },
-    ],
-    relatedStocks: [
-      {
-        nodeId: 'euv',
-        direction: 'UP',
-        relationLabel: '선단공정 노광 도입',
-        chain: ['ss', 'euv'],
-      },
-      {
-        nodeId: 'park',
-        direction: 'UP',
-        relationLabel: '계측 장비 공급',
-        chain: ['ss', 'euv', 'park'],
-      },
-      {
-        nodeId: 'fdry',
-        direction: 'UP',
-        relationLabel: '미세공정 필수',
-        chain: ['ss', 'euv', 'fdry'],
-      },
-    ],
-  },
-  {
-    id: 30003,
-    title: 'SK하이닉스, 첨단패키징 라인 증설 검토',
-    press: '연합뉴스',
-    publishedAt: TODAY,
-    url: 'https://www.yna.co.kr/',
-    summary: [
-      'SK하이닉스가 첨단패키징 라인 증설을 검토 중이라고 밝혔다.',
-      'HBM 후공정 대응 능력 확대가 목적이다.',
-      '후공정 협력사 수주 기대감이 커지고 있다.',
-    ],
-    originStocks: [
-      {
-        nodeId: 'sk',
-        direction: 'UP',
-        reason: '첨단패키징 라인 증설을 직접 검토하는 당사자',
-      },
-    ],
-    relatedStocks: [
-      {
-        nodeId: 'adpkg',
-        direction: 'UP',
-        relationLabel: 'HBM 패키징 공급',
-        chain: ['sk', 'adpkg'],
-      },
-      {
-        nodeId: 'hanamc',
-        direction: 'UP',
-        relationLabel: '첨단패키징 후공정',
-        chain: ['sk', 'adpkg', 'hanamc'],
-      },
-      {
-        nodeId: 'nepes',
-        direction: 'UP',
-        relationLabel: '첨단패키징 후공정',
-        chain: ['sk', 'adpkg', 'nepes'],
-      },
-      {
-        nodeId: 'sfa',
-        direction: 'UP',
-        relationLabel: '첨단패키징 후공정',
-        chain: ['sk', 'adpkg', 'sfa'],
-      },
-    ],
-  },
-  {
-    id: 30004,
-    title: '웨이퍼 공정 소재 가격 상승… 한솔케미칼 수혜',
-    press: '머니투데이',
-    publishedAt: TODAY,
-    url: 'https://www.mt.co.kr/',
-    summary: [
-      '웨이퍼 공정 소재 가격이 오르며 관련주가 강세다.',
-      '수급 타이트로 소재 업체 협상력이 개선되고 있다.',
-      '증설 투자로 이어질지 시장이 주목하고 있다.',
-    ],
-    originStocks: [
-      {
-        nodeId: 'hansolchem',
-        direction: 'UP',
-        reason: '웨이퍼 공정 소재 가격 상승의 직접 수혜 당사자',
-      },
-    ],
-    relatedStocks: [
-      {
-        nodeId: 'wafermat',
-        direction: 'UP',
-        relationLabel: '웨이퍼 공정 소재 공급',
-        chain: ['hansolchem', 'wafermat'],
-      },
-      {
-        nodeId: 'ss',
-        direction: 'UP',
-        relationLabel: '공정 소재 조달',
-        chain: ['hansolchem', 'wafermat', 'ss'],
-      },
-      {
-        nodeId: 'enf',
-        direction: 'UP',
-        relationLabel: '포토레지스트 공급',
-        chain: ['hansolchem', 'wafermat', 'enf'],
-      },
-    ],
-  },
-  {
-    id: 30005,
-    title: '텔레칩스, 온디바이스 AI 확산에 차량용 구동칩 수주 확대',
+    id: 20002,
+    title: '한미반도체, 와이드 TC본더 앞세워 HBM4용 신규 수주 경쟁력 강화',
     press: '이데일리',
     publishedAt: TODAY,
-    url: 'https://www.edaily.co.kr/',
+    url: 'https://v.daum.net/v/20260702084432066',
     summary: [
-      '텔레칩스가 차량용 온디바이스 AI 구동칩 수주를 확대했다.',
-      '온디바이스 AI 탑재 차량이 늘어난 영향으로 풀이된다.',
-      'AI 반도체 팹리스 전반으로 온기가 확산되는 모습이다.',
+      "한미반도체가 '와이드 TC본더'를 앞세워 HBM4용 신규 수주 경쟁력을 강화하고 있다고 밝혔다.",
+      'TC본더 적용처가 확장되며 신규 수주 기회가 늘어날 것으로 전망된다.',
+      'HBM TC본더 시장 점유율 71%를 바탕으로 후속 수주 논의도 이어지고 있다.',
     ],
     originStocks: [
       {
-        nodeId: 'telechips',
+        nodeId: 'hanmi',
         direction: 'UP',
-        reason: '차량용 온디바이스 AI 구동칩 수주 확대의 직접 당사자',
+        reason: 'TC본더 적용처 확장으로 신규 수주 경쟁력이 직접 강화되는 당사자',
       },
     ],
-    relatedStocks: [
-      {
-        nodeId: 'ondevice',
-        direction: 'UP',
-        relationLabel: '차량용 온디바이스 AI 칩 개발',
-        chain: ['telechips', 'ondevice'],
-      },
-      {
-        nodeId: 'anapass',
-        direction: 'UP',
-        relationLabel: '온디바이스 AI 구동칩 개발',
-        chain: ['telechips', 'ondevice', 'anapass'],
-      },
-      {
-        nodeId: 'abov',
-        direction: 'UP',
-        relationLabel: 'MCU 공급',
-        chain: ['telechips', 'ondevice', 'abov'],
-      },
-    ],
+    relatedStocks: [],
   },
   {
-    id: 30006,
-    title: '심텍, 유리기판 상용화 임박에 시제품 검증 마무리',
-    press: '파이낸셜뉴스',
+    id: 20003,
+    title: "한미반도체, HBM4 'TC본더 4.5 그리핀' 442억원 수주 공시",
+    press: '한국경제',
     publishedAt: TODAY,
-    url: 'https://www.fnnews.com/',
+    url: 'https://news.nate.com/view/20260608n17852',
     summary: [
-      '심텍이 차세대 패키징용 유리기판 시제품 검증을 마무리했다.',
-      '상용화 일정이 당초 계획보다 앞당겨질 전망이다.',
-      'AI 반도체 패키징 수요와 맞물려 주목받고 있다.',
+      "한미반도체가 HBM4 제조용 'TC본더 4.5 그리핀' 장비 수주를 공시했다.",
+      '이번 수주 규모는 442억원으로, 매출액 대비 약 7.66%에 해당한다.',
+      'HBM4 양산 확대에 따른 후속 발주가 이어질지 시장의 관심이 모인다.',
     ],
     originStocks: [
       {
-        nodeId: 'simmtech',
+        nodeId: 'hanmi',
         direction: 'UP',
-        reason: '유리기판 시제품 검증 마무리의 직접 당사자',
+        reason: '442억원 규모의 TC본더 신규 수주를 직접 공시한 당사자',
       },
     ],
-    relatedStocks: [
-      {
-        nodeId: 'glass',
-        direction: 'UP',
-        relationLabel: '유리기판 개발',
-        chain: ['simmtech', 'glass'],
-      },
-      {
-        nodeId: 'daeduck',
-        direction: 'UP',
-        relationLabel: '유리기판 개발',
-        chain: ['simmtech', 'glass', 'daeduck'],
-      },
-      {
-        nodeId: 'aidc',
-        direction: 'UP',
-        relationLabel: '차세대 패키징 수요',
-        chain: ['simmtech', 'glass', 'aidc'],
-      },
-    ],
-  },
-  {
-    id: 30007,
-    title: 'SK하이닉스, CXL 표준 확산에 차세대 메모리 개발 박차',
-    press: '서울경제',
-    publishedAt: TODAY,
-    url: 'https://www.sedaily.com/',
-    summary: [
-      'SK하이닉스가 차세대 메모리 인터페이스 CXL 제품 개발에 속도를 내고 있다.',
-      '데이터센터향 메모리 확장 수요 대응이 목적이다.',
-      '관련 생태계 투자도 함께 확대될 전망이다.',
-    ],
-    originStocks: [
-      {
-        nodeId: 'sk',
-        direction: 'UP',
-        reason: 'CXL 차세대 메모리 개발을 직접 주도하는 당사자',
-      },
-    ],
-    relatedStocks: [
-      {
-        nodeId: 'cxl',
-        direction: 'UP',
-        relationLabel: '차세대 메모리 인터페이스 개발',
-        chain: ['sk', 'cxl'],
-      },
-      {
-        nodeId: 'ss',
-        direction: 'UP',
-        relationLabel: '차세대 메모리 인터페이스 개발',
-        chain: ['sk', 'cxl', 'ss'],
-      },
-      {
-        nodeId: 'dram',
-        direction: 'UP',
-        relationLabel: '메모리 확장 표준',
-        chain: ['sk', 'cxl', 'dram'],
-      },
-    ],
-  },
-  {
-    id: 30008,
-    title: '후성, 특수가스 공급 부족 심화에 반사이익',
-    press: '뉴스1',
-    publishedAt: TODAY,
-    url: 'https://www.news1.kr/',
-    summary: [
-      '후성이 반도체 공정용 특수가스 공급 부족의 반사이익을 누리고 있다.',
-      '증착·파운드리 공정 전반의 수요 확대가 배경이다.',
-      '가격 협상력도 함께 개선되는 모습이다.',
-    ],
-    originStocks: [
-      {
-        nodeId: 'foosung',
-        direction: 'UP',
-        reason: '특수가스 공급 부족 심화의 직접 반사이익 당사자',
-      },
-    ],
-    relatedStocks: [
-      {
-        nodeId: 'specgas',
-        direction: 'UP',
-        relationLabel: '특수가스 공급',
-        chain: ['foosung', 'specgas'],
-      },
-      {
-        nodeId: 'sk',
-        direction: 'UP',
-        relationLabel: '증착 공정 필수 가스',
-        chain: ['foosung', 'specgas', 'sk'],
-      },
-      {
-        nodeId: 'fdry',
-        direction: 'UP',
-        relationLabel: '파운드리 공정 필수',
-        chain: ['foosung', 'specgas', 'fdry'],
-      },
-    ],
-  },
-  {
-    id: 30009,
-    title: '피에스케이, 대형 식각장비 수주 공시',
-    press: '아시아경제',
-    publishedAt: TODAY,
-    url: 'https://www.asiae.co.kr/',
-    summary: [
-      '피에스케이가 대형 식각장비 공급 계약을 공시했다.',
-      '고객사 라인 증설에 대응하는 수주로 파악된다.',
-      '경쟁사 대비 수주 모멘텀이 부각되고 있다.',
-    ],
-    originStocks: [
-      {
-        nodeId: 'psk',
-        direction: 'UP',
-        reason: '대형 식각장비 수주 공시의 직접 당사자',
-      },
-    ],
-    relatedStocks: [
-      {
-        nodeId: 'sk',
-        direction: 'UP',
-        relationLabel: '식각 장비 공급',
-        chain: ['psk', 'sk'],
-      },
-      {
-        nodeId: 'jusung',
-        direction: 'DOWN',
-        relationLabel: '경쟁',
-        chain: ['psk', 'jusung'],
-      },
-    ],
-  },
-  {
-    id: 30010,
-    title: '코미코, 반도체 부품 세정 수주 확대',
-    press: '매일경제',
-    publishedAt: TODAY,
-    url: 'https://www.mk.co.kr/',
-    summary: [
-      '코미코의 반도체 부품 세정·코팅 수주가 확대됐다.',
-      '고객사 가동률 상승이 배경으로 꼽힌다.',
-      '경쟁사 대비 점유율 확대가 기대된다.',
-    ],
-    originStocks: [
-      {
-        nodeId: 'comico',
-        direction: 'UP',
-        reason: '부품 세정 코팅 수주 확대의 직접 당사자',
-      },
-    ],
-    relatedStocks: [
-      {
-        nodeId: 'sk',
-        direction: 'UP',
-        relationLabel: '부품 세정 코팅 공급',
-        chain: ['comico', 'sk'],
-      },
-      {
-        nodeId: 'tck',
-        direction: 'DOWN',
-        relationLabel: '경쟁',
-        chain: ['comico', 'tck'],
-      },
-    ],
+    relatedStocks: [],
   },
 ]
 
-const REFRESH_BATCH_SIZES = [3, 2, 2, 3]
-let refreshClickCount = 0
-let refreshPoolCursor = 0
+let refreshAlreadyPulled = false
 
 /**
- * "새로고침" 클릭 데모용 — REFRESH_POOL을 순환하며 몇 건을 뽑아 발행 시각을
- * 지금으로 찍고 NEWS_RECORDS 맨 앞에 끼워 넣는다. 이미 나온 뉴스라도 풀을
- * 다 돌면 새 id로 다시 등장한다(데모를 몇 번이고 반복할 수 있도록).
+ * "새로고침" 클릭 데모용 — REFRESH_ADDITIONS 3건을 발행 시각만 지금으로 찍어
+ * NEWS_RECORDS 맨 앞에 한 번만 끼워 넣는다. 이미 넣었으면 빈 배열을 반환해
+ * "새 뉴스가 없습니다" 상태를 보여준다.
  */
 export function pullRefreshBatch(): NewsRecord[] {
-  const batchSize =
-    REFRESH_BATCH_SIZES[refreshClickCount % REFRESH_BATCH_SIZES.length]
-  refreshClickCount += 1
+  if (refreshAlreadyPulled) return []
+  refreshAlreadyPulled = true
 
   const now = Date.now()
-  const items: NewsRecord[] = []
-  for (let i = 0; i < batchSize; i++) {
-    const template = REFRESH_POOL[refreshPoolCursor % REFRESH_POOL.length]
-    const cycle = Math.floor(refreshPoolCursor / REFRESH_POOL.length)
-    refreshPoolCursor += 1
-    items.push({
-      ...template,
-      id: template.id + cycle * 10000,
-      publishedAt: new Date(now - i * 45_000).toISOString(),
-    })
-  }
+  const items = REFRESH_ADDITIONS.map((template, i) => ({
+    ...template,
+    publishedAt: new Date(now - i * 45_000).toISOString(),
+  }))
 
   NEWS_RECORDS.unshift(...items)
   return items

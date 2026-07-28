@@ -1,0 +1,131 @@
+{
+  "20001": {
+    "news_summary": [
+      "한미반도체가 인천 본사 인근 부지를 매입해 창사 이래 최대 규모인 제8공장 건설을 추진한다고 밝혔다.",
+      "신규 공장은 HBM 생산에 필수적인 TC본더 등 첨단 패키징 장비 생산시설로 활용될 계획이다.",
+      "AI 반도체 시장 확대에 따른 장비 공급 부족(쇼티지)에 선제 대응하려는 조치로 풀이된다."
+    ],
+    "source": {
+      "press": "뉴스핌",
+      "published_at": "PLACEHOLDER",
+      "url": "https://www.newspim.com/news/view/20260720000985"
+    },
+    "origin_stocks": [
+      {
+        "ticker": "042700",
+        "name": "한미반도체",
+        "status": "up",
+        "reason": "한미반도체는 이번 제8공장 확보로 TC본더 등 첨단 패키징 장비 생산능력을 직접 확대하는 당사자다."
+      }
+    ],
+    "related_stocks": [
+      {
+        "ticker": "000660",
+        "name": "SK하이닉스",
+        "status": "up",
+        "relation_label": "공급망",
+        "relation_path": "한미반도체 → SK하이닉스",
+        "propagation": "*SK하이닉스*는 한미반도체의 TC본더를 HBM 생산에 쓰는 핵심 수요처라, 장비 증산은 곧 HBM 공급 안정으로 이어질 가능성이 있다."
+      },
+      {
+        "ticker": "403870",
+        "name": "HPSP",
+        "status": "up",
+        "relation_label": "공급망",
+        "relation_path": "한미반도체 → SK하이닉스 → HPSP",
+        "propagation": "*HPSP*는 한미반도체와 같은 SK하이닉스 후공정 협력사로, 패키징 장비 투자 확대의 온기를 함께 받을 가능성이 있다."
+      }
+    ],
+    "final_summary": "이번 뉴스는 한미반도체가 AI·HBM向 패키징 장비 생산능력을 선제적으로 확대한다는 내용으로, *한미반도체*의 직접적인 실적 기여가 기대된다. 핵심 수요처인 *SK하이닉스*와 같은 후공정 공급망에 있는 *HPSP* 등도 함께 주목받을 것으로 보인다.",
+    "graph": {
+      "newsId": 20001,
+      "originId": "S_HMI"
+    }
+  },
+  "20002": {
+    "news_summary": [
+      "한미반도체가 '와이드 TC본더'를 앞세워 HBM4용 신규 수주 경쟁력을 강화하고 있다고 밝혔다.",
+      "TC본더 적용처가 확장되며 신규 수주 기회가 늘어날 것으로 전망된다.",
+      "HBM TC본더 시장 점유율 71%를 바탕으로 후속 수주 논의도 이어지고 있다."
+    ],
+    "source": {
+      "press": "이데일리",
+      "published_at": "PLACEHOLDER",
+      "url": "https://v.daum.net/v/20260702084432066"
+    },
+    "origin_stocks": [
+      {
+        "ticker": "042700",
+        "name": "한미반도체",
+        "status": "up",
+        "reason": "한미반도체는 TC본더 적용처 확장으로 신규 수주 경쟁력이 직접 강화되는 당사자다."
+      }
+    ],
+    "related_stocks": [
+      {
+        "ticker": "000660",
+        "name": "SK하이닉스",
+        "status": "up",
+        "relation_label": "공급망",
+        "relation_path": "한미반도체 → SK하이닉스",
+        "propagation": "*SK하이닉스*는 한미반도체 TC본더의 주요 수요처로, 적용처 확장에 따른 후속 발주 확대 수혜가 예상된다."
+      },
+      {
+        "ticker": "095340",
+        "name": "ISC",
+        "status": "up",
+        "relation_label": "공급망",
+        "relation_path": "한미반도체 → SK하이닉스 → ISC",
+        "propagation": "*ISC*는 SK하이닉스향 테스트 소켓 공급사로, 후공정 투자 확대 국면에서 함께 수혜를 받을 가능성이 있다."
+      }
+    ],
+    "final_summary": "이번 뉴스는 한미반도체의 TC본더 적용처 확장과 신규 수주 경쟁력 강화를 다루며, *한미반도체*의 실적 기여가 기대된다. 주요 수요처인 *SK하이닉스*와 후공정 협력사 *ISC* 등도 함께 주목받을 것으로 보인다.",
+    "graph": {
+      "newsId": 20002,
+      "originId": "S_HMI"
+    }
+  },
+  "20003": {
+    "news_summary": [
+      "한미반도체가 HBM4 제조용 'TC본더 4.5 그리핀' 장비 수주를 공시했다.",
+      "이번 수주 규모는 442억원으로, 매출액 대비 약 7.66%에 해당한다.",
+      "HBM4 양산 확대에 따른 후속 발주가 이어질지 시장의 관심이 모인다."
+    ],
+    "source": {
+      "press": "한국경제",
+      "published_at": "PLACEHOLDER",
+      "url": "https://news.nate.com/view/20260608n17852"
+    },
+    "origin_stocks": [
+      {
+        "ticker": "042700",
+        "name": "한미반도체",
+        "status": "up",
+        "reason": "한미반도체는 442억원 규모의 TC본더 신규 수주를 직접 공시한 당사자다."
+      }
+    ],
+    "related_stocks": [
+      {
+        "ticker": "000660",
+        "name": "SK하이닉스",
+        "status": "up",
+        "relation_label": "공급망",
+        "relation_path": "한미반도체 → SK하이닉스",
+        "propagation": "*SK하이닉스*는 이번 TC본더 수주 물량의 실제 발주처로 추정되며, HBM4 양산 확대 기조가 재확인된다."
+      },
+      {
+        "ticker": "005290",
+        "name": "동진쎄미켐",
+        "status": "up",
+        "relation_label": "기술 협력",
+        "relation_path": "한미반도체 → SK하이닉스 → 동진쎄미켐",
+        "propagation": "*동진쎄미켐*은 SK하이닉스와 기술 협력 관계에 있어, HBM4 양산 확대에 따른 공정 소재 수요 증가의 수혜가 기대된다."
+      }
+    ],
+    "final_summary": "이번 뉴스는 한미반도체가 HBM4용 TC본더 442억원 규모 수주를 공시한 내용으로, *한미반도체*의 실적 기여가 기대된다. 발주처로 추정되는 *SK하이닉스*와 기술 협력사 *동진쎄미켐* 등도 함께 주목받을 것으로 보인다.",
+    "graph": {
+      "newsId": 20003,
+      "originId": "S_HMI"
+    }
+  }
+}

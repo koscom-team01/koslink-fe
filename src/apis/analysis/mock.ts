@@ -1,6 +1,8 @@
 import { NEWS_RECORDS } from '#/mocks/news/data'
 import { ONTOLOGY_EDGES, ONTOLOGY_NODES } from '#/mocks/graph/data'
 import { marketCapToCapSize } from '#/shared/utils/format'
+import refreshNewsExamples from '#/mocks/analysis/refreshNewsExamples.json'
+import hmiSubgraph from '#/mocks/analysis/hmiSubgraph.json'
 import type {
   ImpactGraphNodeWire,
   NewsImpactWire,
@@ -8,6 +10,17 @@ import type {
 } from './mappers'
 import type { Direction } from '#/shared/types'
 import type { OntologyEdge, OntologyNode } from '#/types/graph'
+
+/** "새로고침" 데모용 한미반도체 뉴스 3건(20001~20003) — 셋 다 실제 온톨로지
+ * 2-hop 서브그래프(hmiSubgraph.json)를 공유하고, 뉴스별 요약/기점/관련종목만 다르다. */
+const REFRESH_EXAMPLES = refreshNewsExamples as unknown as Partial<
+  Record<
+    string,
+    Omit<NewsImpactWire, 'graph'> & {
+      graph: { newsId: number; originId: string }
+    }
+  >
+>
 
 /**
  * `docs/KOSLINK_API.md` §2 GET /news/{news_id}/impact 명세와 같은 시그니처를 갖는
@@ -81,6 +94,27 @@ function buildFinalSummary(originNames: string[], relatedCount: number): string 
  */
 export function getNewsImpact(newsId: number): NewsImpactWire | null {
   const record = NEWS_RECORDS.find((n) => n.id === newsId)
+
+  // "새로고침"으로 받아온 한미반도체 뉴스 3건 — 그래프는 실제 온톨로지 2-hop
+  // 서브그래프(hmiSubgraph.json)를 그대로 쓰고, 발행 시각은 리스트에 실제로
+  // 찍힌 값(새로고침 클릭 시점)을 그대로 맞춘다.
+  const example = REFRESH_EXAMPLES[String(newsId)]
+  if (example) {
+    return {
+      ...example,
+      source: {
+        ...example.source,
+        published_at: record?.publishedAt ?? example.source.published_at,
+      },
+      graph: {
+        newsId: example.graph.newsId,
+        originId: example.graph.originId,
+        nodes: hmiSubgraph.nodes as ImpactGraphNodeWire[],
+        edges: hmiSubgraph.edges,
+      },
+    }
+  }
+
   if (!record) return null
 
   const originNames = record.originStocks.map(
