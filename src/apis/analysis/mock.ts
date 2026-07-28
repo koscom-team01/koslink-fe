@@ -1,12 +1,18 @@
 import { NEWS_RECORDS } from '#/mocks/news/data'
 import { ONTOLOGY_EDGES, ONTOLOGY_NODES } from '#/mocks/graph/data'
-import type { NewsImpactWire } from './mappers'
+import { marketCapToCapSize } from '#/shared/utils/format'
+import type {
+  ImpactGraphNodeWire,
+  NewsImpactWire,
+  OntologyEdgeWire,
+} from './mappers'
 import type { Direction } from '#/shared/types'
-import type { ImpactGraphNode, OntologyEdge, OntologyNode } from '#/types/graph'
+import type { OntologyEdge, OntologyNode } from '#/types/graph'
 
 /**
- * `docs/KOSLINK-FRONTEND.md` §5 API 명세와 같은 시그니처를 갖는 헬퍼. 지금은 백엔드가
- * 없어 mocks/news/data.ts + mocks/graph/data.ts를 동기적으로 가공해 반환한다.
+ * `docs/KOSLINK_API.md` §2 GET /news/{news_id}/impact 명세와 같은 시그니처를 갖는
+ * 헬퍼. 지금은 백엔드가 없어 mocks/news/data.ts + mocks/graph/data.ts를 동기적으로
+ * 가공해 반환한다.
  */
 
 const nodeById = new Map(ONTOLOGY_NODES.map((n) => [n.id, n]))
@@ -23,6 +29,30 @@ function findOntologyEdge(a: string, b: string): OntologyEdge | undefined {
       (e.source === a && e.target === b) ||
       (e.source === b && e.target === a),
   )
+}
+
+// wire 그래프는 kind/sector/marketCap 없이 GET /graph?mode=full과 동일한
+// {id,name,ticker,capSize,marketType} 스키마로 통일한다. 개념 노드(HBM 등)는 실제
+// ticker가 없어 내부 id를 placeholder로 채운다 — mapNewsImpact()가 다시 STOCK으로
+// 취급하므로 그래프에서는 더 이상 점선(추상) 카드로 구분되지 않는다.
+function toGraphNodeWire(id: string): ImpactGraphNodeWire {
+  const node = requireNode(id)
+  return {
+    id: node.id,
+    name: node.name,
+    ticker: node.ticker ?? node.id,
+    capSize: marketCapToCapSize(node.marketCap),
+    marketType: 'KOSPI', // 데모 데이터는 실제 상장시장 구분을 두지 않아 고정값으로 채운다
+  }
+}
+
+function toGraphEdgeWire(edge: OntologyEdge): OntologyEdgeWire {
+  return {
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    relation: edge.relation,
+  }
 }
 
 /** 관련주 카드의 근거 문장 — 서버가 그래프 경로(관계 레이블 + 방향)에서 템플릿 생성한다. */
@@ -97,15 +127,9 @@ export function getNewsImpact(newsId: number): NewsImpactWire | null {
     }
   })
 
-  const directionById = new Map<string, Direction>()
-  record.originStocks.forEach((o) => directionById.set(o.nodeId, o.direction))
-  record.relatedStocks.forEach((r) => directionById.set(r.nodeId, r.direction))
-
-  const graphNodes: ImpactGraphNode[] = Array.from(nodeIds).map((id) => {
-    const node = requireNode(id)
-    const direction = directionById.get(id)
-    return direction ? { ...node, direction } : { ...node }
-  })
+  const graphNodes: ImpactGraphNodeWire[] = Array.from(nodeIds).map((id) =>
+    toGraphNodeWire(id),
+  )
 
   return {
     news_summary: record.summary,
@@ -121,7 +145,7 @@ export function getNewsImpact(newsId: number): NewsImpactWire | null {
       newsId: record.id,
       originId,
       nodes: graphNodes,
-      edges: Array.from(edgeById.values()),
+      edges: Array.from(edgeById.values()).map(toGraphEdgeWire),
     },
   }
 }

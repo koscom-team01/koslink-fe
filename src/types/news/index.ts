@@ -3,6 +3,7 @@ export interface NewsListItem {
   title: string
   press: string
   publishedAt: string // ISO
+  url: string
 }
 
 /** GET /api/news의 커서 기반 페이지 응답. cursor는 클라이언트가 해석하지 않는 opaque 값이다. */

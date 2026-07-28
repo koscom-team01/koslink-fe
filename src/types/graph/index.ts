@@ -17,6 +17,14 @@ export interface OntologyNode {
   marketCap?: number // 억원, STOCK만
 }
 
+/** GET /graph, GET /news/{id}/impact의 wire 그래프 노드가 시가총액을 실어 나르는 형태.
+ * 실 API는 marketCap 숫자 대신 이 구간값만 내려준다 — 프론트가 sizeOf() 임계값에
+ * 맞춰 대표값으로 환산한다(shared/utils/format.ts의 capSizeToMarketCap). */
+export type CapSize = 'Small' | 'Mid' | 'Large'
+
+/** wire 그래프 노드의 상장시장 구분 — 현재 프론트 로직은 참고용으로만 통과시킨다. */
+export type MarketType = 'KOSPI' | 'KOSDAQ'
+
 /** 실제 RELATED_TO 엣지의 relation_type 값 중 일부. STOCK-STOCK 엣지에만 존재한다. */
 export type RelationType =
   | 'EQUITY_INVESTMENT'

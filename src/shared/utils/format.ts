@@ -1,5 +1,5 @@
 import type { Direction } from '#/shared/types'
-import type { OntologyNode } from '#/types/graph'
+import type { CapSize, OntologyNode } from '#/types/graph'
 
 export function arrow(direction: Direction): '▲' | '▼' {
   return direction === 'UP' ? '▲' : '▼'
@@ -51,4 +51,19 @@ export function sizeOf(node: OntologyNode): NodeSize {
   if (node.marketCap >= 300000) return { w: 172, h: 60 } // 30조↑
   if (node.marketCap >= 50000) return { w: 150, h: 58 } // 5~30조
   return { w: 134, h: 56 } // 5조↓
+}
+
+/** wire의 capSize 구간값 → 프론트 sizeOf() 임계값(300000/50000) 안에 정확히 떨어지는 대표 marketCap */
+export function capSizeToMarketCap(capSize: CapSize): number {
+  if (capSize === 'Large') return 400000
+  if (capSize === 'Mid') return 100000
+  return 20000
+}
+
+/** 도메인 marketCap → wire capSize 구간값. marketCap이 없는 노드(개념 노드)는 'Small'로 취급한다. */
+export function marketCapToCapSize(marketCap: number | undefined): CapSize {
+  if (marketCap == null) return 'Small'
+  if (marketCap >= 300000) return 'Large'
+  if (marketCap >= 50000) return 'Mid'
+  return 'Small'
 }

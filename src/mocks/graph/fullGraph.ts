@@ -1,5 +1,12 @@
 import rawGraph from './graph.json'
-import type { OntologyEdge, OntologyNode, RelationType } from '#/types/graph'
+import { capSizeToMarketCap } from '#/shared/utils/format'
+import type {
+  CapSize,
+  MarketType,
+  OntologyEdge,
+  OntologyNode,
+  RelationType,
+} from '#/types/graph'
 
 /**
  * "전체 관계망"(GNB 탭) 전용 데이터. mocks/graph/data.ts의 ONTOLOGY_NODES/EDGES와는
@@ -12,8 +19,8 @@ interface RawNode {
   id: string
   name: string
   ticker: string
-  marketType: 'KOSPI' | 'KOSDAQ'
-  capSize: 'Small' | 'Mid' | 'Large'
+  marketType: MarketType
+  capSize: CapSize
 }
 
 interface RawEdge {
@@ -21,12 +28,6 @@ interface RawEdge {
   source: string
   target: string
   relation: string
-}
-
-const CAP_SIZE_TO_MARKET_CAP: Record<RawNode['capSize'], number> = {
-  Large: 400000,
-  Mid: 100000,
-  Small: 20000,
 }
 
 // 영문 상수만 한글 라벨로 번역한다 — 나머지는 이미 한글이라 그대로 노출한다.
@@ -58,7 +59,7 @@ export const FULL_GRAPH_NODES: OntologyNode[] = nodes.map(
     kind: 'STOCK',
     ticker: n.ticker,
     sector: '반도체',
-    marketCap: CAP_SIZE_TO_MARKET_CAP[n.capSize],
+    marketCap: capSizeToMarketCap(n.capSize),
   }),
 )
 

@@ -11,7 +11,7 @@ export const newsKeys = {
 
 async function fetchNews(cursor?: string): Promise<NewsListPage> {
   const searchParams: Record<string, string> = {}
-  if (cursor) searchParams.cursor = cursor
+  if (cursor) searchParams.cursorId = cursor
   const wire = await http
     .get('news', { searchParams })
     .json<NewsListPageWire>()
