@@ -8,7 +8,7 @@ import { getNews } from '#/apis/news/mock'
  */
 
 export const newsHandlers = [
-  http.get('/api/news', async ({ request }) => {
+  http.get('/api/v1/news', async ({ request }) => {
     await delay(300)
     const searchParams = new URL(request.url).searchParams
     const cursorId = searchParams.get('cursorId')
