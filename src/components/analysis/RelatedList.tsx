@@ -1,6 +1,3 @@
-import { useState } from 'react'
-import { ChevronDown } from 'lucide-react'
-import { cn } from '#/lib/utils'
 import { arrow, directionLabel, impactOf } from '#/lib/format'
 import { bfsBuild, buildGraphIndex } from '#/lib/graphIndex'
 import type { NewsImpactGraph, RelatedStock } from '#/types'
@@ -22,8 +19,6 @@ export default function RelatedList({
   relatedStocks: RelatedStock[]
   graph: NewsImpactGraph
 }) {
-  const [expanded, setExpanded] = useState<string | null>(null)
-
   const index = buildGraphIndex(graph.nodes, graph.edges)
   const built = bfsBuild(index, graph.originId)
   const hopByTicker = new Map<string, number>()
@@ -47,21 +42,11 @@ export default function RelatedList({
           const hop = hopOf(r.ticker)
           const impact = impactOf(hop)
           const down = r.direction === 'DOWN'
-          const isExpanded = expanded === r.ticker
           return (
-            <button
+            <div
               key={r.ticker}
-              type="button"
-              onClick={() => setExpanded(isExpanded ? null : r.ticker)}
-              className={cn(
-                'rounded-xl border px-[13px] py-3 text-left transition-colors duration-200',
-                !isExpanded &&
-                  'hover:border-[var(--n-300)] hover:bg-[var(--n-25)]',
-              )}
-              style={{
-                borderColor: isExpanded ? 'var(--n-300)' : 'var(--n-150)',
-                background: isExpanded ? 'var(--n-25)' : 'transparent',
-              }}
+              className="rounded-xl border px-[13px] py-3"
+              style={{ borderColor: 'var(--n-150)' }}
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-bold tracking-[-0.025em]">
@@ -99,28 +84,15 @@ export default function RelatedList({
                 {r.relationPath}
               </div>
               <div
-                className="mt-2 flex items-center gap-1 text-[11px] font-medium"
-                style={{ color: isExpanded ? 'var(--n-600)' : 'var(--n-500)' }}
+                className="mt-2.5 rounded-lg px-3 py-2.5 text-[12px] leading-[1.55] font-medium"
+                style={{
+                  background: down ? 'var(--d-50)' : 'var(--o-50)',
+                  color: down ? 'var(--d-700)' : 'var(--o-700)',
+                }}
               >
-                <span>{isExpanded ? '근거 접기' : '근거 보기'}</span>
-                <ChevronDown
-                  size={12}
-                  strokeWidth={2.5}
-                  className={cn(
-                    'transition-transform duration-200',
-                    isExpanded && 'rotate-180',
-                  )}
-                />
+                {r.propagation}
               </div>
-              {isExpanded && (
-                <div
-                  className="mt-2.5 animate-in fade-in-0 slide-in-from-top-1 rounded-lg px-3 py-2.5 text-[12px] leading-[1.55] font-medium duration-200"
-                  style={{ background: 'var(--n-50)', color: 'var(--n-700)' }}
-                >
-                  {r.propagation}
-                </div>
-              )}
-            </button>
+            </div>
           )
         })}
       </div>
