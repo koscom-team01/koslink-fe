@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { useIsFetching, useQueryClient } from '@tanstack/react-query'
 import { useAtom, useSetAtom } from 'jotai'
 import { RefreshCw } from 'lucide-react'
-import { cn } from '#/lib/utils'
-import { newlyAddedNewsIdsAtom, newsSheetOpenAtom } from '#/lib/atoms'
-import { refreshNews } from '#/lib/api'
-import { queryKeys } from '#/lib/queries'
+import { cn } from '#/shared/utils/cn'
+import { newsSheetOpenAtom } from '#/shared/store/atoms'
+import { newlyAddedNewsIdsAtom } from '#/store/news/atoms'
+import { refreshNews } from '#/apis/news/mock'
+import { newsKeys } from '#/apis/news/queries'
 import NewsList from './NewsList'
 
 const REFRESH_TOAST_MS = 4500
@@ -19,7 +20,7 @@ export default function NewsPanel() {
   const [sheetOpen, setSheetOpen] = useAtom(newsSheetOpenAtom)
   const setNewlyAdded = useSetAtom(newlyAddedNewsIdsAtom)
   const queryClient = useQueryClient()
-  const isRefreshing = useIsFetching({ queryKey: queryKeys.news() }) > 0
+  const isRefreshing = useIsFetching({ queryKey: newsKeys.all() }) > 0
   const [toastCount, setToastCount] = useState<number | null>(null)
   const toastTimerRef = useRef<number>()
 
@@ -30,7 +31,7 @@ export default function NewsPanel() {
     // 첫 페이지부터 다시 불러온다 — 스크롤로 더 불러온 뒷페이지는 새로고침 시
     // 버리고 최신순 1페이지로 되돌아간다(실제 뉴스 피드 새로고침과 동일한 동작).
     const { addedIds } = refreshNews()
-    await queryClient.resetQueries({ queryKey: queryKeys.news() })
+    await queryClient.resetQueries({ queryKey: newsKeys.all() })
 
     setNewlyAdded(addedIds)
     setToastCount(addedIds.length)

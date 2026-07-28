@@ -13,7 +13,7 @@ import './styles.css'
  */
 async function enableMocking() {
   if (import.meta.env.VITE_API_BASE_URL) return
-  const { worker } = await import('#/mocks/browser')
+  const { worker } = await import('#/shared/mocks/browser')
   await worker.start({ onUnhandledRequest: 'bypass' })
 }
 

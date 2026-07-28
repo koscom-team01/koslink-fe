@@ -1,12 +1,9 @@
 import { useRef } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import {
-  newlyAddedNewsIdsAtom,
-  newsSheetOpenAtom,
-  selectedNewsIdAtom,
-} from '#/lib/atoms'
-import { useNewsQuery } from '#/lib/queries'
-import { useInfiniteScrollTrigger } from '#/lib/useInfiniteScrollTrigger'
+import { newsSheetOpenAtom, selectedNewsIdAtom } from '#/shared/store/atoms'
+import { newlyAddedNewsIdsAtom } from '#/store/news/atoms'
+import { useNewsQuery } from '#/apis/news/queries'
+import { useInfiniteScrollTrigger } from '#/shared/hooks/useInfiniteScrollTrigger'
 import NewsCard from './NewsCard'
 
 /** 뉴스 카드 목록. 데스크탑 패널과 모바일 바텀시트에서 함께 쓴다. */

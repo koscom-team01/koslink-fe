@@ -1,6 +1,7 @@
-import { arrow, directionLabel, impactOf } from '#/lib/format'
-import { bfsBuild, buildGraphIndex } from '#/lib/graphIndex'
-import type { NewsImpactGraph, RelatedStock } from '#/types'
+import { arrow, directionLabel, impactOf } from '#/shared/utils/format'
+import { bfsBuild, buildGraphIndex } from '#/shared/utils/graphIndex'
+import type { NewsImpactGraph } from '#/types/graph'
+import type { RelatedStock } from '#/types/analysis'
 
 function sortRelated(hopOf: (ticker: string) => number) {
   return (a: RelatedStock, b: RelatedStock) => {

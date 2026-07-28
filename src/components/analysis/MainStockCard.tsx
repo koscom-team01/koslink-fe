@@ -1,5 +1,5 @@
-import { arrow, directionLabel, impactOf } from '#/lib/format'
-import type { OriginStock } from '#/types'
+import { arrow, directionLabel, impactOf } from '#/shared/utils/format'
+import type { OriginStock } from '#/types/analysis'
 
 function OriginCard({ stock }: { stock: OriginStock }) {
   const down = stock.direction === 'DOWN'

@@ -1,5 +1,5 @@
-import { arrow, directionLabel } from '#/lib/format'
-import type { VerifyEntry } from '#/types'
+import { arrow, directionLabel } from '#/shared/utils/format'
+import type { VerifyEntry } from '#/types/verify'
 import { hitCount } from './VerifyList'
 
 /** 선택한 검증 뉴스의 적중률 도넛 + 종목별 예측 vs 실제 표 */
