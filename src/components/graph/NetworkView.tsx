@@ -4,12 +4,7 @@ import { useAtom } from 'jotai'
 import { introPlayedAtom } from '#/shared/store/atoms'
 import { highlightedNodeAtom } from '#/store/graph/atoms'
 import { FULL_GRAPH_EDGES, FULL_GRAPH_NODES } from '#/mocks/graph/fullGraph'
-import {
-  GraphCanvas,
-  buildAllScene,
-  FULL_LAYOUT,
-  fullGraphIndex,
-} from './GraphPanel'
+import { GraphCanvas, buildAllScene, FULL_LAYOUT } from './GraphPanel'
 import './graph.css'
 
 const FULL_GRAPH = { nodes: FULL_GRAPH_NODES, edges: FULL_GRAPH_EDGES }
@@ -38,12 +33,7 @@ export default function NetworkView() {
   return (
     <section className="panel col-graph">
       <ReactFlowProvider>
-        <GraphCanvas
-          scene2={scene2}
-          mode="all"
-          index={fullGraphIndex}
-          title="전체 관계망"
-        />
+        <GraphCanvas scene2={scene2} mode="all" title="전체 관계망" />
       </ReactFlowProvider>
     </section>
   )
