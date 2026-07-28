@@ -69,6 +69,9 @@ function buildPropagation(
 /** 패널 하단 최종 요약 — 영향 기점과 파급된 관련주 수를 요약한다. */
 function buildFinalSummary(originNames: string[], relatedCount: number): string {
   const origin = originNames.join(', ')
+  if (relatedCount === 0) {
+    return `${origin} 관련 이슈이나, 온톨로지 상 이어진 관련 종목은 확인되지 않았다.`
+  }
   return `${origin} 관련 이슈로 관련 종목 ${relatedCount}개까지 영향이 파급됐다.`
 }
 

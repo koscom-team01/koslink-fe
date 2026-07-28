@@ -38,6 +38,14 @@ export default function RelatedList({
       >
         관계로 이어진 종목 {relatedStocks.length}
       </div>
+      {relatedStocks.length === 0 && (
+        <p
+          className="rounded-xl px-3.5 py-[13px] text-[12.5px] font-medium"
+          style={{ background: 'var(--n-50)', color: 'var(--n-500)' }}
+        >
+          온톨로지 상 이어진 관련 종목이 확인되지 않았습니다.
+        </p>
+      )}
       <div className="flex flex-col gap-[7px]">
         {sorted.map((r) => {
           const hop = hopOf(r.ticker)
