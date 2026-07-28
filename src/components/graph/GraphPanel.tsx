@@ -298,7 +298,7 @@ export function GraphCanvas({
         fitView({
           padding: 0.2,
           duration: 400,
-          ...(targetNodes ? { nodes: targetNodes, minZoom: 0.7 } : {}),
+          ...(targetNodes ? { nodes: targetNodes, minZoom: 1 } : {}),
         }),
       60,
     )
