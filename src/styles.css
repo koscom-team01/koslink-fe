@@ -186,6 +186,43 @@ body {
   opacity: 0.5;
   cursor: default;
 }
+/* 새로고침으로 새 뉴스가 몇 건 들어왔는지 알려주는 배너 — 그래프 임팩트와
+   무관한 일반 UI 알림이라 주황은 쓰지 않는다(koslink-design-constraints). */
+.news-refresh-toast {
+  margin: 0 14px 10px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  background: var(--n-900);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  animation: koslink-toast-in 0.25s ease-out;
+}
+@keyframes koslink-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* 새로고침으로 방금 추가된 카드 표시 — "새로움"이라는 별개 의미라 그래프 임팩트
+   색(주황)과 겹치지 않게 미사용 토큰인 --ok(초록)를 쓴다. */
+.news-new-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: var(--ok);
+  vertical-align: middle;
+}
 .pbody {
   flex: 1;
   overflow-y: auto;

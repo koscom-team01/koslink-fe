@@ -432,6 +432,285 @@ const CURATED_NEWS: NewsRecord[] = [
   },
 ]
 
+/**
+ * "최신 뉴스 새로고침" 시연용 풀. 실 백엔드가 없으니 새로고침 버튼을 누를 때마다
+ * pullRefreshBatch()가 여기서 몇 건을 순환해 뽑아 NEWS_RECORDS 맨 앞에 끼워 넣는다.
+ * 실 API가 준비되면 이 풀과 pullRefreshBatch는 통째로 지우고 새로고침을 그냥
+ * 쿼리 재조회로 대체하면 된다.
+ */
+const REFRESH_POOL: NewsRecord[] = [
+  {
+    id: 30001,
+    title: 'HBM 검증 수요 급증… 유니테스트·테스나 테스트 장비 발주 확대',
+    press: '전자신문',
+    publishedAt: TODAY,
+    url: 'https://www.etnews.com/',
+    summary: [
+      'HBM 검증 물량이 늘면서 테스트 장비 발주가 확대되고 있다.',
+      '후공정 테스트 업체들의 가동률이 동반 상승하는 모습이다.',
+      '하반기까지 관련 수주가 이어질 것으로 전망된다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'testinsp',
+        direction: 'UP',
+        reason: 'HBM 검증 수요 급증이 직접 확인된 테마',
+      },
+    ],
+    relatedStocks: [
+      { nodeId: 'unitest', direction: 'UP', relationLabel: '테스트 장비 공급', chain: ['testinsp', 'unitest'] },
+      { nodeId: 'testna', direction: 'UP', relationLabel: '테스트 서비스', chain: ['testinsp', 'testna'] },
+      { nodeId: 'isc', direction: 'UP', relationLabel: '테스트 소켓 공급', chain: ['testinsp', 'isc'] },
+    ],
+  },
+  {
+    id: 30002,
+    title: '삼성전자, EUV 노광 장비 신규 발주 확정',
+    press: '한국경제',
+    publishedAt: TODAY,
+    url: 'https://www.hankyung.com/',
+    summary: [
+      '삼성전자가 선단공정 EUV 노광 장비 신규 발주를 확정했다.',
+      '미세공정 전환 대응이 목적으로 파악된다.',
+      '계측 장비 협력사 수주도 함께 늘어날 전망이다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'ss',
+        direction: 'UP',
+        reason: 'EUV 장비 신규 발주를 직접 확정한 당사자',
+      },
+    ],
+    relatedStocks: [
+      { nodeId: 'euv', direction: 'UP', relationLabel: '선단공정 노광 도입', chain: ['ss', 'euv'] },
+      { nodeId: 'park', direction: 'UP', relationLabel: '계측 장비 공급', chain: ['ss', 'euv', 'park'] },
+      { nodeId: 'fdry', direction: 'UP', relationLabel: '미세공정 필수', chain: ['ss', 'euv', 'fdry'] },
+    ],
+  },
+  {
+    id: 30003,
+    title: 'SK하이닉스, 첨단패키징 라인 증설 검토',
+    press: '연합뉴스',
+    publishedAt: TODAY,
+    url: 'https://www.yna.co.kr/',
+    summary: [
+      'SK하이닉스가 첨단패키징 라인 증설을 검토 중이라고 밝혔다.',
+      'HBM 후공정 대응 능력 확대가 목적이다.',
+      '후공정 협력사 수주 기대감이 커지고 있다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        reason: '첨단패키징 라인 증설을 직접 검토하는 당사자',
+      },
+    ],
+    relatedStocks: [
+      { nodeId: 'adpkg', direction: 'UP', relationLabel: 'HBM 패키징 공급', chain: ['sk', 'adpkg'] },
+      { nodeId: 'hanamc', direction: 'UP', relationLabel: '첨단패키징 후공정', chain: ['sk', 'adpkg', 'hanamc'] },
+      { nodeId: 'nepes', direction: 'UP', relationLabel: '첨단패키징 후공정', chain: ['sk', 'adpkg', 'nepes'] },
+      { nodeId: 'sfa', direction: 'UP', relationLabel: '첨단패키징 후공정', chain: ['sk', 'adpkg', 'sfa'] },
+    ],
+  },
+  {
+    id: 30004,
+    title: '웨이퍼 공정 소재 가격 상승… 한솔케미칼 수혜',
+    press: '머니투데이',
+    publishedAt: TODAY,
+    url: 'https://www.mt.co.kr/',
+    summary: [
+      '웨이퍼 공정 소재 가격이 오르며 관련주가 강세다.',
+      '수급 타이트로 소재 업체 협상력이 개선되고 있다.',
+      '증설 투자로 이어질지 시장이 주목하고 있다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'wafermat',
+        direction: 'UP',
+        reason: '웨이퍼 공정 소재 가격 상승이 직접 확인된 품목',
+      },
+    ],
+    relatedStocks: [
+      { nodeId: 'hansolchem', direction: 'UP', relationLabel: '웨이퍼 공정 소재 공급', chain: ['wafermat', 'hansolchem'] },
+      { nodeId: 'enf', direction: 'UP', relationLabel: '포토레지스트 공급', chain: ['wafermat', 'enf'] },
+      { nodeId: 'dnf', direction: 'UP', relationLabel: '전구체 공급', chain: ['wafermat', 'dnf'] },
+    ],
+  },
+  {
+    id: 30005,
+    title: '온디바이스 AI 확산… 텔레칩스·아나패스 강세',
+    press: '이데일리',
+    publishedAt: TODAY,
+    url: 'https://www.edaily.co.kr/',
+    summary: [
+      '온디바이스 AI 탑재 기기가 확산되며 관련 팹리스가 강세다.',
+      '차량용·가전용 구동칩 수요가 함께 늘고 있다.',
+      'AI 반도체 전반으로 온기가 확산되는 모습이다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'ondevice',
+        direction: 'UP',
+        reason: '온디바이스 AI 수요 확산이 직접 확인된 테마',
+      },
+    ],
+    relatedStocks: [
+      { nodeId: 'telechips', direction: 'UP', relationLabel: '차량용 온디바이스 AI 칩 개발', chain: ['ondevice', 'telechips'] },
+      { nodeId: 'anapass', direction: 'UP', relationLabel: '온디바이스 AI 구동칩 개발', chain: ['ondevice', 'anapass'] },
+      { nodeId: 'abov', direction: 'UP', relationLabel: 'MCU 공급', chain: ['ondevice', 'abov'] },
+    ],
+  },
+  {
+    id: 30006,
+    title: '유리기판 상용화 임박… 관련주 재조명',
+    press: '파이낸셜뉴스',
+    publishedAt: TODAY,
+    url: 'https://www.fnnews.com/',
+    summary: [
+      '차세대 패키징용 유리기판 상용화 일정이 앞당겨지고 있다.',
+      '기판 업체들의 시제품 검증이 마무리 단계에 접어들었다.',
+      'AI 반도체 패키징 수요와 맞물려 주목받고 있다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'glass',
+        direction: 'UP',
+        reason: '유리기판 상용화 일정 단축이 직접 확인된 테마',
+      },
+    ],
+    relatedStocks: [
+      { nodeId: 'simmtech', direction: 'UP', relationLabel: '유리기판 개발', chain: ['glass', 'simmtech'] },
+      { nodeId: 'daeduck', direction: 'UP', relationLabel: '유리기판 개발', chain: ['glass', 'daeduck'] },
+      { nodeId: 'aidc', direction: 'UP', relationLabel: '차세대 패키징 수요', chain: ['glass', 'aidc'] },
+    ],
+  },
+  {
+    id: 30007,
+    title: 'CXL 표준 확산… 메모리 대형주 재조명',
+    press: '서울경제',
+    publishedAt: TODAY,
+    url: 'https://www.sedaily.com/',
+    summary: [
+      '차세대 메모리 인터페이스 CXL 채택이 확산되고 있다.',
+      '메모리 확장 수요가 늘며 대형 메모리 업체가 주목받는다.',
+      '관련 생태계 투자도 함께 확대될 전망이다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'cxl',
+        direction: 'UP',
+        reason: 'CXL 표준 채택 확산이 직접 확인된 테마',
+      },
+    ],
+    relatedStocks: [
+      { nodeId: 'ss', direction: 'UP', relationLabel: '차세대 메모리 인터페이스 개발', chain: ['cxl', 'ss'] },
+      { nodeId: 'sk', direction: 'UP', relationLabel: '차세대 메모리 인터페이스 개발', chain: ['cxl', 'sk'] },
+      { nodeId: 'dram', direction: 'UP', relationLabel: '메모리 확장 표준', chain: ['cxl', 'dram'] },
+    ],
+  },
+  {
+    id: 30008,
+    title: '특수가스 공급 부족 심화… 후성 반사이익',
+    press: '뉴스1',
+    publishedAt: TODAY,
+    url: 'https://www.news1.kr/',
+    summary: [
+      '반도체 공정용 특수가스 공급 부족이 심화하고 있다.',
+      '증착·파운드리 공정 전반에 영향이 확산되는 모습이다.',
+      '공급사의 가격 협상력이 개선되고 있다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'specgas',
+        direction: 'UP',
+        reason: '특수가스 공급 부족 심화가 직접 확인된 품목',
+      },
+    ],
+    relatedStocks: [
+      { nodeId: 'foosung', direction: 'UP', relationLabel: '특수가스 공급', chain: ['specgas', 'foosung'] },
+      { nodeId: 'sk', direction: 'UP', relationLabel: '증착 공정 필수 가스', chain: ['specgas', 'sk'] },
+      { nodeId: 'fdry', direction: 'UP', relationLabel: '파운드리 공정 필수', chain: ['specgas', 'fdry'] },
+    ],
+  },
+  {
+    id: 30009,
+    title: '피에스케이, 대형 식각장비 수주 공시',
+    press: '아시아경제',
+    publishedAt: TODAY,
+    url: 'https://www.asiae.co.kr/',
+    summary: [
+      '피에스케이가 대형 식각장비 공급 계약을 공시했다.',
+      '고객사 라인 증설에 대응하는 수주로 파악된다.',
+      '경쟁사 대비 수주 모멘텀이 부각되고 있다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'psk',
+        direction: 'UP',
+        reason: '대형 식각장비 수주 공시의 직접 당사자',
+      },
+    ],
+    relatedStocks: [
+      { nodeId: 'sk', direction: 'UP', relationLabel: '식각 장비 공급', chain: ['psk', 'sk'] },
+      { nodeId: 'jusung', direction: 'DOWN', relationLabel: '경쟁', chain: ['psk', 'jusung'] },
+    ],
+  },
+  {
+    id: 30010,
+    title: '코미코, 반도체 부품 세정 수주 확대',
+    press: '매일경제',
+    publishedAt: TODAY,
+    url: 'https://www.mk.co.kr/',
+    summary: [
+      '코미코의 반도체 부품 세정·코팅 수주가 확대됐다.',
+      '고객사 가동률 상승이 배경으로 꼽힌다.',
+      '경쟁사 대비 점유율 확대가 기대된다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'comico',
+        direction: 'UP',
+        reason: '부품 세정 코팅 수주 확대의 직접 당사자',
+      },
+    ],
+    relatedStocks: [
+      { nodeId: 'sk', direction: 'UP', relationLabel: '부품 세정 코팅 공급', chain: ['comico', 'sk'] },
+      { nodeId: 'tck', direction: 'DOWN', relationLabel: '경쟁', chain: ['comico', 'tck'] },
+    ],
+  },
+]
+
+const REFRESH_BATCH_SIZES = [3, 2, 2, 3]
+let refreshClickCount = 0
+let refreshPoolCursor = 0
+
+/**
+ * "새로고침" 클릭 데모용 — REFRESH_POOL을 순환하며 몇 건을 뽑아 발행 시각을
+ * 지금으로 찍고 NEWS_RECORDS 맨 앞에 끼워 넣는다. 이미 나온 뉴스라도 풀을
+ * 다 돌면 새 id로 다시 등장한다(데모를 몇 번이고 반복할 수 있도록).
+ */
+export function pullRefreshBatch(): NewsRecord[] {
+  const batchSize =
+    REFRESH_BATCH_SIZES[refreshClickCount % REFRESH_BATCH_SIZES.length]
+  refreshClickCount += 1
+
+  const now = Date.now()
+  const items: NewsRecord[] = []
+  for (let i = 0; i < batchSize; i++) {
+    const template = REFRESH_POOL[refreshPoolCursor % REFRESH_POOL.length]
+    const cycle = Math.floor(refreshPoolCursor / REFRESH_POOL.length)
+    refreshPoolCursor += 1
+    items.push({
+      ...template,
+      id: template.id + cycle * 10000,
+      publishedAt: new Date(now - i * 45_000).toISOString(),
+    })
+  }
+
+  NEWS_RECORDS.unshift(...items)
+  return items
+}
+
 const STOCK_IDS = RAW_COMPANIES.map(([id]) => id)
 const nodeNameById = new Map<string, string>([
   ...RAW_COMPANIES.map(([id, name]): [string, string] => [id, name]),

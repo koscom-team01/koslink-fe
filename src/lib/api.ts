@@ -4,6 +4,7 @@ import {
   NEWS_RECORDS,
   VERIFY_ENTRIES,
   buildVerifyDaily,
+  pullRefreshBatch,
 } from './data'
 import type { NewsImpactWire, NewsListPageWire } from './mappers'
 import type {
@@ -77,6 +78,17 @@ export function getNews({
     })),
     nextCursor,
   }
+}
+
+/**
+ * "최신 뉴스 새로고침" 데모용 — 실 백엔드가 없어 pullRefreshBatch()로 몇 건을
+ * 새 뉴스로 뽑아 NEWS_RECORDS 맨 앞에 끼워 넣고, 그 id 목록을 돌려준다.
+ * 호출부(NewsPanel)는 이 id로 새로 추가된 카드에 NEW 배지를 붙이고 몇 건이
+ * 들어왔는지 안내한다.
+ */
+export function refreshNews(): { addedIds: number[] } {
+  const added = pullRefreshBatch()
+  return { addedIds: added.map((n) => n.id) }
 }
 
 function findOntologyEdge(a: string, b: string): OntologyEdge | undefined {

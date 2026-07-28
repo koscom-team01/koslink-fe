@@ -1,6 +1,10 @@
 import { useRef } from 'react'
-import { useAtom, useSetAtom } from 'jotai'
-import { newsSheetOpenAtom, selectedNewsIdAtom } from '#/lib/atoms'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import {
+  newlyAddedNewsIdsAtom,
+  newsSheetOpenAtom,
+  selectedNewsIdAtom,
+} from '#/lib/atoms'
 import { useNewsQuery } from '#/lib/queries'
 import { useInfiniteScrollTrigger } from '#/lib/useInfiniteScrollTrigger'
 import NewsCard from './NewsCard'
@@ -9,6 +13,7 @@ import NewsCard from './NewsCard'
 export default function NewsList() {
   const [selectedId, setSelectedId] = useAtom(selectedNewsIdAtom)
   const setSheetOpen = useSetAtom(newsSheetOpenAtom)
+  const newlyAdded = useAtomValue(newlyAddedNewsIdsAtom)
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useNewsQuery()
@@ -37,6 +42,7 @@ export default function NewsList() {
             key={n.id}
             news={n}
             selected={n.id === selectedId}
+            isNew={newlyAdded.includes(n.id)}
             onSelect={() => {
               setSelectedId(n.id)
               setSheetOpen(false)
