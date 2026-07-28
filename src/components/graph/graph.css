@@ -83,18 +83,18 @@
 }
 
 .nd.origin {
-  background: var(--n-900);
+  background: var(--o-500);
   border-color: #fff;
   border-width: 3px;
   box-shadow:
-    0 0 0 3px var(--n-900),
-    0 6px 22px rgba(28, 25, 23, 0.28);
+    0 0 0 3px var(--o-500),
+    0 6px 22px rgba(242, 103, 34, 0.34);
 }
 .nd.origin .nd-name {
   color: #fff;
 }
 .nd.origin .nd-tk {
-  color: var(--n-400);
+  color: var(--o-100);
 }
 
 .nd.hide {
