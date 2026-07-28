@@ -42,7 +42,8 @@ const edgeTypes = { rel: RelEdge }
 
 // 정적 온톨로지 기준으로 결정적으로 계산되는 좌표라 모듈 스코프에서 한 번만
 // 계산해 캐시한다. 뷰를 오갈 때마다 재계산하면(성능 낭비는 물론) 노드가 튈 수 있다.
-const FULL_LAYOUT = fullLayout()
+// export해서 NetworkView가 centerId(인트로 하이라이트 기점)를 재계산 없이 가져다 쓴다.
+export const FULL_LAYOUT = fullLayout()
 
 interface EdgeSpec {
   id: string
@@ -274,17 +275,47 @@ export function GraphCanvas({
   const prevNodesRef = useRef(new Map<string, StockFlowNode>())
   const prevEdgesRef = useRef(new Map<string, RelFlowEdge>())
 
-  const { nodeOverrides, edgeOverrides, stageText, tick } = usePropagation(
-    scene2.scene,
-  )
+  const { nodeOverrides, edgeOverrides, stageText, tick, settled } =
+    usePropagation(scene2.scene)
 
+  // mode==='focus'(뉴스 파급 경로, GraphPanel)는 지금까지처럼 항상 전체 노드에
+  // 즉시 fitView한다 — 아래 서브그래프 확대 줌은 mode==='all'(전체 관계망,
+  // NetworkView)에서만 적용한다.
+  //
+  // mode==='all'에서 하이라이트가 없으면(전체 보기) 전체 노드에 즉시 맞추고,
+  // 하이라이트 중(scene2.scene 존재)이면 리빌 애니메이션이 끝나(settled)
+  // 진정될 때까지는 줌을 건드리지 않고 기존 화면 그대로 하이라이트가 퍼지는
+  // 걸 보여준 뒤, 다 끝나면 그제서야 기점+리빌 노드로만 fitView를 좁혀
+  // 보기 좋은 크기로 줌인한다. SK하이닉스처럼 연결이 아주 많은 허브는 리빌
+  // 노드 전부를 담으려 하면 다시 확 줌아웃돼 버리므로, minZoom으로 하한선을
+  // 둬 일부 노드가 화면 밖으로 밀려나더라도 카드가 잘 보이는 크기 밑으로는
+  // 안 내려가게 한다.
   useEffect(() => {
+    if (mode !== 'all') {
+      const id = window.setTimeout(
+        () => fitView({ padding: 0.2, duration: 400 }),
+        60,
+      )
+      return () => window.clearTimeout(id)
+    }
+
+    const scene = scene2.scene
+    if (scene && !settled) return
+
+    const targetNodes = scene
+      ? [scene.originId, ...scene.nodes.map((n) => n.id)].map((id) => ({ id }))
+      : undefined
     const id = window.setTimeout(
-      () => fitView({ padding: 0.2, duration: 400 }),
+      () =>
+        fitView({
+          padding: 0.2,
+          duration: 400,
+          ...(targetNodes ? { nodes: targetNodes, minZoom: 1 } : {}),
+        }),
       60,
     )
     return () => window.clearTimeout(id)
-  }, [fitView, scene2.scene?.key, scene2.ids.length])
+  }, [fitView, mode, scene2.scene?.key, scene2.ids.length, settled])
 
   // scene2/override가 실제로 바뀔 때만 재계산한다. React Flow는 노드/엣지를 id별로
   // 내부 스토어에 구독시키기 때문에, 값이 같아도 매 틱마다 전체 배열을 새 객체로

@@ -6,12 +6,15 @@ import { atom } from 'jotai'
  * 세션 메모리 전용이며 localStorage 등 영속 저장은 쓰지 않는다.
  */
 
-export const viewAtom = atom<'map' | 'network' | 'verify'>('map')
+export const viewAtom = atom<'network' | 'map' | 'verify'>('network')
 
 export const selectedNewsIdAtom = atom<number | null>(null)
 
 /** 전체 관계망에서 배치를 유지한 채 특정 노드 기점으로 제자리 강조할 때의 대상 */
 export const highlightedNodeAtom = atom<string | null>(null)
+
+/** 커버 화면 → /app 진입 시 전체 관계망 인트로(자동 하이라이트+줌)를 재생했는지 — 세션당 1회만 */
+export const introPlayedAtom = atom(false)
 
 export const verifyContextAtom = atom<{
   label: string
@@ -23,3 +26,6 @@ export const newsSheetOpenAtom = atom(false)
 
 /** 스크랩(저장) 뉴스 id 목록 — 메모리 전용, 새로고침하면 사라진다 */
 export const scrappedNewsIdsAtom = atom<number[]>([])
+
+/** "최신 뉴스" 새로고침으로 방금 추가된 뉴스 id 목록 — NEW 배지 표시용, 세션 메모리 전용 */
+export const newlyAddedNewsIdsAtom = atom<number[]>([])

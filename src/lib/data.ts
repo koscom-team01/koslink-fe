@@ -28,6 +28,38 @@ const RAW_COMPANIES: [string, string, string, string, number][] = [
   ['dbh', 'DB하이텍', '000990', '반도체', 16000],
   ['solb', '솔브레인', '357780', '반도체', 19000],
   ['dj', '동진쎄미켐', '005290', '반도체', 15000],
+  // 후공정·패키징
+  ['nepes', '네패스', '033640', '반도체', 8000],
+  ['hanamc', '하나마이크론', '067310', '반도체', 13000],
+  ['sfa', 'SFA반도체', '036540', '반도체', 9000],
+  ['simmtech', '심텍', '222800', '반도체', 14000],
+  ['haesungds', '해성디에스', '195870', '반도체', 8000],
+  ['daeduck', '대덕전자', '353200', '반도체', 9000],
+  // 테스트·검사
+  ['unitest', '유니테스트', '086390', '반도체', 7000],
+  ['testna', '테스나', '131290', '반도체', 6000],
+  ['exicon', '엑시콘', '092870', '반도체', 3500],
+  ['isc', 'ISC', '095340', '반도체', 14000],
+  ['nextin', '넥스틴', '348340', '반도체', 9000],
+  ['park', '파크시스템스', '140860', '반도체', 17000],
+  // 장비
+  ['wonikqnc', '원익QnC', '074600', '반도체', 11000],
+  ['kctech', '케이씨텍', '281820', '반도체', 15000],
+  ['psk', '피에스케이', '319660', '반도체', 18000],
+  ['eugene', '유진테크', '084370', '반도체', 16000],
+  ['comico', '코미코', '183300', '반도체', 12000],
+  ['miraecom', '미래컴퍼니', '049950', '반도체', 7000],
+  ['protec', '프로텍', '053610', '반도체', 4000],
+  ['yest', '예스티', '122640', '반도체', 3000],
+  // 소재·가스
+  ['hansolchem', '한솔케미칼', '014680', '반도체', 28000],
+  ['foosung', '후성', '093370', '반도체', 20000],
+  ['enf', '이엔에프테크놀로지', '102710', '반도체', 10000],
+  ['dnf', '디엔에프', '092070', '반도체', 5000],
+  // 팹리스
+  ['anapass', '아나패스', '123860', '반도체', 4000],
+  ['telechips', '텔레칩스', '054450', '반도체', 6000],
+  ['abov', '어보브반도체', '102120', '반도체', 3000],
 ]
 
 // 개념 노드(실제 온톨로지의 Role/Theme — 프론트는 거래 불가 노드로만 구분하면 되므로 CONCEPT로 통칭): [id, 이름, 섹터]
@@ -36,6 +68,14 @@ const RAW_CONCEPTS: [string, string, string][] = [
   ['dram', 'D램', '반도체'],
   ['fdry', '파운드리', '반도체'],
   ['aidc', 'AI 데이터센터', '반도체'],
+  ['adpkg', '삼성전자', '반도체'],
+  ['glass', '유리기판', '반도체'],
+  ['euv', 'EUV', '반도체'],
+  ['ondevice', '온디바이스AI', '반도체'],
+  ['cxl', 'CXL', '반도체'],
+  ['wafermat', '웨이퍼소재', '반도체'],
+  ['specgas', '특수가스', '반도체'],
+  ['testinsp', '테스트·검사', '반도체'],
 ]
 
 export const ONTOLOGY_NODES: OntologyNode[] = [
@@ -81,6 +121,66 @@ const RAW_EDGES: [string, string, string, RelationType?][] = [
   ['dbh', 'fdry', '사업 영위'],
   ['aidc', 'fdry', '수요 견인'],
   ['dram', 'aidc', '수요 견인'],
+  // 첨단패키징
+  ['nepes', 'adpkg', '첨단패키징 후공정'],
+  ['hanamc', 'adpkg', '첨단패키징 후공정'],
+  ['sfa', 'adpkg', '첨단패키징 후공정'],
+  ['simmtech', 'adpkg', '반도체 기판 공급'],
+  ['haesungds', 'adpkg', '리드프레임 공급'],
+  ['daeduck', 'adpkg', '반도체 기판 공급'],
+  ['adpkg', 'sk', 'HBM 패키징 공급'],
+  ['adpkg', 'hbm', '패키징 필수 공정'],
+  ['nepes', 'hanamc', '경쟁', 'COMPETITOR'],
+  ['sfa', 'hanamc', '경쟁', 'COMPETITOR'],
+  // 유리기판
+  ['glass', 'simmtech', '유리기판 개발'],
+  ['glass', 'daeduck', '유리기판 개발'],
+  ['glass', 'aidc', '차세대 패키징 수요'],
+  // EUV
+  ['ss', 'euv', '선단공정 노광 도입'],
+  ['euv', 'fdry', '미세공정 필수'],
+  ['park', 'euv', '계측 장비 공급'],
+  // 테스트·검사
+  ['unitest', 'testinsp', '테스트 장비 공급'],
+  ['testna', 'testinsp', '테스트 서비스'],
+  ['exicon', 'testinsp', '테스트 장비 공급'],
+  ['nextin', 'testinsp', '웨이퍼 검사 장비 공급'],
+  ['park', 'testinsp', '계측 장비 공급'],
+  ['isc', 'testinsp', '테스트 소켓 공급'],
+  ['testinsp', 'hbm', 'HBM 검증 필수'],
+  ['unitest', 'exicon', '경쟁', 'COMPETITOR'],
+  ['unitest', 'testna', '경쟁', 'COMPETITOR'],
+  // 소재·가스
+  ['hansolchem', 'wafermat', '웨이퍼 공정 소재 공급'],
+  ['enf', 'wafermat', '포토레지스트 공급'],
+  ['dnf', 'wafermat', '전구체 공급'],
+  ['wafermat', 'ss', '공정 소재 조달'],
+  ['foosung', 'specgas', '특수가스 공급'],
+  ['specgas', 'sk', '증착 공정 필수 가스'],
+  ['specgas', 'fdry', '파운드리 공정 필수'],
+  ['enf', 'dnf', '경쟁', 'COMPETITOR'],
+  // 장비
+  ['kctech', 'ss', 'CMP 장비 공급'],
+  ['psk', 'sk', '식각 장비 공급'],
+  ['eugene', 'sk', '증착 장비 공급'],
+  ['wonikqnc', 'sk', '쿼츠 부품 공급'],
+  ['comico', 'sk', '부품 세정 코팅 공급'],
+  ['miraecom', 'ss', '반도체 장비 공급'],
+  ['protec', 'hanmi', '본딩 장비 공급'],
+  ['yest', 'sk', '열처리 장비 공급'],
+  ['eugene', 'wonik', '경쟁', 'COMPETITOR'],
+  ['psk', 'jusung', '경쟁', 'COMPETITOR'],
+  ['comico', 'tck', '경쟁', 'COMPETITOR'],
+  // 팹리스 · 온디바이스AI · CXL
+  ['anapass', 'ondevice', '온디바이스 AI 구동칩 개발'],
+  ['telechips', 'ondevice', '차량용 온디바이스 AI 칩 개발'],
+  ['abov', 'ondevice', 'MCU 공급'],
+  ['ondevice', 'aidc', 'AI 반도체 수요 확산'],
+  ['anapass', 'telechips', '경쟁', 'COMPETITOR'],
+  ['telechips', 'abov', '경쟁', 'COMPETITOR'],
+  ['cxl', 'ss', '차세대 메모리 인터페이스 개발'],
+  ['cxl', 'sk', '차세대 메모리 인터페이스 개발'],
+  ['cxl', 'dram', '메모리 확장 표준'],
 ]
 
 export const ONTOLOGY_EDGES: OntologyEdge[] = RAW_EDGES.map(
@@ -137,10 +237,30 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'hanmi', direction: 'UP', relationLabel: '장비 공급', chain: ['sk', 'hanmi'] },
-      { nodeId: 'hpsp', direction: 'UP', relationLabel: '고압 어닐링 장비', chain: ['sk', 'hpsp'] },
-      { nodeId: 'wonik', direction: 'UP', relationLabel: '증착 장비', chain: ['sk', 'wonik'] },
-      { nodeId: 'ss', direction: 'DOWN', relationLabel: '경쟁 관계', chain: ['sk', 'ss'] },
+      {
+        nodeId: 'hanmi',
+        direction: 'UP',
+        relationLabel: '장비 공급',
+        chain: ['sk', 'hanmi'],
+      },
+      {
+        nodeId: 'hpsp',
+        direction: 'UP',
+        relationLabel: '고압 어닐링 장비',
+        chain: ['sk', 'hpsp'],
+      },
+      {
+        nodeId: 'wonik',
+        direction: 'UP',
+        relationLabel: '증착 장비',
+        chain: ['sk', 'wonik'],
+      },
+      {
+        nodeId: 'ss',
+        direction: 'DOWN',
+        relationLabel: '경쟁 관계',
+        chain: ['sk', 'ss'],
+      },
     ],
   },
   {
@@ -162,10 +282,30 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: 'HBM 주력 생산', chain: ['aidc', 'hbm', 'sk'] },
-      { nodeId: 'hanmi', direction: 'UP', relationLabel: 'HBM 필수 장비', chain: ['aidc', 'hbm', 'hanmi'] },
-      { nodeId: 'ss', direction: 'UP', relationLabel: 'HBM 생산', chain: ['aidc', 'hbm', 'ss'] },
-      { nodeId: 'eo', direction: 'UP', relationLabel: '장비 납품', chain: ['aidc', 'hbm', 'sk', 'eo'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: 'HBM 주력 생산',
+        chain: ['aidc', 'hbm', 'sk'],
+      },
+      {
+        nodeId: 'hanmi',
+        direction: 'UP',
+        relationLabel: 'HBM 필수 장비',
+        chain: ['aidc', 'hbm', 'hanmi'],
+      },
+      {
+        nodeId: 'ss',
+        direction: 'UP',
+        relationLabel: 'HBM 생산',
+        chain: ['aidc', 'hbm', 'ss'],
+      },
+      {
+        nodeId: 'eo',
+        direction: 'UP',
+        relationLabel: '장비 납품',
+        chain: ['aidc', 'hbm', 'sk', 'eo'],
+      },
     ],
   },
   {
@@ -187,10 +327,30 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'jusung', direction: 'UP', relationLabel: '장비 공급', chain: ['ss', 'jusung'] },
-      { nodeId: 'lino', direction: 'UP', relationLabel: '테스트 소켓', chain: ['ss', 'lino'] },
-      { nodeId: 'dj', direction: 'UP', relationLabel: '포토레지스트', chain: ['ss', 'dj'] },
-      { nodeId: 'sk', direction: 'DOWN', relationLabel: '경쟁', chain: ['ss', 'sk'] },
+      {
+        nodeId: 'jusung',
+        direction: 'UP',
+        relationLabel: '장비 공급',
+        chain: ['ss', 'jusung'],
+      },
+      {
+        nodeId: 'lino',
+        direction: 'UP',
+        relationLabel: '테스트 소켓',
+        chain: ['ss', 'lino'],
+      },
+      {
+        nodeId: 'dj',
+        direction: 'UP',
+        relationLabel: '포토레지스트',
+        chain: ['ss', 'dj'],
+      },
+      {
+        nodeId: 'sk',
+        direction: 'DOWN',
+        relationLabel: '경쟁',
+        chain: ['ss', 'sk'],
+      },
     ],
   },
   {
@@ -212,10 +372,30 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: '주력 생산', chain: ['hbm', 'sk'] },
-      { nodeId: 'ss', direction: 'UP', relationLabel: '생산', chain: ['hbm', 'ss'] },
-      { nodeId: 'hanmi', direction: 'UP', relationLabel: 'TC본더 필수', chain: ['hbm', 'hanmi'] },
-      { nodeId: 'aidc', direction: 'UP', relationLabel: '수요 견인', chain: ['hbm', 'aidc'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '주력 생산',
+        chain: ['hbm', 'sk'],
+      },
+      {
+        nodeId: 'ss',
+        direction: 'UP',
+        relationLabel: '생산',
+        chain: ['hbm', 'ss'],
+      },
+      {
+        nodeId: 'hanmi',
+        direction: 'UP',
+        relationLabel: 'TC본더 필수',
+        chain: ['hbm', 'hanmi'],
+      },
+      {
+        nodeId: 'aidc',
+        direction: 'UP',
+        relationLabel: '수요 견인',
+        chain: ['hbm', 'aidc'],
+      },
     ],
   },
   {
@@ -237,9 +417,24 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: '주력 생산', chain: ['dram', 'sk'] },
-      { nodeId: 'ss', direction: 'UP', relationLabel: '생산', chain: ['dram', 'ss'] },
-      { nodeId: 'aidc', direction: 'UP', relationLabel: '수요 견인', chain: ['dram', 'aidc'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '주력 생산',
+        chain: ['dram', 'sk'],
+      },
+      {
+        nodeId: 'ss',
+        direction: 'UP',
+        relationLabel: '생산',
+        chain: ['dram', 'ss'],
+      },
+      {
+        nodeId: 'aidc',
+        direction: 'UP',
+        relationLabel: '수요 견인',
+        chain: ['dram', 'aidc'],
+      },
     ],
   },
   {
@@ -261,7 +456,12 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: '증착 장비', chain: ['wonik', 'sk'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '증착 장비',
+        chain: ['wonik', 'sk'],
+      },
     ],
   },
   {
@@ -283,7 +483,12 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: '고압 어닐링', chain: ['hpsp', 'sk'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '고압 어닐링',
+        chain: ['hpsp', 'sk'],
+      },
     ],
   },
   {
@@ -305,7 +510,12 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'sk', direction: 'UP', relationLabel: '소모품 공급', chain: ['tck', 'sk'] },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '소모품 공급',
+        chain: ['tck', 'sk'],
+      },
     ],
   },
   {
@@ -327,10 +537,439 @@ const CURATED_NEWS: NewsRecord[] = [
       },
     ],
     relatedStocks: [
-      { nodeId: 'fdry', direction: 'UP', relationLabel: '사업 영위', chain: ['dbh', 'fdry'] },
+      {
+        nodeId: 'fdry',
+        direction: 'UP',
+        relationLabel: '사업 영위',
+        chain: ['dbh', 'fdry'],
+      },
     ],
   },
 ]
+
+/**
+ * "최신 뉴스 새로고침" 시연용 풀. 실 백엔드가 없으니 새로고침 버튼을 누를 때마다
+ * pullRefreshBatch()가 여기서 몇 건을 순환해 뽑아 NEWS_RECORDS 맨 앞에 끼워 넣는다.
+ * 실 API가 준비되면 이 풀과 pullRefreshBatch는 통째로 지우고 새로고침을 그냥
+ * 쿼리 재조회로 대체하면 된다.
+ */
+const REFRESH_POOL: NewsRecord[] = [
+  {
+    id: 30001,
+    title: '유니테스트, HBM 검증 수요 급증에 테스트 장비 수주 확대',
+    press: '전자신문',
+    publishedAt: TODAY,
+    url: 'https://www.etnews.com/',
+    summary: [
+      '유니테스트가 HBM 검증용 테스트 장비 수주를 확대했다고 밝혔다.',
+      'HBM 검증 물량 증가가 수주 확대의 배경으로 꼽힌다.',
+      '하반기까지 관련 수주가 이어질 것으로 전망된다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'unitest',
+        direction: 'UP',
+        reason: 'HBM 검증용 테스트 장비 수주 확대의 직접 당사자',
+      },
+    ],
+    relatedStocks: [
+      {
+        nodeId: 'testinsp',
+        direction: 'UP',
+        relationLabel: '테스트 장비 공급',
+        chain: ['unitest', 'testinsp'],
+      },
+      {
+        nodeId: 'testna',
+        direction: 'UP',
+        relationLabel: '테스트 서비스',
+        chain: ['unitest', 'testinsp', 'testna'],
+      },
+      {
+        nodeId: 'isc',
+        direction: 'UP',
+        relationLabel: '테스트 소켓 공급',
+        chain: ['unitest', 'testinsp', 'isc'],
+      },
+    ],
+  },
+  {
+    id: 30002,
+    title: '삼성전자, EUV 노광 장비 신규 발주 확정',
+    press: '한국경제',
+    publishedAt: TODAY,
+    url: 'https://www.hankyung.com/',
+    summary: [
+      '삼성전자가 선단공정 EUV 노광 장비 신규 발주를 확정했다.',
+      '미세공정 전환 대응이 목적으로 파악된다.',
+      '계측 장비 협력사 수주도 함께 늘어날 전망이다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'ss',
+        direction: 'UP',
+        reason: 'EUV 장비 신규 발주를 직접 확정한 당사자',
+      },
+    ],
+    relatedStocks: [
+      {
+        nodeId: 'euv',
+        direction: 'UP',
+        relationLabel: '선단공정 노광 도입',
+        chain: ['ss', 'euv'],
+      },
+      {
+        nodeId: 'park',
+        direction: 'UP',
+        relationLabel: '계측 장비 공급',
+        chain: ['ss', 'euv', 'park'],
+      },
+      {
+        nodeId: 'fdry',
+        direction: 'UP',
+        relationLabel: '미세공정 필수',
+        chain: ['ss', 'euv', 'fdry'],
+      },
+    ],
+  },
+  {
+    id: 30003,
+    title: 'SK하이닉스, 첨단패키징 라인 증설 검토',
+    press: '연합뉴스',
+    publishedAt: TODAY,
+    url: 'https://www.yna.co.kr/',
+    summary: [
+      'SK하이닉스가 첨단패키징 라인 증설을 검토 중이라고 밝혔다.',
+      'HBM 후공정 대응 능력 확대가 목적이다.',
+      '후공정 협력사 수주 기대감이 커지고 있다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        reason: '첨단패키징 라인 증설을 직접 검토하는 당사자',
+      },
+    ],
+    relatedStocks: [
+      {
+        nodeId: 'adpkg',
+        direction: 'UP',
+        relationLabel: 'HBM 패키징 공급',
+        chain: ['sk', 'adpkg'],
+      },
+      {
+        nodeId: 'hanamc',
+        direction: 'UP',
+        relationLabel: '첨단패키징 후공정',
+        chain: ['sk', 'adpkg', 'hanamc'],
+      },
+      {
+        nodeId: 'nepes',
+        direction: 'UP',
+        relationLabel: '첨단패키징 후공정',
+        chain: ['sk', 'adpkg', 'nepes'],
+      },
+      {
+        nodeId: 'sfa',
+        direction: 'UP',
+        relationLabel: '첨단패키징 후공정',
+        chain: ['sk', 'adpkg', 'sfa'],
+      },
+    ],
+  },
+  {
+    id: 30004,
+    title: '웨이퍼 공정 소재 가격 상승… 한솔케미칼 수혜',
+    press: '머니투데이',
+    publishedAt: TODAY,
+    url: 'https://www.mt.co.kr/',
+    summary: [
+      '웨이퍼 공정 소재 가격이 오르며 관련주가 강세다.',
+      '수급 타이트로 소재 업체 협상력이 개선되고 있다.',
+      '증설 투자로 이어질지 시장이 주목하고 있다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'hansolchem',
+        direction: 'UP',
+        reason: '웨이퍼 공정 소재 가격 상승의 직접 수혜 당사자',
+      },
+    ],
+    relatedStocks: [
+      {
+        nodeId: 'wafermat',
+        direction: 'UP',
+        relationLabel: '웨이퍼 공정 소재 공급',
+        chain: ['hansolchem', 'wafermat'],
+      },
+      {
+        nodeId: 'ss',
+        direction: 'UP',
+        relationLabel: '공정 소재 조달',
+        chain: ['hansolchem', 'wafermat', 'ss'],
+      },
+      {
+        nodeId: 'enf',
+        direction: 'UP',
+        relationLabel: '포토레지스트 공급',
+        chain: ['hansolchem', 'wafermat', 'enf'],
+      },
+    ],
+  },
+  {
+    id: 30005,
+    title: '텔레칩스, 온디바이스 AI 확산에 차량용 구동칩 수주 확대',
+    press: '이데일리',
+    publishedAt: TODAY,
+    url: 'https://www.edaily.co.kr/',
+    summary: [
+      '텔레칩스가 차량용 온디바이스 AI 구동칩 수주를 확대했다.',
+      '온디바이스 AI 탑재 차량이 늘어난 영향으로 풀이된다.',
+      'AI 반도체 팹리스 전반으로 온기가 확산되는 모습이다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'telechips',
+        direction: 'UP',
+        reason: '차량용 온디바이스 AI 구동칩 수주 확대의 직접 당사자',
+      },
+    ],
+    relatedStocks: [
+      {
+        nodeId: 'ondevice',
+        direction: 'UP',
+        relationLabel: '차량용 온디바이스 AI 칩 개발',
+        chain: ['telechips', 'ondevice'],
+      },
+      {
+        nodeId: 'anapass',
+        direction: 'UP',
+        relationLabel: '온디바이스 AI 구동칩 개발',
+        chain: ['telechips', 'ondevice', 'anapass'],
+      },
+      {
+        nodeId: 'abov',
+        direction: 'UP',
+        relationLabel: 'MCU 공급',
+        chain: ['telechips', 'ondevice', 'abov'],
+      },
+    ],
+  },
+  {
+    id: 30006,
+    title: '심텍, 유리기판 상용화 임박에 시제품 검증 마무리',
+    press: '파이낸셜뉴스',
+    publishedAt: TODAY,
+    url: 'https://www.fnnews.com/',
+    summary: [
+      '심텍이 차세대 패키징용 유리기판 시제품 검증을 마무리했다.',
+      '상용화 일정이 당초 계획보다 앞당겨질 전망이다.',
+      'AI 반도체 패키징 수요와 맞물려 주목받고 있다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'simmtech',
+        direction: 'UP',
+        reason: '유리기판 시제품 검증 마무리의 직접 당사자',
+      },
+    ],
+    relatedStocks: [
+      {
+        nodeId: 'glass',
+        direction: 'UP',
+        relationLabel: '유리기판 개발',
+        chain: ['simmtech', 'glass'],
+      },
+      {
+        nodeId: 'daeduck',
+        direction: 'UP',
+        relationLabel: '유리기판 개발',
+        chain: ['simmtech', 'glass', 'daeduck'],
+      },
+      {
+        nodeId: 'aidc',
+        direction: 'UP',
+        relationLabel: '차세대 패키징 수요',
+        chain: ['simmtech', 'glass', 'aidc'],
+      },
+    ],
+  },
+  {
+    id: 30007,
+    title: 'SK하이닉스, CXL 표준 확산에 차세대 메모리 개발 박차',
+    press: '서울경제',
+    publishedAt: TODAY,
+    url: 'https://www.sedaily.com/',
+    summary: [
+      'SK하이닉스가 차세대 메모리 인터페이스 CXL 제품 개발에 속도를 내고 있다.',
+      '데이터센터향 메모리 확장 수요 대응이 목적이다.',
+      '관련 생태계 투자도 함께 확대될 전망이다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        reason: 'CXL 차세대 메모리 개발을 직접 주도하는 당사자',
+      },
+    ],
+    relatedStocks: [
+      {
+        nodeId: 'cxl',
+        direction: 'UP',
+        relationLabel: '차세대 메모리 인터페이스 개발',
+        chain: ['sk', 'cxl'],
+      },
+      {
+        nodeId: 'ss',
+        direction: 'UP',
+        relationLabel: '차세대 메모리 인터페이스 개발',
+        chain: ['sk', 'cxl', 'ss'],
+      },
+      {
+        nodeId: 'dram',
+        direction: 'UP',
+        relationLabel: '메모리 확장 표준',
+        chain: ['sk', 'cxl', 'dram'],
+      },
+    ],
+  },
+  {
+    id: 30008,
+    title: '후성, 특수가스 공급 부족 심화에 반사이익',
+    press: '뉴스1',
+    publishedAt: TODAY,
+    url: 'https://www.news1.kr/',
+    summary: [
+      '후성이 반도체 공정용 특수가스 공급 부족의 반사이익을 누리고 있다.',
+      '증착·파운드리 공정 전반의 수요 확대가 배경이다.',
+      '가격 협상력도 함께 개선되는 모습이다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'foosung',
+        direction: 'UP',
+        reason: '특수가스 공급 부족 심화의 직접 반사이익 당사자',
+      },
+    ],
+    relatedStocks: [
+      {
+        nodeId: 'specgas',
+        direction: 'UP',
+        relationLabel: '특수가스 공급',
+        chain: ['foosung', 'specgas'],
+      },
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '증착 공정 필수 가스',
+        chain: ['foosung', 'specgas', 'sk'],
+      },
+      {
+        nodeId: 'fdry',
+        direction: 'UP',
+        relationLabel: '파운드리 공정 필수',
+        chain: ['foosung', 'specgas', 'fdry'],
+      },
+    ],
+  },
+  {
+    id: 30009,
+    title: '피에스케이, 대형 식각장비 수주 공시',
+    press: '아시아경제',
+    publishedAt: TODAY,
+    url: 'https://www.asiae.co.kr/',
+    summary: [
+      '피에스케이가 대형 식각장비 공급 계약을 공시했다.',
+      '고객사 라인 증설에 대응하는 수주로 파악된다.',
+      '경쟁사 대비 수주 모멘텀이 부각되고 있다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'psk',
+        direction: 'UP',
+        reason: '대형 식각장비 수주 공시의 직접 당사자',
+      },
+    ],
+    relatedStocks: [
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '식각 장비 공급',
+        chain: ['psk', 'sk'],
+      },
+      {
+        nodeId: 'jusung',
+        direction: 'DOWN',
+        relationLabel: '경쟁',
+        chain: ['psk', 'jusung'],
+      },
+    ],
+  },
+  {
+    id: 30010,
+    title: '코미코, 반도체 부품 세정 수주 확대',
+    press: '매일경제',
+    publishedAt: TODAY,
+    url: 'https://www.mk.co.kr/',
+    summary: [
+      '코미코의 반도체 부품 세정·코팅 수주가 확대됐다.',
+      '고객사 가동률 상승이 배경으로 꼽힌다.',
+      '경쟁사 대비 점유율 확대가 기대된다.',
+    ],
+    originStocks: [
+      {
+        nodeId: 'comico',
+        direction: 'UP',
+        reason: '부품 세정 코팅 수주 확대의 직접 당사자',
+      },
+    ],
+    relatedStocks: [
+      {
+        nodeId: 'sk',
+        direction: 'UP',
+        relationLabel: '부품 세정 코팅 공급',
+        chain: ['comico', 'sk'],
+      },
+      {
+        nodeId: 'tck',
+        direction: 'DOWN',
+        relationLabel: '경쟁',
+        chain: ['comico', 'tck'],
+      },
+    ],
+  },
+]
+
+const REFRESH_BATCH_SIZES = [3, 2, 2, 3]
+let refreshClickCount = 0
+let refreshPoolCursor = 0
+
+/**
+ * "새로고침" 클릭 데모용 — REFRESH_POOL을 순환하며 몇 건을 뽑아 발행 시각을
+ * 지금으로 찍고 NEWS_RECORDS 맨 앞에 끼워 넣는다. 이미 나온 뉴스라도 풀을
+ * 다 돌면 새 id로 다시 등장한다(데모를 몇 번이고 반복할 수 있도록).
+ */
+export function pullRefreshBatch(): NewsRecord[] {
+  const batchSize =
+    REFRESH_BATCH_SIZES[refreshClickCount % REFRESH_BATCH_SIZES.length]
+  refreshClickCount += 1
+
+  const now = Date.now()
+  const items: NewsRecord[] = []
+  for (let i = 0; i < batchSize; i++) {
+    const template = REFRESH_POOL[refreshPoolCursor % REFRESH_POOL.length]
+    const cycle = Math.floor(refreshPoolCursor / REFRESH_POOL.length)
+    refreshPoolCursor += 1
+    items.push({
+      ...template,
+      id: template.id + cycle * 10000,
+      publishedAt: new Date(now - i * 45_000).toISOString(),
+    })
+  }
+
+  NEWS_RECORDS.unshift(...items)
+  return items
+}
 
 const STOCK_IDS = RAW_COMPANIES.map(([id]) => id)
 const nodeNameById = new Map<string, string>([
@@ -454,7 +1093,9 @@ function buildFillerNews(count: number, startId: number): NewsRecord[] {
       publishedAt: cursor.toISOString(),
       url: 'https://example.com/',
       summary: template.summary(originName),
-      originStocks: [{ nodeId: originId, direction, reason: template.reason(originName) }],
+      originStocks: [
+        { nodeId: originId, direction, reason: template.reason(originName) },
+      ],
       relatedStocks,
     })
   }

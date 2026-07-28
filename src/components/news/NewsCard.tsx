@@ -9,10 +9,16 @@ import type { NewsListItem } from '#/types'
 interface NewsCardProps {
   news: NewsListItem
   selected: boolean
+  isNew?: boolean
   onSelect: () => void
 }
 
-export default function NewsCard({ news, selected, onSelect }: NewsCardProps) {
+export default function NewsCard({
+  news,
+  selected,
+  isNew,
+  onSelect,
+}: NewsCardProps) {
   const [scrapped, setScrapped] = useAtom(scrappedNewsIdsAtom)
   const isScrapped = scrapped.includes(news.id)
 
@@ -71,6 +77,7 @@ export default function NewsCard({ news, selected, onSelect }: NewsCardProps) {
           {news.press}
         </b>{' '}
         · {formatRelativeTime(news.publishedAt)}
+        {isNew && <span className="news-new-badge">NEW</span>}
       </div>
     </div>
   )
