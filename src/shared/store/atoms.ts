@@ -5,7 +5,7 @@ import { atom } from 'jotai'
  * apis/에서 직접 읽는다. 세션 메모리 전용이며 localStorage 등 영속 저장은 쓰지 않는다.
  */
 
-export const viewAtom = atom<'network' | 'map' | 'verify'>('network')
+export const viewAtom = atom<'network' | 'map' | 'verify'>('map')
 
 /** 현재 선택된 뉴스 id — news/graph/analysis/scrap 도메인이 공유한다 */
 export const selectedNewsIdAtom = atom<number | null>(null)
