@@ -17,22 +17,6 @@
       "capSize": "Large"
     },
     {
-      "id": "S_DBH",
-      "node_type": "Stock",
-      "name": "DB하이텍",
-      "ticker": "000990",
-      "marketType": "KOSPI",
-      "capSize": "Mid"
-    },
-    {
-      "id": "S_OPE",
-      "node_type": "Stock",
-      "name": "오픈엣지테크놀로지",
-      "ticker": "394280",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
       "id": "S_CNM",
       "node_type": "Stock",
       "name": "칩스앤미디어",
@@ -45,14 +29,6 @@
       "node_type": "Stock",
       "name": "퀄리타스반도체",
       "ticker": "432720",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
-      "id": "S_GAO",
-      "node_type": "Stock",
-      "name": "가온칩스",
-      "ticker": "399720",
       "marketType": "KOSDAQ",
       "capSize": "Small"
     },
@@ -85,22 +61,6 @@
       "node_type": "Stock",
       "name": "텔레칩스",
       "ticker": "054450",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
-      "id": "S_NXC",
-      "node_type": "Stock",
-      "name": "넥스트칩",
-      "ticker": "396270",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
-      "id": "S_JJS",
-      "node_type": "Stock",
-      "name": "제주반도체",
-      "ticker": "080220",
       "marketType": "KOSDAQ",
       "capSize": "Small"
     },
@@ -141,38 +101,6 @@
       "node_type": "Stock",
       "name": "디아이티",
       "ticker": "110990",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
-      "id": "S_ZEU",
-      "node_type": "Stock",
-      "name": "제우스",
-      "ticker": "079370",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
-      "id": "S_PRT",
-      "node_type": "Stock",
-      "name": "프로텍",
-      "ticker": "053610",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
-      "id": "S_LZC",
-      "node_type": "Stock",
-      "name": "레이저쎌",
-      "ticker": "412350",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
-      "id": "S_NEO",
-      "node_type": "Stock",
-      "name": "네오셈",
-      "ticker": "253590",
       "marketType": "KOSDAQ",
       "capSize": "Small"
     },
@@ -233,22 +161,6 @@
       "capSize": "Small"
     },
     {
-      "id": "S_KOY",
-      "node_type": "Stock",
-      "name": "고영",
-      "ticker": "098460",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
-      "id": "S_LNO",
-      "node_type": "Stock",
-      "name": "리노공업",
-      "ticker": "058470",
-      "marketType": "KOSDAQ",
-      "capSize": "Mid"
-    },
-    {
       "id": "S_ISC",
       "node_type": "Stock",
       "name": "ISC",
@@ -261,14 +173,6 @@
       "node_type": "Stock",
       "name": "티에스이",
       "ticker": "131290",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
-      "id": "S_MCT",
-      "node_type": "Stock",
-      "name": "마이크로컨텍솔",
-      "ticker": "098120",
       "marketType": "KOSDAQ",
       "capSize": "Small"
     },
@@ -337,22 +241,6 @@
       "capSize": "Small"
     },
     {
-      "id": "S_HSD",
-      "node_type": "Stock",
-      "name": "해성디에스",
-      "ticker": "195870",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
-      "id": "S_KAC",
-      "node_type": "Stock",
-      "name": "코리아써키트",
-      "ticker": "007810",
-      "marketType": "KOSPI",
-      "capSize": "Small"
-    },
-    {
       "id": "S_DJS",
       "node_type": "Stock",
       "name": "동진쎄미켐",
@@ -377,26 +265,10 @@
       "capSize": "Small"
     },
     {
-      "id": "S_HNM",
-      "node_type": "Stock",
-      "name": "하나머티리얼즈",
-      "ticker": "166090",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
       "id": "S_WDX",
       "node_type": "Stock",
       "name": "월덱스",
       "ticker": "101160",
-      "marketType": "KOSDAQ",
-      "capSize": "Small"
-    },
-    {
-      "id": "S_TCK",
-      "node_type": "Stock",
-      "name": "티씨케이",
-      "ticker": "064760",
       "marketType": "KOSDAQ",
       "capSize": "Small"
     },
@@ -407,110 +279,6 @@
       "ticker": "319660",
       "marketType": "KOSDAQ",
       "capSize": "Small"
-    },
-    {
-      "id": "T_AI",
-      "node_type": "Theme",
-      "name": "온디바이스 AI",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
-    },
-    {
-      "id": "T_HBM",
-      "node_type": "Theme",
-      "name": "HBM",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
-    },
-    {
-      "id": "T_CXL",
-      "node_type": "Theme",
-      "name": "CXL",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
-    },
-    {
-      "id": "R_CHIP",
-      "node_type": "Role",
-      "name": "칩 제조사",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
-    },
-    {
-      "id": "R_IP",
-      "node_type": "Role",
-      "name": "반도체 IP 설계",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
-    },
-    {
-      "id": "R_DESIGN_HOUSE",
-      "node_type": "Role",
-      "name": "디자인하우스",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
-    },
-    {
-      "id": "R_FABLESS",
-      "node_type": "Role",
-      "name": "팹리스",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
-    },
-    {
-      "id": "R_PKG_EQUIP",
-      "node_type": "Role",
-      "name": "패키징 장비",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
-    },
-    {
-      "id": "R_TEST_EQUIP",
-      "node_type": "Role",
-      "name": "테스트 장비",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
-    },
-    {
-      "id": "R_TEST_PART",
-      "node_type": "Role",
-      "name": "테스트 부품",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
-    },
-    {
-      "id": "R_EUV",
-      "node_type": "Role",
-      "name": "미세공정 EUV",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
-    },
-    {
-      "id": "R_SUBSTRATE",
-      "node_type": "Role",
-      "name": "기판",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
-    },
-    {
-      "id": "R_MATERIAL",
-      "node_type": "Role",
-      "name": "공정 소재",
-      "ticker": null,
-      "marketType": null,
-      "capSize": null
     }
   ],
   "edges": [
