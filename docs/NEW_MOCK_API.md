@@ -1,0 +1,282 @@
+# news
+
+```json
+        {
+            "newsId": 518,
+            "title": "[뉴욕개장] 하락세 출발…반도체주, 빅테크 실적 발표 앞 '부진'",
+            "press": "뉴스1",
+            "publishedAt": "2026-07-29T20:58Z",
+            "url": "https://n.news.naver.com/mnews/article/421/0009086821?sid=104"
+        },
+        {
+            "newsId": 519,
+            "title": "\"엔비디아 등 고객 10여곳과 협상 마무리\" SK하이닉스, 반도체 '장기공급' 계약 잇따라",
+            "press": "파이낸셜뉴스",
+            "publishedAt": "2026-07-29T20:10Z",
+            "url": "https://www.fnnews.com/news/202607290912282696"
+        },
+```
+
+# impact
+
+```json
+{
+  "news_summary": [
+    "29일 뉴욕 증시가 하락세로 출발했다.",
+    "반도체주는 이번 주 후반 예정된 빅테크 실적 발표를 앞두고 부진한 모습을 보였다.",
+    "투자자들은 미 연방준비제도의 통화 정책 결정을 기다리고 있다."
+  ],
+  "source": {
+    "press": "뉴스1",
+    "published_at": "2026-07-29 13:58:00+00:00",
+    "url": "https://n.news.naver.com/mnews/article/421/0009086821?sid=104"
+  },
+  "origin_stocks": [
+    {
+      "ticker": "000660",
+      "name": "SK하이닉스",
+      "status": "down",
+      "reason": "반도체주가 부진한 모습을 보이고 있으며, 이는 SK하이닉스와 같은 주요 반도체 기업에 부정적인 영향을 미칠 것으로 예상된다."
+    }
+  ],
+  "related_stocks": [
+    {
+      "ticker": "403870",
+      "name": "HPSP",
+      "status": "down",
+      "relation_label": "공급망",
+      "relation_path": "SK하이닉스 → HPSP",
+      "propagation": "반도체주가 전반적으로 부진하다는 뉴스는 *HPSP*의 주가에도 부정적인 영향을 미칠 것으로 보인다."
+    },
+    {
+      "ticker": "005290",
+      "name": "동진쎄미켐",
+      "status": "down",
+      "relation_label": "기술협력",
+      "relation_path": "SK하이닉스 → 동진쎄미켐",
+      "propagation": "반도체주가 부진하다는 뉴스는 *동진쎄미켐*의 주가에도 부정적인 영향을 미칠 것으로 예상된다."
+    },
+    {
+      "ticker": "357780",
+      "name": "솔브레인",
+      "status": "down",
+      "relation_label": "경쟁사",
+      "relation_path": "SK하이닉스 → 솔브레인",
+      "propagation": "반도체주가 부진하다는 뉴스는 *솔브레인*의 주가에도 부정적인 영향을 미칠 것으로 보인다."
+    },
+    {
+      "ticker": "101160",
+      "name": "월덱스",
+      "status": "down",
+      "relation_label": "경쟁사",
+      "relation_path": "SK하이닉스 → 월덱스",
+      "propagation": "이번 뉴스는 반도체주가 부진하다는 내용을 담고 있어, *월덱스*의 주가에 부정적인 영향을 미칠 것으로 예상된다."
+    }
+  ],
+  "final_summary": "이번 뉴스는 반도체주가 부진하다는 내용을 담고 있어, 관련 기업들의 주가에 부정적인 영향을 미칠 것으로 예상된다. *SK하이닉스*, *HPSP*, *동진쎄미켐*, *솔브레인*, *월덱스* 모두 하락세를 보일 것으로 판단된다. 전반적으로 반도체 산업에 대한 부정적인 전망이 주가에 영향을 미칠 것으로 보인다.",
+  "graph": {
+    "newsId": "518",
+    "originId": "S_SKH",
+    "nodes": [
+      {
+        "id": "S_SKH",
+        "name": "SK하이닉스",
+        "ticker": "000660",
+        "capSize": "Large",
+        "marketType": "KOSPI"
+      },
+      {
+        "id": "S_HPS",
+        "name": "HPSP",
+        "ticker": "403870",
+        "capSize": "Mid",
+        "marketType": "KOSDAQ"
+      },
+      {
+        "id": "S_DJS",
+        "name": "동진쎄미켐",
+        "ticker": "005290",
+        "capSize": "Mid",
+        "marketType": "KOSPI"
+      },
+      {
+        "id": "S_WDX",
+        "name": "월덱스",
+        "ticker": "101160",
+        "capSize": "Small",
+        "marketType": "KOSDAQ"
+      },
+      {
+        "id": "S_SOB",
+        "name": "솔브레인",
+        "ticker": "357780",
+        "capSize": "Mid",
+        "marketType": "KOSDAQ"
+      }
+    ],
+    "edges": [
+      {
+        "id": "e2",
+        "source": "S_HPS",
+        "target": "S_SKH",
+        "relation": "공급망"
+      },
+      {
+        "id": "e4",
+        "source": "S_DJS",
+        "target": "S_SKH",
+        "relation": "기술협력"
+      },
+      {
+        "id": "e7",
+        "source": "S_SOB",
+        "target": "S_SKH",
+        "relation": "경쟁사"
+      },
+      {
+        "id": "e9",
+        "source": "S_WDX",
+        "target": "S_SKH",
+        "relation": "경쟁사"
+      },
+      {
+        "id": "e34",
+        "source": "S_SKH",
+        "target": "S_DJS",
+        "relation": "기술협력"
+      }
+    ]
+  }
+}
+```
+
+```json
+{
+  "news_summary": [
+    "SK하이닉스는 엔비디아를 포함한 10여 개 고객과 메모리 반도체 장기공급계약을 체결했다고 발표했다.",
+    "2분기 실적에서 매출과 영업이익이 전년 대비 각각 256.8%와 557.2% 증가한 79조3187억원과 60조5426억원을 기록했다.",
+    "회사는 빅테크의 메모리 수요 증가에 대응하기 위해 장기공급계약을 통해 사업 안정성과 성장 기반을 강화할 계획이다."
+  ],
+  "source": {
+    "press": "파이낸셜뉴스",
+    "published_at": "2026-07-29 00:00:00+00:00",
+    "url": "https://www.fnnews.com/news/202607290912282696"
+  },
+  "origin_stocks": [
+    {
+      "ticker": "000660",
+      "name": "SK하이닉스",
+      "status": "up",
+      "reason": "SK하이닉스는 엔비디아와의 장기공급계약 체결로 인해 안정적인 매출 증가가 예상되며, 이는 주가 상승에 긍정적인 영향을 미칠 것으로 보인다."
+    }
+  ],
+  "related_stocks": [
+    {
+      "ticker": "403870",
+      "name": "HPSP",
+      "status": "up",
+      "relation_label": "공급망",
+      "relation_path": "SK하이닉스 → HPSP",
+      "propagation": "*HPSP*는 *SK하이닉스*와의 D램 장비 공급 계약으로 인해 매출 증가가 기대되며, 이는 주가 상승으로 이어질 가능성이 있다."
+    },
+    {
+      "ticker": "005290",
+      "name": "동진쎄미켐",
+      "status": "up",
+      "relation_label": "기술협력",
+      "relation_path": "SK하이닉스 → 동진쎄미켐",
+      "propagation": "*동진쎄미켐*은 *SK하이닉스*와의 EUV 포토레지스트 국산화 협력으로 인해 매출 증가가 예상되어 주가 상승이 기대된다."
+    },
+    {
+      "ticker": "357780",
+      "name": "솔브레인",
+      "status": "down",
+      "relation_label": "경쟁사",
+      "relation_path": "SK하이닉스 → 솔브레인",
+      "propagation": "*솔브레인*은 *SK하이닉스*와의 경쟁 관계에 있으며, *SK하이닉스*의 장기공급계약 체결로 인해 시장 점유율이 감소할 가능성이 있어 주가 하락이 우려된다."
+    },
+    {
+      "ticker": "101160",
+      "name": "월덱스",
+      "status": "down",
+      "relation_label": "경쟁사",
+      "relation_path": "SK하이닉스 → 월덱스",
+      "propagation": "*월덱스*는 *SK하이닉스*와의 주요 고객 관계가 있지만, *SK하이닉스*의 장기공급계약 체결로 인해 가격 압박이 우려되어 주가 하락이 예상된다."
+    }
+  ],
+  "final_summary": "이번 뉴스는 *SK하이닉스*의 장기공급계약 체결로 인해 안정적인 매출 기반을 확보하게 되어 주가 상승이 예상된다. 또한, *HPSP*와 *동진쎄미켐*은 *SK하이닉스*와의 협력으로 매출 증가가 기대되며 주가 상승이 예상된다. 반면, *솔브레인*과 *월덱스*는 *SK하이닉스*의 장기공급계약 체결로 인해 경쟁 압박이 우려되어 주가 하락이 예상된다.",
+  "graph": {
+    "newsId": "519",
+    "originId": "S_SKH",
+    "nodes": [
+      {
+        "id": "S_SKH",
+        "name": "SK하이닉스",
+        "ticker": "000660",
+        "capSize": "Large",
+        "marketType": "KOSPI"
+      },
+      {
+        "id": "S_HPS",
+        "name": "HPSP",
+        "ticker": "403870",
+        "capSize": "Mid",
+        "marketType": "KOSDAQ"
+      },
+      {
+        "id": "S_DJS",
+        "name": "동진쎄미켐",
+        "ticker": "005290",
+        "capSize": "Mid",
+        "marketType": "KOSPI"
+      },
+      {
+        "id": "S_WDX",
+        "name": "월덱스",
+        "ticker": "101160",
+        "capSize": "Small",
+        "marketType": "KOSDAQ"
+      },
+      {
+        "id": "S_SOB",
+        "name": "솔브레인",
+        "ticker": "357780",
+        "capSize": "Mid",
+        "marketType": "KOSDAQ"
+      }
+    ],
+    "edges": [
+      {
+        "id": "e2",
+        "source": "S_HPS",
+        "target": "S_SKH",
+        "relation": "공급망"
+      },
+      {
+        "id": "e4",
+        "source": "S_DJS",
+        "target": "S_SKH",
+        "relation": "기술협력"
+      },
+      {
+        "id": "e7",
+        "source": "S_SOB",
+        "target": "S_SKH",
+        "relation": "경쟁사"
+      },
+      {
+        "id": "e9",
+        "source": "S_WDX",
+        "target": "S_SKH",
+        "relation": "경쟁사"
+      },
+      {
+        "id": "e34",
+        "source": "S_SKH",
+        "target": "S_DJS",
+        "relation": "기술협력"
+      }
+    ]
+  }
+}
+```

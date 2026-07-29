@@ -333,71 +333,50 @@ const CURATED_NEWS: NewsRecord[] = [
 ]
 
 /**
- * "최신 뉴스 새로고침" 시연용 고정 3건 — 한미반도체(SK하이닉스·삼성전자 제외) 관련
- * 실제 최근 반도체 기사를 바탕으로 함. 이 3건의 실제 impact 응답은
- * apis/analysis/mock.ts가 id 20001~20003을 특별 취급해
- * mocks/analysis/refreshNewsExamples.json + hmiSubgraph.json으로 반환하므로,
- * 아래 originStocks/relatedStocks/summary는 리스트 표시에는 안 쓰인다.
+ * "최신 뉴스 새로고침" 시연용 고정 2건 — SK하이닉스 관련 실제 최근 반도체 기사를
+ * 바탕으로 함(docs/NEW_MOCK_API.md). 이 2건의 실제 impact 응답은
+ * apis/analysis/mock.ts가 id 518/519를 특별 취급해 mocks/analysis/refreshNewsExamples.json
+ * 으로 반환하므로, 아래 originStocks/relatedStocks/summary는 리스트 표시에는 안 쓰인다.
  * 실 API가 준비되면 이 배열과 pullRefreshBatch는 통째로 지우고 새로고침을 그냥
  * 쿼리 재조회로 대체하면 된다.
  */
 const REFRESH_ADDITIONS: NewsRecord[] = [
   {
-    id: 20001,
-    title: '한미반도체, 5천여평 규모 제8공장 확보…AI 반도체 장비 쇼티지 선제 대응',
-    press: '뉴스핌',
+    id: 518,
+    title: "[뉴욕개장] 하락세 출발…반도체주, 빅테크 실적 발표 앞 '부진'",
+    press: '뉴스1',
     publishedAt: TODAY,
-    url: 'https://www.newspim.com/news/view/20260720000985',
+    url: 'https://n.news.naver.com/mnews/article/421/0009086821?sid=104',
     summary: [
-      '한미반도체가 인천 본사 인근 부지를 매입해 창사 이래 최대 규모인 제8공장 건설을 추진한다고 밝혔다.',
-      '신규 공장은 HBM 생산에 필수적인 TC본더 등 첨단 패키징 장비 생산시설로 활용될 계획이다.',
-      'AI 반도체 시장 확대에 따른 장비 공급 부족(쇼티지)에 선제 대응하려는 조치로 풀이된다.',
+      '29일 뉴욕 증시가 하락세로 출발했다.',
+      '반도체주는 이번 주 후반 예정된 빅테크 실적 발표를 앞두고 부진한 모습을 보였다.',
+      '투자자들은 미 연방준비제도의 통화 정책 결정을 기다리고 있다.',
     ],
     originStocks: [
       {
-        nodeId: 'hanmi',
-        direction: 'UP',
-        reason: '제8공장 확보로 TC본더 생산능력이 직접 확대되는 당사자',
+        nodeId: 'sk',
+        direction: 'DOWN',
+        reason: '반도체주가 부진한 모습을 보이고 있으며, 이는 SK하이닉스와 같은 주요 반도체 기업에 부정적인 영향을 미칠 것으로 예상된다.',
       },
     ],
     relatedStocks: [],
   },
   {
-    id: 20002,
-    title: '한미반도체, 와이드 TC본더 앞세워 HBM4용 신규 수주 경쟁력 강화',
-    press: '이데일리',
+    id: 519,
+    title: '"엔비디아 등 고객 10여곳과 협상 마무리" SK하이닉스, 반도체 \'장기공급\' 계약 잇따라',
+    press: '파이낸셜뉴스',
     publishedAt: TODAY,
-    url: 'https://v.daum.net/v/20260702084432066',
+    url: 'https://www.fnnews.com/news/202607290912282696',
     summary: [
-      "한미반도체가 '와이드 TC본더'를 앞세워 HBM4용 신규 수주 경쟁력을 강화하고 있다고 밝혔다.",
-      'TC본더 적용처가 확장되며 신규 수주 기회가 늘어날 것으로 전망된다.',
-      'HBM TC본더 시장 점유율 71%를 바탕으로 후속 수주 논의도 이어지고 있다.',
+      'SK하이닉스는 엔비디아를 포함한 10여 개 고객과 메모리 반도체 장기공급계약을 체결했다고 발표했다.',
+      '2분기 실적에서 매출과 영업이익이 전년 대비 각각 256.8%와 557.2% 증가한 79조3187억원과 60조5426억원을 기록했다.',
+      '회사는 빅테크의 메모리 수요 증가에 대응하기 위해 장기공급계약을 통해 사업 안정성과 성장 기반을 강화할 계획이다.',
     ],
     originStocks: [
       {
-        nodeId: 'hanmi',
+        nodeId: 'sk',
         direction: 'UP',
-        reason: 'TC본더 적용처 확장으로 신규 수주 경쟁력이 직접 강화되는 당사자',
-      },
-    ],
-    relatedStocks: [],
-  },
-  {
-    id: 20003,
-    title: "한미반도체, HBM4 'TC본더 4.5 그리핀' 442억원 수주 공시",
-    press: '한국경제',
-    publishedAt: TODAY,
-    url: 'https://news.nate.com/view/20260608n17852',
-    summary: [
-      "한미반도체가 HBM4 제조용 'TC본더 4.5 그리핀' 장비 수주를 공시했다.",
-      '이번 수주 규모는 442억원으로, 매출액 대비 약 7.66%에 해당한다.',
-      'HBM4 양산 확대에 따른 후속 발주가 이어질지 시장의 관심이 모인다.',
-    ],
-    originStocks: [
-      {
-        nodeId: 'hanmi',
-        direction: 'UP',
-        reason: '442억원 규모의 TC본더 신규 수주를 직접 공시한 당사자',
+        reason: 'SK하이닉스는 엔비디아와의 장기공급계약 체결로 인해 안정적인 매출 증가가 예상되며, 이는 주가 상승에 긍정적인 영향을 미칠 것으로 보인다.',
       },
     ],
     relatedStocks: [],
