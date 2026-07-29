@@ -86,17 +86,23 @@ function toOntologyNode(wireNode: ImpactGraphNodeWire): Omit<ImpactGraphNode, 'd
   }
 }
 
-// wire 엣지는 relationType을 싣지 않는다. 데모 데이터에서 극성을 반전시키는 관계는
-// '경쟁' 레이블 하나뿐이라 이 레이블만으로 안전하게 복원할 수 있다(polarityOf()는
-// relationType === 'COMPETITOR'일 때만 반전시키고, 나머지는 항상 동조로 취급되므로
-// undefined와 'OTHER' 등은 결과가 같다).
+// wire 엣지는 relationType을 싣지 않는다. 극성을 반전시키는 경쟁 관계는 데이터
+// 출처에 따라 레이블 표기가 다르다 — mocks/graph/data.ts(뉴스별 온톨로지 엣지)는
+// '경쟁', graph.json 계열(hmiSubgraph.json 등, mocks/graph/fullGraph.ts의
+// RELATION_LABEL/RELATION_TYPE과 동일한 어휘)은 '경쟁사'/'시장 경쟁'을 쓴다.
+// 이 셋 중 하나면 COMPETITOR로 복원한다(polarityOf()는 relationType === 'COMPETITOR'일
+// 때만 반전시키고, 나머지는 항상 동조로 취급되므로 undefined와 'OTHER' 등은 결과가 같다).
+const COMPETITOR_RELATION_LABELS = new Set(['경쟁', '경쟁사', '시장 경쟁'])
+
 function toOntologyEdge(wireEdge: OntologyEdgeWire): OntologyEdge {
   return {
     id: wireEdge.id,
     source: wireEdge.source,
     target: wireEdge.target,
     relation: wireEdge.relation,
-    relationType: wireEdge.relation === '경쟁' ? 'COMPETITOR' : undefined,
+    relationType: COMPETITOR_RELATION_LABELS.has(wireEdge.relation)
+      ? 'COMPETITOR'
+      : undefined,
   }
 }
 
