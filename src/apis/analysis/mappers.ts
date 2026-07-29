@@ -112,14 +112,36 @@ export function mapNewsImpact(newsId: number, wire: NewsImpactWire): NewsImpact 
     directionByTicker.set(r.ticker, toDirection(r.status)),
   )
 
+  const nodes: ImpactGraphNode[] = wire.graph.nodes.map((n): ImpactGraphNode => {
+    const direction = directionByTicker.get(n.ticker)
+    const node = toOntologyNode(n)
+    return direction ? { ...node, direction } : node
+  })
+
+  // graph.nodes가 origin_stocks에 있는 기점 종목을 포함하지 않을 수 있다(예:
+  // 연관 종목이 하나도 없어 그래프가 통째로 빈 배열로 내려오는 경우) — bfsBuild가
+  // originId를 노드 유무와 무관하게 무조건 시드하기 때문에, 여기서 보정해두지
+  // 않으면 실제로는 없는 노드를 참조하게 되어 하위에서 undefined.marketCap로 터진다.
+  if (!nodes.some((n) => n.id === wire.graph.originId)) {
+    const originStock = wire.origin_stocks.find(
+      (o) => o.ticker === wire.graph.originId,
+    )
+    if (originStock) {
+      nodes.push({
+        id: wire.graph.originId,
+        name: originStock.name,
+        kind: 'STOCK',
+        ticker: originStock.ticker,
+        sector: '반도체',
+        direction: toDirection(originStock.status),
+      })
+    }
+  }
+
   const graph: NewsImpactGraph = {
     newsId: wire.graph.newsId,
     originId: wire.graph.originId,
-    nodes: wire.graph.nodes.map((n): ImpactGraphNode => {
-      const direction = directionByTicker.get(n.ticker)
-      const node = toOntologyNode(n)
-      return direction ? { ...node, direction } : node
-    }),
+    nodes,
     edges: wire.graph.edges.map(toOntologyEdge),
   }
 
