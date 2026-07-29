@@ -82,6 +82,13 @@ function buildFinalSummary(originNames: string[], relatedCount: number): string 
   return `${origin} 관련 이슈로 관련 종목 ${relatedCount}개까지 영향이 파급됐다.`
 }
 
+/** newsId가 REFRESH_EXAMPLES에 있으면 true — 실 백엔드에 대응 데이터가 없는
+ * 데모용 뉴스이므로 이 경우 queries.ts는 IMPACT API를 호출하지 않고 로컬
+ * 목데이터만 사용한다. */
+export function hasMockOnlyImpact(newsId: number): boolean {
+  return REFRESH_EXAMPLES[String(newsId)] != null
+}
+
 /**
  * GET /api/news/{id}/impact. 분석 패널과 그래프 패널이 같은 화면 전환에서 동시에
  * 필요한 데이터를 하나로 합쳐 내려준다.
