@@ -92,7 +92,7 @@ export default function AnalysisPanel() {
                 <b className="font-semibold" style={{ color: 'var(--n-600)' }}>
                   {impact.source.press}
                 </b>
-                <span>·</span>
+                {/* <span>·</span>
                 <span>
                   {new Date(impact.source.publishedAt).toLocaleTimeString(
                     'ko-KR',
@@ -101,7 +101,7 @@ export default function AnalysisPanel() {
                       minute: '2-digit',
                     },
                   )}
-                </span>
+                </span> */}
                 <a
                   href={impact.source.url}
                   target="_blank"
