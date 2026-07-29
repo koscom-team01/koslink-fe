@@ -165,7 +165,7 @@ function buildFocusScene(impactGraph: NewsImpactGraph): Scene2 {
   }
 }
 
-/** 전체 관계망: 섹터 3클러스터 고정 좌표. highlightId가 있으면 배치는 그대로 두고 그 자리에서 2단계 파급만 강조. */
+/** 전체 관계망: 섹터 3클러스터 고정 좌표. highlightId가 있으면 배치는 그대로 두고 그 자리에서 1단계(직접 연결)만 강조. */
 export function buildAllScene(
   highlightId: string | null,
   graph: { nodes: OntologyNode[]; edges: OntologyEdge[] },
@@ -203,7 +203,7 @@ export function buildAllScene(
     }
   }
 
-  const built = bfsBuild(fullGraphIndex, highlightId, 2)
+  const built = bfsBuild(fullGraphIndex, highlightId, 1)
   const origin = fullGraphIndex.byId.get(highlightId)!
 
   function ontologyEdgeId(source: string, target: string): string {
@@ -236,18 +236,17 @@ export function buildAllScene(
     .map((id) => ({
       id,
       level: built.level[id],
-      state: built.level[id] === 1 ? 'via' : 'via2',
+      state: 'via',
       badge: null,
     }))
   const revealEdges: RevealEdge[] = built.pairs.map((p) => ({
     id: ontologyEdgeId(p.source, p.target),
     target: p.target,
     level: p.level,
-    state: polarityEdgeState(p.polarity, p.level === 1 ? 1 : 2),
+    state: polarityEdgeState(p.polarity, 1),
   }))
 
   const hop1 = Object.values(built.level).filter((l) => l === 1).length
-  const hop2 = Object.values(built.level).filter((l) => l === 2).length
 
   return {
     ids,
@@ -262,7 +261,7 @@ export function buildAllScene(
       nodes: revealNodes,
       edges: revealEdges,
     },
-    ghint: `${origin.name} · 1단계 ${hop1}개, 2단계 ${hop2}개로 파급`,
+    ghint: `${origin.name} · 1단계 ${hop1}개로 파급`,
     legendMode: 'all',
     backchip: '← 전체 보기',
     index: fullGraphIndex,
